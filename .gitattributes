@@ -1,0 +1,94 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+*.c text
+*.cc text
+*.cxx text
+*.cpp text
+*.c++ text
+*.h text
+*.hpp text
+*.h++ text
+*.hh text
+*.cs text
+*.css text
+*.go text
+*.java text
+*.js text
+*.m text
+*.mm text
+*.proto text
+*.py text
+*.rb text
+*.rs text
+*.scala text
+*.ts text
+*.tsx text
+*.xml text
+*.yml text
+*.yaml text
+*.json text
+
+# Declare files that will always have CRLF line endings on checkout.
+*.sln text eol=crlf
+*.csproj text eol=crlf
+*.vcxproj text eol=crlf
+*.vcxproj.filters text eol=crlf
+*.vsixmanifest text eol=crlf
+
+# Declare files that will always have LF line endings on checkout.
+*.sh text eol=lf
+*.shar text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.fish text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Declare files that are already normalized
+*.sql text
+*.md text
+*.markdown text
+
+# Declare files that will be normalized regardless of Git's core.autocrlf
+# Setting 'text' attribute for all files
+* text=auto
+
+# Declare executables that will always have LF line endings on checkout.
+*.exe text eol=lf
+*.dll text eol=lf
+*.so text eol=lf
+*.dylib text eol=lf
+
+# Declare binary files that are explicitly declared as having no
+# textual encoding.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.svg binary
+*.mp3 binary
+*.wav binary
+*.mp4 binary
+*.mov binary
+*.avi binary
+*.mkv binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.gz.b64 binary
+*.7z binary
+*.docx binary
+*.doc binary
+*.pptx binary
+*.ppt binary
+*.xlsx binary
+*.xls binary
+*.pdf binary
+*.key binary
+*.ppt binary
