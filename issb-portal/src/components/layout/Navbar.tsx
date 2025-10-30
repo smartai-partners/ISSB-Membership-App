@@ -20,7 +20,7 @@ export function Navbar({ className = '' }: NavbarProps) {
   const navItems = [
     { name: 'Home', path: '/', icon: Home, public: true },
     { name: 'Events', path: '/events', icon: Calendar, public: true },
-    { name: 'Volunteers', path: '/volunteers', icon: Users, roles: ['admin', 'board', 'member', 'student'] },
+    { name: 'Community', path: '/volunteers', icon: Users, roles: ['admin', 'board', 'member', 'student'] },
     { name: 'Donations', path: '/donations', icon: Heart, public: true },
   ];
 
@@ -41,23 +41,24 @@ export function Navbar({ className = '' }: NavbarProps) {
   };
 
   return (
-    <nav className={`bg-white border-b border-gray-200 ${className}`}>
+    <nav className={`bg-white border-b border-gray-200 shadow-sm ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="text-xl font-bold text-blue-600">
-                ISSB Portal
+              <Link to="/" className="flex flex-col">
+                <span className="text-xl font-bold text-green-700">ISSB</span>
+                <span className="text-xs text-gray-600">Sarasota & Bradenton</span>
               </Link>
             </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+            <div className="hidden sm:ml-8 sm:flex sm:space-x-8">
               {navItems.filter(canAccess).map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
                   className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
                     isActive(item.path)
-                      ? 'border-blue-500 text-gray-900'
+                      ? 'border-green-600 text-gray-900'
                       : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                   }`}
                 >
@@ -71,7 +72,7 @@ export function Navbar({ className = '' }: NavbarProps) {
                   to={item.path}
                   className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
                     isActive(item.path)
-                      ? 'border-blue-500 text-gray-900'
+                      ? 'border-green-600 text-gray-900'
                       : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                   }`}
                 >
@@ -109,7 +110,7 @@ export function Navbar({ className = '' }: NavbarProps) {
                 </Link>
                 <Link
                   to="/signup"
-                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
                 >
                   Sign Up
                 </Link>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Clock, CheckCircle, XCircle, Users, BookOpen, Heart } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { VolunteerOpportunity, VolunteerHours } from '@/types';
@@ -82,8 +82,8 @@ export function VolunteersPage() {
   if (!user) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-bold mb-4">Please sign in to access the Volunteers Portal</h2>
-        <p className="text-gray-600">You need to be logged in to view volunteer opportunities and track your hours.</p>
+        <h2 className="text-2xl font-bold mb-4">Please sign in to access the Community Portal</h2>
+        <p className="text-gray-600">You need to be logged in to view community programs and track your participation.</p>
       </div>
     );
   }
@@ -96,42 +96,87 @@ export function VolunteersPage() {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Volunteers Portal</h1>
-          <p className="text-gray-600 mt-2">Find opportunities and track your volunteer hours</p>
+          <h1 className="text-3xl font-bold text-gray-900">Community Portal</h1>
+          <p className="text-gray-600 mt-2">Islamic education, community service, and volunteer opportunities</p>
         </div>
         <button
           onClick={() => setShowLogModal(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
         >
           <Plus className="w-4 h-4 mr-2" />
           Log Hours
         </button>
       </div>
 
-      {/* Hours Summary */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Your Volunteer Summary</h2>
-        <div className="grid md:grid-cols-4 gap-4">
-          <div className="bg-blue-50 rounded-lg p-4">
-            <div className="text-2xl font-bold text-blue-600">{totalHours}</div>
-            <div className="text-sm text-gray-600">Total Hours (Approved)</div>
+      {/* Community Engagement Summary */}
+      <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg shadow-xl p-6 text-white">
+        <h2 className="text-2xl font-bold mb-3">Community Participation</h2>
+        <p className="text-green-50 mb-4">
+          "The believer's shade on the Day of Resurrection will be their charity." (Hadith - Tirmidhi)
+        </p>
+        <div className="grid md:grid-cols-4 gap-4 mt-4">
+          <div className="bg-green-700 rounded-lg p-4">
+            <div className="text-3xl font-bold">{totalHours}</div>
+            <div className="text-sm text-green-100">Total Hours (Approved)</div>
           </div>
-          <div className="bg-green-50 rounded-lg p-4">
-            <div className="text-2xl font-bold text-green-600">
+          <div className="bg-emerald-700 rounded-lg p-4">
+            <div className="text-3xl font-bold">
               {myHours.filter(h => h.status === 'approved').length}
             </div>
-            <div className="text-sm text-gray-600">Approved Entries</div>
+            <div className="text-sm text-emerald-100">Approved Entries</div>
           </div>
-          <div className="bg-yellow-50 rounded-lg p-4">
-            <div className="text-2xl font-bold text-yellow-600">
+          <div className="bg-teal-700 rounded-lg p-4">
+            <div className="text-3xl font-bold">
               {myHours.filter(h => h.status === 'pending').length}
             </div>
-            <div className="text-sm text-gray-600">Pending Approval</div>
+            <div className="text-sm text-teal-100">Pending Approval</div>
           </div>
-          <div className="bg-purple-50 rounded-lg p-4">
-            <div className="text-2xl font-bold text-purple-600">{opportunities.length}</div>
-            <div className="text-sm text-gray-600">Open Opportunities</div>
+          <div className="bg-cyan-700 rounded-lg p-4">
+            <div className="text-3xl font-bold">{opportunities.length}</div>
+            <div className="text-sm text-cyan-100">Open Opportunities</div>
           </div>
+        </div>
+      </div>
+
+      {/* Community Program Categories */}
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-green-500">
+          <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg mb-4">
+            <BookOpen className="w-6 h-6 text-green-600" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2 text-gray-900">Islamic Education</h3>
+          <ul className="space-y-2 text-sm text-gray-600">
+            <li>Quran study circles</li>
+            <li>Arabic language classes</li>
+            <li>Youth Islamic education</li>
+            <li>Adult learning programs</li>
+          </ul>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-emerald-500">
+          <div className="flex items-center justify-center w-12 h-12 bg-emerald-100 rounded-lg mb-4">
+            <Users className="w-6 h-6 text-emerald-600" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2 text-gray-900">Community Service</h3>
+          <ul className="space-y-2 text-sm text-gray-600">
+            <li>Food pantry assistance</li>
+            <li>Community outreach</li>
+            <li>Interfaith dialogue</li>
+            <li>Social welfare programs</li>
+          </ul>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-teal-500">
+          <div className="flex items-center justify-center w-12 h-12 bg-teal-100 rounded-lg mb-4">
+            <Heart className="w-6 h-6 text-teal-600" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2 text-gray-900">Family Programs</h3>
+          <ul className="space-y-2 text-sm text-gray-600">
+            <li>Family counseling</li>
+            <li>Youth mentorship</li>
+            <li>Marriage preparation</li>
+            <li>Parenting workshops</li>
+          </ul>
         </div>
       </div>
 
@@ -139,11 +184,11 @@ export function VolunteersPage() {
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-xl font-semibold mb-4">Open Opportunities</h2>
         {opportunities.length === 0 ? (
-          <p className="text-gray-500">No open volunteer opportunities at this time.</p>
+          <p className="text-gray-500">No open volunteer opportunities at this time. Check back soon!</p>
         ) : (
           <div className="space-y-4">
             {opportunities.map((opp) => (
-              <div key={opp.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition">
+              <div key={opp.id} className="border border-gray-200 rounded-lg p-4 hover:border-green-500 transition">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg text-gray-900">{opp.title}</h3>
@@ -169,9 +214,9 @@ export function VolunteersPage() {
 
       {/* My Hours Log */}
       <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">My Hours Log</h2>
+        <h2 className="text-xl font-semibold mb-4">My Community Service Log</h2>
         {myHours.length === 0 ? (
-          <p className="text-gray-500">No volunteer hours logged yet.</p>
+          <p className="text-gray-500">No volunteer hours logged yet. Start contributing to the community!</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -218,7 +263,7 @@ export function VolunteersPage() {
       {showLogModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-xl font-semibold mb-4">Log Volunteer Hours</h3>
+            <h3 className="text-xl font-semibold mb-4">Log Community Service Hours</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Hours</label>
@@ -248,7 +293,7 @@ export function VolunteersPage() {
                   onChange={(e) => setLogForm({ ...logForm, description: e.target.value })}
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  placeholder="Describe what you did"
+                  placeholder="Describe your community service (e.g., Assisted with Friday prayer setup, Taught Quran class)"
                 />
               </div>
               <div className="flex justify-end space-x-3 mt-6">
@@ -261,7 +306,7 @@ export function VolunteersPage() {
                 <button
                   onClick={handleLogHours}
                   disabled={!logForm.hours || !logForm.description}
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
                 >
                   Log Hours
                 </button>
