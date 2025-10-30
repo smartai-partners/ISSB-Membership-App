@@ -5,14 +5,14 @@
         "id": "1",
         "content": "Design and implement comprehensive ISSB membership system architecture",
         "details": "Create full-stack application with authentication, database, and multiple portals including events, volunteers, donations, admin, and application review",
-        "status": "in_progress",
+        "status": "completed",
         "priority": "high"
       },
       "2": {
         "id": "2",
         "content": "Setup Supabase backend infrastructure",
         "details": "1. Get Supabase credentials from user 2. Design database schema (users, memberships, events, volunteers, donations, applications) 3. Setup authentication 4. Create edge functions for complex operations",
-        "status": "pending",
+        "status": "in_progress",
         "priority": "high"
       },
       "3": {
