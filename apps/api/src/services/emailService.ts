@@ -382,9 +382,266 @@ export const testEmailConfig = async (): Promise<boolean> => {
   }
 };
 
+// ============================================================================
+// MEMBERSHIP-RELATED EMAIL METHODS
+// ============================================================================
+
+/**
+ * Send membership confirmation email
+ */
+export const sendMembershipConfirmation = async (
+  email: string,
+  name: string,
+  tier: string,
+  startDate: Date,
+  endDate: Date
+): Promise<boolean> => {
+  try {
+    return await sendEmail({
+      to: email,
+      subject: `Welcome to ${tier} Membership - ISSB Membership Portal`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Membership Confirmation</title>
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h1 style="color: #0ea5e9;">ISSB Membership Portal</h1>
+              <h2>Membership Confirmed!</h2>
+              <p>Dear ${name},</p>
+              <p>Congratulations! Your ${tier} membership has been confirmed and is now active.</p>
+              
+              <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #0ea5e9;">Membership Details</h3>
+                <p><strong>Tier:</strong> ${tier}</p>
+                <p><strong>Start Date:</strong> ${startDate.toLocaleDateString()}</p>
+                <p><strong>End Date:</strong> ${endDate.toLocaleDateString()}</p>
+              </div>
+              
+              <p>You now have access to all the benefits of your membership tier. You can manage your membership and access exclusive content through your member portal.</p>
+              
+              <p>Thank you for being part of the ISSB community!</p>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+  } catch (error) {
+    logger.error('Error sending membership confirmation email:', error);
+    return false;
+  }
+};
+
+/**
+ * Send membership renewal confirmation email
+ */
+export const sendMembershipRenewed = async (
+  email: string,
+  name: string,
+  tier: string,
+  newEndDate: Date,
+  amount: number
+): Promise<boolean> => {
+  try {
+    return await sendEmail({
+      to: email,
+      subject: `Membership Renewed - ${tier} - ISSB Membership Portal`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Membership Renewed</title>
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h1 style="color: #0ea5e9;">ISSB Membership Portal</h1>
+              <h2>Membership Renewed Successfully!</h2>
+              <p>Dear ${name},</p>
+              <p>Great news! Your ${tier} membership has been successfully renewed.</p>
+              
+              <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #0ea5e9;">Renewal Details</h3>
+                <p><strong>Tier:</strong> ${tier}</p>
+                <p><strong>New End Date:</strong> ${newEndDate.toLocaleDateString()}</p>
+                <p><strong>Amount Charged:</strong> $${amount.toFixed(2)}</p>
+              </div>
+              
+              <p>Your membership is now active until ${newEndDate.toLocaleDateString()}. Thank you for your continued support!</p>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+  } catch (error) {
+    logger.error('Error sending membership renewal email:', error);
+    return false;
+  }
+};
+
+/**
+ * Send membership cancellation email
+ */
+export const sendMembershipCancelled = async (
+  email: string,
+  name: string,
+  tier: string,
+  reason?: string
+): Promise<boolean> => {
+  try {
+    return await sendEmail({
+      to: email,
+      subject: `Membership Cancelled - ${tier} - ISSB Membership Portal`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Membership Cancelled</title>
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h1 style="color: #0ea5e9;">ISSB Membership Portal</h1>
+              <h2>Membership Cancelled</h2>
+              <p>Dear ${name},</p>
+              <p>This is to confirm that your ${tier} membership has been cancelled.</p>
+              
+              ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
+              
+              <div style="background-color: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p>We're sorry to see you go! Your access to ${tier} features will remain active until the end of your current billing period.</p>
+              </div>
+              
+              <p>If you have any questions about your cancellation or would like to reactivate your membership in the future, please don't hesitate to contact us.</p>
+              
+              <p>Thank you for being part of the ISSB community!</p>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+  } catch (error) {
+    logger.error('Error sending membership cancellation email:', error);
+    return false;
+  }
+};
+
+/**
+ * Send membership upgrade email
+ */
+export const sendMembershipUpgraded = async (
+  email: string,
+  name: string,
+  oldTier: string,
+  newTier: string
+): Promise<boolean> => {
+  try {
+    return await sendEmail({
+      to: email,
+      subject: `Membership Upgraded - ${oldTier} to ${newTier} - ISSB Membership Portal`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Membership Upgraded</title>
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h1 style="color: #0ea5e9;">ISSB Membership Portal</h1>
+              <h2>Congratulations on Your Upgrade!</h2>
+              <p>Dear ${name},</p>
+              <p>Excellent news! Your membership has been successfully upgraded from ${oldTier} to ${newTier}.</p>
+              
+              <div style="background-color: #d4edda; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #155724;">Upgrade Details</h3>
+                <p><strong>Previous Tier:</strong> ${oldTier}</p>
+                <p><strong>New Tier:</strong> ${newTier}</p>
+                <p><strong>Upgrade Date:</strong> ${new Date().toLocaleDateString()}</p>
+              </div>
+              
+              <p>You now have access to all the enhanced benefits and features of your ${newTier} membership!</p>
+              
+              <p>Thank you for choosing to upgrade and for your continued support of the ISSB community!</p>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+  } catch (error) {
+    logger.error('Error sending membership upgrade email:', error);
+    return false;
+  }
+};
+
+/**
+ * Send membership expiry warning email
+ */
+export const sendMembershipExpiryWarning = async (
+  email: string,
+  name: string,
+  tier: string,
+  endDate: Date,
+  daysUntilExpiry: number
+): Promise<boolean> => {
+  try {
+    const urgencyLevel = daysUntilExpiry <= 7 ? 'urgent' : daysUntilExpiry <= 14 ? 'important' : 'reminder';
+    const urgencyColor = daysUntilExpiry <= 7 ? '#dc3545' : daysUntilExpiry <= 14 ? '#ffc107' : '#0ea5e9';
+    
+    return await sendEmail({
+      to: email,
+      subject: `${urgencyLevel === 'urgent' ? 'URGENT: ' : ''}Membership Expiring Soon - ${tier} - ISSB Membership Portal`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Membership Expiry Warning</title>
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h1 style="color: #0ea5e9;">ISSB Membership Portal</h1>
+              <h2 style="color: ${urgencyColor};">${urgencyLevel === 'urgent' ? 'URGENT: ' : ''}Membership Expiring Soon</h2>
+              <p>Dear ${name},</p>
+              <p>Your ${tier} membership is expiring soon and will need to be renewed to maintain access to all member benefits.</p>
+              
+              <div style="background-color: ${urgencyColor}10; border: 2px solid ${urgencyColor}; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: ${urgencyColor};">Expiry Details</h3>
+                <p><strong>Tier:</strong> ${tier}</p>
+                <p><strong>Expiry Date:</strong> ${endDate.toLocaleDateString()}</p>
+                <p><strong>Days Until Expiry:</strong> ${daysUntilExpiry}</p>
+              </div>
+              
+              <p>${daysUntilExpiry <= 7 ? 
+                '<strong>Action Required:</strong> Your membership expires in less than a week. Please renew immediately to avoid interruption of service.' :
+                'Please consider renewing your membership to continue enjoying all the benefits and features.'
+              }</p>
+              
+              <p>To renew your membership, log in to your member portal and visit the membership section.</p>
+              
+              <p>Thank you for being a valued member of the ISSB community!</p>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+  } catch (error) {
+    logger.error('Error sending membership expiry warning email:', error);
+    return false;
+  }
+};
+
 export default {
   sendEmail,
   sendBulkEmails,
   validateEmail,
   testEmailConfig,
+  sendMembershipConfirmation,
+  sendMembershipRenewed,
+  sendMembershipCancelled,
+  sendMembershipUpgraded,
+  sendMembershipExpiryWarning,
 };

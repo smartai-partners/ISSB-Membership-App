@@ -1,42 +1,80 @@
 import express from 'express';
-import { asyncHandler } from '../middleware/errorHandler';
-import { authenticate, authorize } from '../middleware/auth';
+import { authenticate, authorize, checkOwnership } from '../middleware/auth';
+import MembershipController from '../controllers/MembershipController';
 
 const router = express.Router();
 
-// Placeholder routes for membership management
+// Apply authentication to all membership routes
+router.use(authenticate);
 
-// @route   GET /api/v1/membership
+// @route   GET /api/membership
+// @desc    Get all memberships with pagination and filtering
+// @access  Private (Admin/Board only)
+router.get('/', 
+  authorize('admin', 'board'), 
+  MembershipController.getAllMemberships
+);
+
+// @route   GET /api/membership/expiring
+// @desc    Get memberships expiring within specified days
+// @access  Private (Admin/Board only)
+router.get('/expiring', 
+  authorize('admin', 'board'), 
+  MembershipController.getExpiringMemberships
+);
+
+// @route   GET /api/membership/stats
+// @desc    Get membership statistics
+// @access  Private (Admin/Board only)
+router.get('/stats', 
+  authorize('admin', 'board'), 
+  MembershipController.getMembershipStats
+);
+
+// @route   GET /api/membership/:id
+// @desc    Get membership by ID
+// @access  Private (Admin/Board or membership owner)
+router.get('/:id', 
+  MembershipController.getMembershipById
+);
+
+// @route   POST /api/membership
+// @desc    Create a new membership
+// @access  Private (Admin/Board only)
+router.post('/', 
+  authorize('admin', 'board'), 
+  MembershipController.createMembership
+);
+
+// @route   PUT /api/membership/:id
+// @desc    Update membership
+// @access  Private (Admin/Board only)
+router.put('/:id', 
+  authorize('admin', 'board'), 
+  MembershipController.updateMembership
+);
+
+// @route   DELETE /api/membership/:id
+// @desc    Cancel membership
+// @access  Private (Admin/Board only)
+router.delete('/:id', 
+  authorize('admin', 'board'), 
+  MembershipController.cancelMembership
+);
+
+// @route   GET /api/membership/user/:userId
 // @desc    Get user's membership
-// @access  Private
-router.get('/', authenticate, asyncHandler(async (req, res) => {
-  res.json({
-    success: true,
-    message: 'Get membership route - implement membership retrieval logic',
-    timestamp: new Date().toISOString(),
-  });
-}));
+// @access  Private (Admin/Board or the user themselves)
+router.get('/user/:userId', 
+  checkOwnership('userId'),
+  MembershipController.getUserMembership
+);
 
-// @route   POST /api/v1/membership/upgrade
-// @desc    Upgrade membership tier
-// @access  Private
-router.post('/upgrade', authenticate, asyncHandler(async (req, res) => {
-  res.json({
-    success: true,
-    message: 'Membership upgrade route - implement upgrade logic',
-    timestamp: new Date().toISOString(),
-  });
-}));
-
-// @route   GET /api/v1/membership/tiers
-// @desc    Get available membership tiers
-// @access  Public
-router.get('/tiers', asyncHandler(async (req, res) => {
-  res.json({
-    success: true,
-    message: 'Membership tiers route - implement tiers listing logic',
-    timestamp: new Date().toISOString(),
-  });
-}));
+// @route   POST /api/membership/:id/renew
+// @desc    Renew membership
+// @access  Private (Admin/Board or membership owner)
+router.post('/:id/renew', 
+  MembershipController.renewMembership
+);
 
 export default router;

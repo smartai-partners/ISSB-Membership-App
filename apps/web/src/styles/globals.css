@@ -184,6 +184,116 @@
   .dashboard-stat-label {
     @apply text-sm font-medium text-gray-500;
   }
+
+  /* Table Components */
+  .table-wrapper {
+    @apply w-full;
+  }
+
+  .table-container {
+    @apply w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm;
+  }
+
+  .table-container.bordered {
+    @apply border border-secondary-200;
+  }
+
+  .table-header {
+    @apply bg-secondary-50 border-b border-secondary-200;
+  }
+
+  .table-header-cell {
+    @apply relative font-medium text-secondary-900 text-sm;
+  }
+
+  .table-body {
+    @apply divide-y divide-secondary-100;
+  }
+
+  .table-row {
+    @apply transition-colors duration-150 ease-in-out;
+  }
+
+  .table-row:hover {
+    @apply bg-secondary-50;
+  }
+
+  .table-row[aria-selected="true"] {
+    @apply bg-primary-50 border-primary-100;
+  }
+
+  .table-row[aria-selected="true"]:hover {
+    @apply bg-primary-100;
+  }
+
+  .table-row[aria-disabled="true"] {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
+  .table-cell {
+    @apply text-secondary-900 text-sm leading-5;
+  }
+
+  .selection-cell {
+    @apply text-center;
+  }
+
+  .table-loading-cell,
+  .table-empty-cell {
+    @apply text-center bg-white;
+  }
+
+  .table-pagination {
+    @apply flex items-center justify-between mt-4 px-1;
+  }
+
+  .pagination-info {
+    @apply text-sm text-secondary-600;
+  }
+
+  .pagination-controls {
+    @apply flex items-center space-x-2;
+  }
+
+  .pagination-btn {
+    @apply px-3 py-2 text-sm font-medium border border-secondary-300 rounded-md text-secondary-700 bg-white hover:bg-secondary-50 hover:text-secondary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-secondary-700;
+  }
+
+  .pagination-btn:focus {
+    @apply ring-2 ring-primary-500 ring-offset-1 outline-none;
+  }
+
+  .pagination-btn[aria-current="page"] {
+    @apply bg-primary-500 text-white border-primary-500 hover:bg-primary-600 hover:border-primary-600;
+  }
+
+  .page-numbers {
+    @apply flex space-x-1;
+  }
+
+  /* Striped Rows */
+  .table-container.striped .table-row:nth-child(even):not([aria-selected="true"]) {
+    @apply bg-secondary-50/50;
+  }
+
+  .table-container.striped .table-row:nth-child(even):hover {
+    @apply bg-secondary-100/80;
+  }
+
+  /* Compact Table */
+  .table-container.compact .table-header-cell,
+  .table-container.compact .table-cell {
+    @apply py-2 px-3 text-xs;
+  }
+
+  .sort-button,
+  .filter-indicator {
+    @apply p-1 rounded hover:bg-secondary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1;
+  }
+
+  .filter-input {
+    @apply text-xs px-2 py-1 border border-secondary-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+  }
 }
 
 /* Utility layer */

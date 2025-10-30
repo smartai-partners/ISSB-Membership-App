@@ -8,6 +8,7 @@ export { default as Event } from './Event';
 export { default as EventRegistration } from './EventRegistration';
 export { default as MembershipApplication } from './MembershipApplication';
 export { default as VolunteerOpportunity } from './VolunteerOpportunity';
+export { default as Notification } from './Notification';
 
 // Export all document interfaces for typing
 export type { UserDocument } from './User';
@@ -16,6 +17,7 @@ export type { EventDocument } from './Event';
 export type { EventRegistrationDocument } from './EventRegistration';
 export type { MembershipApplicationDocument } from './MembershipApplication';
 export type { VolunteerOpportunityDocument } from './VolunteerOpportunity';
+export type { NotificationDocument } from './Notification';
 
 // ============================================================================
 // MODEL INITIALIZATION

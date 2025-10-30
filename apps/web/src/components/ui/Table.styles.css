@@ -1,0 +1,309 @@
+/* Table Component Styles */
+.table-wrapper {
+  @apply w-full;
+}
+
+/* Table Container */
+.table-container {
+  @apply w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm;
+}
+
+.table-container.bordered {
+  @apply border border-secondary-200;
+}
+
+/* Responsive Table Wrapper */
+@media (max-width: 768px) {
+  .table-wrapper {
+    @apply overflow-x-auto;
+  }
+  
+  .table-container {
+    @apply min-w-full;
+  }
+}
+
+/* Table Header */
+.table-header {
+  @apply bg-secondary-50 border-b border-secondary-200;
+}
+
+.table-header-cell {
+  @apply relative font-medium text-secondary-900 text-sm;
+}
+
+.table-header-cell:first-child {
+  @apply rounded-tl-lg;
+}
+
+.table-header-cell:last-child {
+  @apply rounded-tr-lg;
+}
+
+/* Sort Button */
+.sort-button {
+  @apply p-1 rounded hover:bg-secondary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1;
+}
+
+/* Filter Input */
+.filter-input {
+  @apply text-xs px-2 py-1 border border-secondary-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+}
+
+/* Table Body */
+.table-body {
+  @apply divide-y divide-secondary-100;
+}
+
+/* Table Row */
+.table-row {
+  @apply transition-colors duration-150 ease-in-out;
+}
+
+.table-row:hover {
+  @apply bg-secondary-50;
+}
+
+.table-row[aria-selected="true"] {
+  @apply bg-primary-50 border-primary-100;
+}
+
+.table-row[aria-selected="true"]:hover {
+  @apply bg-primary-100;
+}
+
+.table-row[aria-disabled="true"] {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Striped Rows */
+.table-container.striped .table-row:nth-child(even):not([aria-selected="true"]) {
+  @apply bg-secondary-50/50;
+}
+
+.table-container.striped .table-row:nth-child(even):hover {
+  @apply bg-secondary-100/80;
+}
+
+/* Compact Table */
+.table-container.compact .table-header-cell,
+.table-container.compact .table-cell {
+  @apply py-2 px-3 text-xs;
+}
+
+/* Table Cell */
+.table-cell {
+  @apply text-secondary-900 text-sm leading-5;
+}
+
+/* Selection Cell */
+.selection-cell {
+  @apply text-center;
+}
+
+/* Loading State */
+.table-loading-cell {
+  @apply text-center bg-white;
+}
+
+/* Empty State */
+.table-empty-cell {
+  @apply text-center bg-white;
+}
+
+/* Pagination */
+.table-pagination {
+  @apply flex items-center justify-between mt-4 px-1;
+}
+
+.pagination-info {
+  @apply text-sm text-secondary-600;
+}
+
+.pagination-controls {
+  @apply flex items-center space-x-2;
+}
+
+.pagination-btn {
+  @apply px-3 py-2 text-sm font-medium border border-secondary-300 rounded-md text-secondary-700 bg-white hover:bg-secondary-50 hover:text-secondary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-secondary-700;
+}
+
+.pagination-btn:focus {
+  @apply ring-2 ring-primary-500 ring-offset-1 outline-none;
+}
+
+/* Pagination Numbers */
+.page-numbers {
+  @apply flex space-x-1;
+}
+
+.pagination-btn[aria-current="page"] {
+  @apply bg-primary-500 text-white border-primary-500 hover:bg-primary-600 hover:border-primary-600;
+}
+
+/* Responsive Pagination */
+@media (max-width: 640px) {
+  .table-pagination {
+    @apply flex-col space-y-3;
+  }
+  
+  .pagination-controls {
+    @apply justify-center;
+  }
+  
+  .pagination-info {
+    @apply text-center;
+  }
+  
+  .page-numbers {
+    @apply space-x-1;
+  }
+  
+  .pagination-btn {
+    @apply px-2 py-1 text-xs;
+  }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  .table-row,
+  .sort-button,
+  .filter-indicator,
+  .pagination-btn {
+    @apply transition-none;
+  }
+}
+
+/* Focus Styles */
+.table-header-cell:focus-within,
+.table-cell:focus {
+  @apply outline-none;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .table-header {
+    @apply bg-secondary-100 border-secondary-400;
+  }
+  
+  .table-header-cell {
+    @apply text-secondary-900;
+  }
+  
+  .table-row {
+    @apply border-secondary-300;
+  }
+  
+  .table-cell {
+    @apply text-secondary-900;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .table-container {
+    @apply bg-secondary-900 border-secondary-700;
+  }
+  
+  .table-header {
+    @apply bg-secondary-800 border-secondary-700;
+  }
+  
+  .table-header-cell {
+    @apply text-secondary-100;
+  }
+  
+  .table-body {
+    @apply divide-secondary-700;
+  }
+  
+  .table-row {
+    @apply hover:bg-secondary-800;
+  }
+  
+  .table-row[aria-selected="true"] {
+    @apply bg-primary-900 border-primary-700;
+  }
+  
+  .table-row[aria-selected="true"]:hover {
+    @apply bg-primary-800;
+  }
+  
+  .table-cell {
+    @apply text-secondary-100;
+  }
+  
+  .table-empty-cell,
+  .table-loading-cell {
+    @apply bg-secondary-900;
+  }
+  
+  .pagination-btn {
+    @apply bg-secondary-800 border-secondary-600 text-secondary-100 hover:bg-secondary-700;
+  }
+  
+  .pagination-btn[aria-current="page"] {
+    @apply bg-primary-600 text-white border-primary-600;
+  }
+  
+  .filter-input,
+  .pagination-btn {
+    @apply bg-secondary-800 border-secondary-600 text-secondary-100;
+  }
+  
+  .filter-input::placeholder {
+    @apply text-secondary-400;
+  }
+}
+
+/* Animation Classes */
+.table-row {
+  @apply animate-fade-in;
+}
+
+.sort-button svg {
+  @apply transition-transform duration-200;
+}
+
+.filter-indicator svg {
+  @apply transition-colors duration-200;
+}
+
+/* Responsive Cell Content */
+@media (max-width: 640px) {
+  .table-cell {
+    @apply min-w-0;
+  }
+  
+  .table-cell .flex {
+    @apply items-start;
+  }
+  
+  .table-cell .flex-1 {
+    @apply overflow-hidden;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .table-wrapper {
+    @apply overflow-visible;
+  }
+  
+  .table-container {
+    @apply shadow-none border border-secondary-300;
+  }
+  
+  .table-header {
+    @apply bg-secondary-100;
+  }
+  
+  .pagination-controls {
+    @apply hidden;
+  }
+  
+  .sort-button,
+  .filter-indicator {
+    @apply hidden;
+  }
+}
