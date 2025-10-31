@@ -31,6 +31,51 @@ export function SignUpPage() {
   const donationAmount = parseFloat(formData.initial_donation) || 0;
   const balanceDue = Math.max(0, membershipFee - donationAmount);
 
+  // Error message mapping for better UX
+  const getErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) {
+      const message = error.message.toLowerCase();
+      
+      // Supabase specific error codes
+      if (message.includes('email already') || message.includes('already registered')) {
+        return 'An account with this email already exists. Please try logging in instead.';
+      }
+      
+      if (message.includes('invalid email')) {
+        return 'Please enter a valid email address.';
+      }
+      
+      if (message.includes('password')) {
+        return 'Password must be at least 6 characters long.';
+      }
+      
+      if (message.includes('weak password')) {
+        return 'Password is too weak. Please choose a stronger password.';
+      }
+      
+      if (message.includes('signup disabled')) {
+        return 'Account registration is currently disabled. Please contact support.';
+      }
+      
+      if (message.includes('rate limit')) {
+        return 'Too many registration attempts. Please wait a few minutes before trying again.';
+      }
+      
+      if (message.includes('network') || message.includes('connection')) {
+        return 'Network connection error. Please check your internet connection and try again.';
+      }
+      
+      if (message.includes('database') || message.includes('constraint')) {
+        return 'Unable to create account due to a database error. Please try again or contact support.';
+      }
+      
+      // Fallback to original message
+      return error.message;
+    }
+    
+    return 'An unexpected error occurred. Please try again.';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -48,16 +93,21 @@ export function SignUpPage() {
     setLoading(true);
 
     try {
+      const donationAmount = parseFloat(formData.initial_donation) || 0;
+      
       const { error } = await signUp(formData.email, formData.password, {
         first_name: formData.first_name,
         last_name: formData.last_name,
         phone: formData.phone,
+        volunteer_commitment: formData.volunteer_commitment,
+        donation_amount: donationAmount,
       });
 
       if (error) throw error;
       navigate('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create account');
+      const errorMessage = getErrorMessage(err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

@@ -8,7 +8,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: Error }>;
-  signUp: (email: string, password: string, userData: Partial<Profile>) => Promise<{ error?: Error }>;
+  signUp: (email: string, password: string, userData: Partial<Profile> & { volunteer_commitment?: boolean; donation_amount?: number }) => Promise<{ error?: Error }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -162,16 +162,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  async function signUp(email: string, password: string, userData: Partial<Profile>) {
+  async function signUp(email: string, password: string, userData: Partial<Profile> & { volunteer_commitment?: boolean; donation_amount?: number }) {
     try {
+      console.log('[AUTH] Starting signUp process...');
+      
       // Sign up user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.log('[AUTH] Auth error:', authError);
+        throw authError;
+      }
       if (!authData.user) throw new Error('User creation failed');
+
+      console.log('[AUTH] User created, creating profile...');
 
       // Create profile
       const { error: profileError } = await supabase
@@ -182,12 +189,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           ...userData,
           role: 'applicant',
           status: 'pending',
+          total_volunteer_hours: 0,
+          membership_fee_waived: false,
         });
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.log('[AUTH] Profile creation error:', profileError);
+        throw profileError;
+      }
 
+      console.log('[AUTH] Profile created, creating application...');
+
+      // Create application record for membership tracking
+      const { error: applicationError } = await supabase
+        .from('applications')
+        .insert({
+          user_id: authData.user.id,
+          membership_tier: 'standard',
+          status: 'pending',
+          first_name: userData.first_name || '',
+          last_name: userData.last_name || '',
+          email,
+          phone: userData.phone || '',
+          volunteer_commitment: userData.volunteer_commitment || false,
+          donation_amount: userData.donation_amount || 0,
+          agreed_to_terms: true,
+          agreed_to_code_of_conduct: true,
+        });
+
+      if (applicationError) {
+        console.log('[AUTH] Application creation error:', applicationError);
+        throw applicationError;
+      }
+
+      console.log('[AUTH] SignUp completed successfully');
       return {};
     } catch (error) {
+      console.log('[AUTH] SignUp error:', error);
       return { error: error as Error };
     }
   }

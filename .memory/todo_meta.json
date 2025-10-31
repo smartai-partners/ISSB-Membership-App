@@ -11,8 +11,8 @@
       "11": {
         "id": "11",
         "content": "Fix Registration Form Error Handling",
-        "details": "Registration form shows 'Failed to create account' with no specific validation messages. Real users cannot sign up. Priority: Add specific error handling and validation feedback to registration flow.",
-        "status": "pending",
+        "details": "✅ COMPLETED: Registration form now properly handles volunteer_commitment and donation_amount fields, creates both profile and application records, and provides specific error messages instead of generic 'Failed to create account' errors. Fixed AuthContext.tsx to pass membership fields and SignUpPage.tsx for better error handling.",
+        "status": "completed",
         "priority": "high"
       },
       "12": {
