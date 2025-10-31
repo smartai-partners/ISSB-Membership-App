@@ -3,44 +3,44 @@
     "Coordinator": {
       "1": {
         "id": "1",
-        "content": "Design and implement enhanced database schema for volunteer management",
-        "details": "Create volunteer_opportunities, volunteer_signups, and enhanced volunteer_hours tables with proper relationships, RLS policies, and indexes",
-        "status": "completed",
+        "content": "Phase 1: Critical Security Quick Wins",
+        "details": "1. Enable FORCE RLS on all tables 2. Tighten anonymous access policies 3. Implement basic rate limiting 4. Add security headers 5. Enable MFA for admin accounts",
+        "status": "pending",
         "priority": "high"
       },
       "2": {
         "id": "2",
-        "content": "Build member volunteer portal interface",
-        "details": "Opportunities browser, smart sign-up system, enhanced hour logging with opportunity linking, personal dashboard",
-        "status": "completed",
+        "content": "Phase 2: Enhanced RLS Policies Implementation",
+        "details": "1. Deploy granular role-based RLS policies 2. Replace permissive 'public can view/manage all' policies 3. Implement ownership-based access controls 4. Add secure helper functions (is_admin, is_board) 5. Test all policy combinations",
+        "status": "pending",
         "priority": "high"
       },
       "3": {
         "id": "3",
-        "content": "Develop admin management system",
-        "details": "Opportunity CRUD operations, capacity tracking, approval workflows, analytics dashboard",
-        "status": "completed",
+        "content": "Phase 3: API Security Hardening",
+        "details": "1. Migrate JWT security from HS256 to RS256/ES256 2. Implement schema-based input validation in Edge Functions 3. Add layered rate limiting 4. Standardize error handling (RFC 7807) 5. Enhance security headers",
+        "status": "pending",
         "priority": "high"
       },
       "4": {
         "id": "4",
-        "content": "Implement business logic via Supabase Edge Functions",
-        "details": "Capacity management, waiver calculations, hour approvals, notifications, analytics",
-        "status": "completed",
+        "content": "Phase 4: Authorization Governance & Monitoring",
+        "details": "1. Implement least privilege role definitions 2. Create regular access review processes 3. Add structured logging and audit trails 4. Deploy anomaly detection 5. Create incident response procedures",
+        "status": "pending",
         "priority": "medium"
       },
       "5": {
         "id": "5",
-        "content": "Create enhanced UI/UX with green branding",
-        "details": "Professional volunteer management interface matching site theme, responsive design, accessibility",
-        "status": "completed",
+        "content": "Phase 5: Testing & Validation",
+        "details": "1. Comprehensive security testing of all policies 2. User role permission validation 3. Edge Function security testing 4. Performance impact assessment 5. Documentation and training materials",
+        "status": "pending",
         "priority": "medium"
       },
       "6": {
         "id": "6",
-        "content": "Test and deploy enhanced volunteer portal",
-        "details": "End-to-end testing, user acceptance testing, deployment with migration strategy",
-        "status": "completed",
+        "content": "Phase 6: Deployment & Go-Live",
+        "details": "1. Production deployment with rollback plan 2. User communication about security changes 3. Admin training on new security features 4. Monitor for issues and optimize 5. Final security audit and compliance verification",
+        "status": "pending",
         "priority": "medium"
       }
     }
