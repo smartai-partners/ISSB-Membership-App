@@ -13,12 +13,12 @@ Deno.serve(async (req) => {
             headers: corsHeaders
         });
     }
-  
+
     try {
       // Get parameters from request body
       const requestBody = await req.json();
       const { email, password, role = 'authenticated' } = requestBody;
-      
+
       if (!email || !password) {
         return new Response(JSON.stringify({
           error: { code: 'MISSING_PARAMS', message: 'Email and password are required' }
@@ -27,11 +27,11 @@ Deno.serve(async (req) => {
           status: 400,
         });
       }
-  
+
       // Get environment variables
       const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
       const supabaseUrl = Deno.env.get('SUPABASE_URL');
-      
+
       if (!serviceRoleKey || !supabaseUrl) {
         return new Response(JSON.stringify({
           error: { code: 'CONFIG_ERROR', message: 'Missing Supabase configuration' }
@@ -40,16 +40,16 @@ Deno.serve(async (req) => {
           status: 500,
         });
       }
-  
+
       // Generate user ID
       const userId = crypto.randomUUID();
       const now = new Date().toISOString();
-      
+
       // Create user record (directly insert into auth.users table)
       const insertUserQuery = `
         INSERT INTO auth.users (
-          id, email, encrypted_password, email_confirmed_at, 
-          created_at, updated_at, role, aud, 
+          id, email, encrypted_password, email_confirmed_at,
+          created_at, updated_at, role, aud,
           confirmation_token, email_confirm_token_sent_at
         ) VALUES (
           $1, $2, crypt($3, gen_salt('bf')), $4,
@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
           '', $8
         ) RETURNING id, email, created_at
       `;
-      
+
       // Use fetch to call Supabase REST API
       const response = await fetch(`${supabaseUrl}/rest/v1/rpc/exec_sql`, {
         method: 'POST',
@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
           params: [userId, email, password, now, now, now, role, now]
         })
       });
-  
+
       if (!response.ok) {
         // If direct insert fails, try using Admin API to create user
         const adminResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
@@ -88,12 +88,12 @@ Deno.serve(async (req) => {
             user_metadata: { role: role }
           })
         });
-  
+
         if (!adminResponse.ok) {
           const errorText = await adminResponse.text();
           return new Response(JSON.stringify({
-            error: { 
-              code: 'USER_CREATION_FAILED', 
+            error: {
+              code: 'USER_CREATION_FAILED',
               message: `Failed to create user: ${errorText}`,
               details: { status: adminResponse.status }
             }
@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
             status: 500,
           });
         }
-  
+
         const userData = await adminResponse.json();
         return new Response(JSON.stringify({
           success: true,
@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-  
+
       const userData = await response.json();
       return new Response(JSON.stringify({
         success: true,
@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
-  
+
     } catch (error) {
       logger.error('Function error:', error);
       return new Response(JSON.stringify({
@@ -141,4 +141,4 @@ Deno.serve(async (req) => {
         status: 500,
       });
     }
-  });            
+  });

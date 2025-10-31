@@ -60,7 +60,7 @@
       "9": {
         "id": "9",
         "content": "Admin Dashboard Enhancement Phase 2: User Management",
-        "details": "1. ✅ Enhanced user management interface with shadcn/ui components deployed at https://6op3uk8bqhzd.space.minimax.io/admin/users 2. ✅ RTK Query endpoints for admin operations 3. ✅ Edge Functions deployed: create-admin (https://ewbzpjpbmtnavfaogneq.supabase.co/functions/v1/create-admin), admin-update-user-role 4. ✅ Admin access setup ready with verification code: ISSB_ADMIN_2024 5. ✅ Comprehensive testing documentation created",
+        "details": "1. ✅ Enhanced user management interface with shadcn/ui components deployed at https://6op3uk8bqhzd.space.minimax.io/admin/users 2. ✅ RTK Query endpoints for admin operations 3. ✅ Edge Functions deployed: create-admin (https://ewbzpjpbmtnavfaogneq.supabase.co/functions/v1/create-admin), admin-update-user-role 4. ✅ Admin access granted to topojqak@minimax.com 5. ✅ Comprehensive testing documentation created",
         "status": "completed",
         "priority": "high"
       }
