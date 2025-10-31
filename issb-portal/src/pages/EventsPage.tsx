@@ -72,40 +72,31 @@ export function EventsPage() {
       </div>
 
       {/* Prayer Times Section */}
-      <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg shadow-xl p-6">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-white mb-2">Daily Prayer Times</h2>
-          <p className="text-green-100">
-            Accurate prayer times provided by our official prayer schedule
-          </p>
-        </div>
-        
-        {/* Official Prayer Times Widget with Green Branding */}
-        <div className="bg-white rounded-lg overflow-hidden shadow-lg relative">
-          {/* Green Header Overlay */}
-          <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4 rounded-t-lg">
-            <div className="text-center">
-              <h3 className="text-lg font-bold">Islamic Society of Sarasota & Bradenton</h3>
-              <p className="text-sm text-green-100">Accurate Prayer Times</p>
-            </div>
-          </div>
-          
-          {/* Prayer Times Widget */}
-          <div className="pt-20">
-            <iframe 
-              src="https://timing.athanplus.com/masjid/widgets/embed?theme=2&masjid_id=QL010DAZ" 
-              width="100%" 
-              height="540" 
-              frameBorder={0} 
-              allowTransparency={true}
-              title="ISSB Prayer Times"
-              className="w-full"
-            />
+      <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg shadow-xl overflow-hidden">
+        {/* Compact Green Header */}
+        <div className="bg-green-600/20 backdrop-blur-sm text-white p-4">
+          <div className="text-center">
+            <h2 className="text-xl font-bold mb-1">Daily Prayer Times</h2>
+            <p className="text-sm text-green-100">Islamic Society of Sarasota & Bradenton</p>
           </div>
         </div>
         
-        <div className="mt-4 text-center">
-          <p className="text-sm text-green-100">
+        {/* Prayer Times Widget - Seamless Integration */}
+        <div className="bg-white">
+          <iframe 
+            src="https://timing.athanplus.com/masjid/widgets/embed?theme=2&masjid_id=QL010DAZ" 
+            width="100%" 
+            height="560" 
+            frameBorder={0} 
+            allowTransparency={true}
+            title="ISSB Prayer Times"
+            className="w-full block"
+          />
+        </div>
+        
+        {/* Bottom Text */}
+        <div className="bg-green-600/20 backdrop-blur-sm text-center py-3">
+          <p className="text-sm text-white">
             Jumu'ah (Friday Prayer): 1:30 PM | Iqamah times may vary, please arrive early
           </p>
         </div>
