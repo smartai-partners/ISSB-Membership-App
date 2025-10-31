@@ -8,6 +8,7 @@ export function VolunteersPage() {
   const { user } = useAuth();
   const [showLogModal, setShowLogModal] = useState(false);
   const [activeView, setActiveView] = useState<'opportunities' | 'dashboard'>('opportunities');
+  const [refreshKey, setRefreshKey] = useState(0);
 
   if (!user) {
     return (
@@ -91,9 +92,9 @@ export function VolunteersPage() {
 
       {/* Content */}
       {activeView === 'opportunities' ? (
-        <OpportunityBrowser />
+        <OpportunityBrowser key={`opp-${refreshKey}`} />
       ) : (
-        <VolunteerDashboard />
+        <VolunteerDashboard key={`dash-${refreshKey}`} />
       )}
 
       {/* Log Hours Modal */}
@@ -103,9 +104,8 @@ export function VolunteersPage() {
             <HourLogForm
               onSuccess={() => {
                 setShowLogModal(false);
-                if (activeView === 'dashboard') {
-                  window.location.reload();
-                }
+                // Refresh dashboard without full page reload
+                setRefreshKey(prev => prev + 1);
               }}
               onCancel={() => setShowLogModal(false)}
             />

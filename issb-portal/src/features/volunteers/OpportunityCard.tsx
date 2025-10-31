@@ -16,14 +16,19 @@ export function OpportunityCard({ opportunity, onSelect }: OpportunityCardProps)
   const [loading, setLoading] = useState(false);
   const [liveOpportunity, setLiveOpportunity] = useState(opportunity);
 
+  // Check signup status only once on mount or when opportunity changes
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       checkSignupStatus();
     }
-  }, [user, opportunity.id]);
+  }, [user?.id, opportunity.id]);
 
-  // Real-time subscription for capacity updates
+  // Real-time subscription for capacity updates (with debouncing)
   useEffect(() => {
+    // Initialize live opportunity from prop
+    setLiveOpportunity(opportunity);
+
+    let timeoutId: NodeJS.Timeout;
     const channel = supabase
       .channel(`opportunity-${opportunity.id}`)
       .on(
@@ -35,12 +40,17 @@ export function OpportunityCard({ opportunity, onSelect }: OpportunityCardProps)
           filter: `id=eq.${opportunity.id}`
         },
         (payload) => {
-          setLiveOpportunity(payload.new as VolunteerOpportunity);
+          // Debounce updates to prevent rapid flickering
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            setLiveOpportunity(payload.new as VolunteerOpportunity);
+          }, 300);
         }
       )
       .subscribe();
 
     return () => {
+      clearTimeout(timeoutId);
       supabase.removeChannel(channel);
     };
   }, [opportunity.id]);
@@ -84,10 +94,8 @@ export function OpportunityCard({ opportunity, onSelect }: OpportunityCardProps)
       setSignupStatus('CONFIRMED');
       alert('Successfully signed up for this opportunity!');
       
-      // Reload to update counts
-      if (onSelect) {
-        onSelect(opportunity);
-      }
+      // Refresh signup status
+      checkSignupStatus();
     } catch (error: any) {
       console.error('Error signing up:', error);
       alert(error.message || 'Failed to sign up. Please try again.');
@@ -115,10 +123,8 @@ export function OpportunityCard({ opportunity, onSelect }: OpportunityCardProps)
       setSignupStatus('');
       alert('Successfully withdrawn from this opportunity.');
       
-      // Reload to update counts
-      if (onSelect) {
-        onSelect(opportunity);
-      }
+      // Refresh signup status
+      checkSignupStatus();
     } catch (error: any) {
       console.error('Error withdrawing:', error);
       alert(error.message || 'Failed to withdraw. Please try again.');

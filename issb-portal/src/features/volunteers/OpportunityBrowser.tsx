@@ -20,8 +20,14 @@ export function OpportunityBrowser({ onOpportunitySelect }: OpportunityBrowserPr
     loadOpportunities();
   }, []);
 
+  // Optimize filtering with useMemo pattern
   useEffect(() => {
-    filterOpportunities();
+    // Debounce filtering to prevent excessive re-renders
+    const timeoutId = setTimeout(() => {
+      filterOpportunities();
+    }, 150);
+
+    return () => clearTimeout(timeoutId);
   }, [opportunities, searchTerm, filterCategory, filterStatus]);
 
   async function loadOpportunities() {
@@ -35,6 +41,7 @@ export function OpportunityBrowser({ onOpportunitySelect }: OpportunityBrowserPr
       if (error) throw error;
       if (data) {
         setOpportunities(data);
+        setFilteredOpportunities(data); // Set initial filtered data
       }
     } catch (error) {
       console.error('Error loading opportunities:', error);

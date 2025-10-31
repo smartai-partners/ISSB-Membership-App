@@ -12,11 +12,12 @@ export function VolunteerDashboard() {
   const [waiverProgress, setWaiverProgress] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  // Load dashboard data only once when user is available
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       loadDashboardData();
     }
-  }, [user]);
+  }, [user?.id]);
 
   async function loadDashboardData() {
     try {
