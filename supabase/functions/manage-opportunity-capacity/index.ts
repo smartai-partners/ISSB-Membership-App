@@ -1,17 +1,114 @@
-Deno.serve(async (req) => {
-    const corsHeaders = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE, PATCH',
-        'Access-Control-Max-Age': '86400',
-        'Access-Control-Allow-Credentials': 'false'
+// PHASE 1A SECURITY: Enhanced with rate limiting and security headers
+
+// In-memory rate limit store
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+// Rate limit configuration
+const RATE_LIMIT_CONFIG = {
+  maxRequests: 3,
+  windowMs: 60 * 60 * 1000, // 1 hour
+};
+
+function checkRateLimit(req: Request): {
+  allowed: boolean;
+  remainingRequests: number;
+  resetTime: number;
+} {
+  const forwardedFor = req.headers.get('x-forwarded-for');
+  const realIp = req.headers.get('x-real-ip');
+  const cfConnectingIp = req.headers.get('cf-connecting-ip');
+  const ip = cfConnectingIp || realIp || (forwardedFor?.split(',')[0]) || 'unknown';
+  const userAgent = req.headers.get('user-agent') || 'unknown';
+  const identifier = `${ip}-${userAgent.substring(0, 50)}`;
+  
+  const now = Date.now();
+  const entry = rateLimitStore.get(identifier);
+  
+  // Clean up expired entries
+  for (const [key, value] of rateLimitStore.entries()) {
+    if (value.resetTime < now) {
+      rateLimitStore.delete(key);
+    }
+  }
+  
+  if (!entry || entry.resetTime < now) {
+    rateLimitStore.set(identifier, {
+      count: 1,
+      resetTime: now + RATE_LIMIT_CONFIG.windowMs,
+    });
+    return {
+      allowed: true,
+      remainingRequests: RATE_LIMIT_CONFIG.maxRequests - 1,
+      resetTime: now + RATE_LIMIT_CONFIG.windowMs,
     };
+  }
+  
+  if (entry.count >= RATE_LIMIT_CONFIG.maxRequests) {
+    return {
+      allowed: false,
+      remainingRequests: 0,
+      resetTime: entry.resetTime,
+    };
+  }
+  
+  entry.count++;
+  rateLimitStore.set(identifier, entry);
+  
+  return {
+    allowed: true,
+    remainingRequests: RATE_LIMIT_CONFIG.maxRequests - entry.count,
+    resetTime: entry.resetTime,
+  };
+}
+
+function getSecureHeaders(): HeadersInit {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Max-Age': '86400',
+    'Content-Type': 'application/json',
+    'X-Frame-Options': 'DENY',
+    'X-Content-Type-Options': 'nosniff',
+    'X-XSS-Protection': '1; mode=block',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+  };
+}
+
+Deno.serve(async (req) => {
+    const secureHeaders = getSecureHeaders();
 
     if (req.method === 'OPTIONS') {
-        return new Response(null, { status: 200, headers: corsHeaders });
+        return new Response(null, { status: 200, headers: secureHeaders });
     }
 
     try {
+        // PHASE 1A SECURITY: Rate limiting
+        const rateLimitCheck = checkRateLimit(req);
+        if (!rateLimitCheck.allowed) {
+            const retryAfter = Math.ceil((rateLimitCheck.resetTime - Date.now()) / 1000);
+            return new Response(
+                JSON.stringify({
+                    error: {
+                        code: 'RATE_LIMIT_EXCEEDED',
+                        message: 'Too many signup attempts. Please try again later.',
+                        retryAfter,
+                    },
+                }),
+                {
+                    status: 429,
+                    headers: {
+                        ...secureHeaders,
+                        'Retry-After': retryAfter.toString(),
+                        'X-RateLimit-Limit': RATE_LIMIT_CONFIG.maxRequests.toString(),
+                        'X-RateLimit-Remaining': '0',
+                        'X-RateLimit-Reset': new Date(rateLimitCheck.resetTime).toISOString(),
+                    },
+                }
+            );
+        }
+
         const { opportunityId, action, memberId } = await req.json();
 
         if (!opportunityId || !action || !memberId) {
@@ -179,7 +276,7 @@ Deno.serve(async (req) => {
                 newCapacity: newCount
             }
         }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            headers: secureHeaders
         });
 
     } catch (error) {
@@ -194,7 +291,7 @@ Deno.serve(async (req) => {
 
         return new Response(JSON.stringify(errorResponse), {
             status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            headers: secureHeaders
         });
     }
 });
