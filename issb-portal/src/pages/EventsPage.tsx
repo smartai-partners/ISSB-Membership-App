@@ -1,90 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, MapPin, Users, Plus, Clock, Moon, Sun, Sunset, Loader2 } from 'lucide-react';
+import { Calendar, MapPin, Users, Plus } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Event, EventRegistration } from '@/types';
-
-interface PrayerTime {
-  name: string;
-  time: string;
-  icon: any;
-  color: string;
-}
 
 export function EventsPage() {
   const { user, profile } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [myRegistrations, setMyRegistrations] = useState<EventRegistration[]>([]);
-  const [prayerTimes, setPrayerTimes] = useState<PrayerTime[]>([]);
-  const [prayerTimesLoading, setPrayerTimesLoading] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadEvents();
-    loadPrayerTimes();
     if (user) {
       loadMyRegistrations();
     }
   }, [user]);
-
-  async function loadPrayerTimes() {
-    try {
-      // Sarasota, FL coordinates
-      const latitude = 27.3364;
-      const longitude = -82.5307;
-      
-      // Get current date
-      const today = new Date();
-      const day = today.getDate();
-      const month = today.getMonth() + 1;
-      const year = today.getFullYear();
-      
-      // Fetch from Aladhan API
-      const response = await fetch(
-        `https://api.aladhan.com/v1/timings/${day}-${month}-${year}?latitude=${latitude}&longitude=${longitude}&method=2`
-      );
-      
-      if (response.ok) {
-        const data = await response.json();
-        const timings = data.data.timings;
-        
-        setPrayerTimes([
-          { name: 'Fajr', time: convertTo12Hour(timings.Fajr), icon: Moon, color: 'indigo' },
-          { name: 'Dhuhr', time: convertTo12Hour(timings.Dhuhr), icon: Sun, color: 'yellow' },
-          { name: 'Asr', time: convertTo12Hour(timings.Asr), icon: Sun, color: 'orange' },
-          { name: 'Maghrib', time: convertTo12Hour(timings.Maghrib), icon: Sunset, color: 'red' },
-          { name: 'Isha', time: convertTo12Hour(timings.Isha), icon: Moon, color: 'purple' },
-        ]);
-      } else {
-        // Fallback to default times if API fails
-        setDefaultPrayerTimes();
-      }
-    } catch (error) {
-      console.error('Error loading prayer times:', error);
-      // Fallback to default times
-      setDefaultPrayerTimes();
-    } finally {
-      setPrayerTimesLoading(false);
-    }
-  }
-
-  function setDefaultPrayerTimes() {
-    setPrayerTimes([
-      { name: 'Fajr', time: '5:45 AM', icon: Moon, color: 'indigo' },
-      { name: 'Dhuhr', time: '1:15 PM', icon: Sun, color: 'yellow' },
-      { name: 'Asr', time: '4:30 PM', icon: Sun, color: 'orange' },
-      { name: 'Maghrib', time: '7:05 PM', icon: Sunset, color: 'red' },
-      { name: 'Isha', time: '8:25 PM', icon: Moon, color: 'purple' },
-    ]);
-  }
-
-  function convertTo12Hour(time24: string): string {
-    const [hours, minutes] = time24.split(':');
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const hour12 = hour % 12 || 12;
-    return `${hour12}:${minutes} ${ampm}`;
-  }
 
   async function loadEvents() {
     try {
@@ -141,40 +72,32 @@ export function EventsPage() {
       </div>
 
       {/* Prayer Times Section */}
-      <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg shadow-xl p-6 text-white">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-bold">Daily Prayer Times</h2>
-            <p className="text-sm text-green-100 mt-1">
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            </p>
-          </div>
-          <div className="text-sm text-green-100">Sarasota, FL</div>
+      <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg shadow-xl p-6">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-white mb-2">Daily Prayer Times</h2>
+          <p className="text-green-100">
+            Accurate prayer times provided by our official prayer schedule
+          </p>
         </div>
         
-        {prayerTimesLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin" />
-            <span className="ml-2">Loading prayer times...</span>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {prayerTimes.map((prayer) => {
-              const Icon = prayer.icon;
-              return (
-                <div key={prayer.name} className="bg-white/10 backdrop-blur rounded-lg p-4 text-center">
-                  <Icon className="w-6 h-6 mx-auto mb-2" />
-                  <div className="font-semibold text-lg">{prayer.name}</div>
-                  <div className="text-2xl font-bold mt-1">{prayer.time}</div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        {/* Official Prayer Times Widget */}
+        <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+          <iframe 
+            src="https://timing.athanplus.com/masjid/widgets/embed?theme=1&masjid_id=QL010DAZ" 
+            width="100%" 
+            height="560" 
+            frameBorder={0} 
+            allowTransparency={true}
+            title="ISSB Prayer Times"
+            className="w-full"
+          />
+        </div>
         
-        <p className="text-sm text-green-100 mt-4 text-center">
-          Jumu'ah (Friday Prayer): 1:30 PM | Iqamah times are approximately 15 minutes after Adhan
-        </p>
+        <div className="mt-4 text-center">
+          <p className="text-sm text-green-100">
+            Jumu'ah (Friday Prayer): 1:30 PM | Iqamah times may vary, please arrive early
+          </p>
+        </div>
       </div>
 
       {/* Special Islamic Events Highlight */}
