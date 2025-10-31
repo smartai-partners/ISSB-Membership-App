@@ -1,5 +1,5 @@
 {
-  "_source_id": 8,
+  "_source_id": 34,
   "sources": {
     "State Management Evaluation": {
       "https://redux-toolkit.js.org/rtk-query/overview": {
@@ -57,6 +57,196 @@
         "url": "https://redux.js.org/faq/performance",
         "title": "Performance | Redux",
         "info": "Performance guidelines for Redux applications including scaling considerations, rendering optimization with normalized state, memory usage patterns, and batching strategies for large-scale applications with hundreds of components"
+      }
+    },
+    "Admin Dashboard Component Architecture Analysis": {
+      "https://lsyimggqennkyxgajzvn.supabase.co/functions/v1/manage-opportunity-capacity": {
+        "id": 9,
+        "publisher": "Supabase",
+        "url": "https://lsyimggqennkyxgajzvn.supabase.co/functions/v1/manage-opportunity-capacity",
+        "title": "Edge Function: manage-opportunity-capacity",
+        "info": "Serverless function handling volunteer opportunity capacity management with transactional integrity"
+      },
+      "https://lsyimggqennkyxgajzvn.supabase.co/functions/v1/calculate-volunteer-waiver": {
+        "id": 10,
+        "publisher": "Supabase",
+        "url": "https://lsyimggqennkyxgajzvn.supabase.co/functions/v1/calculate-volunteer-waiver",
+        "title": "Edge Function: calculate-volunteer-waiver",
+        "info": "Automated waiver calculation service for volunteer hours towards membership fees"
+      },
+      "https://lsyimggqennkyxgajzvn.supabase.co/functions/v1/approve-volunteer-hours": {
+        "id": 11,
+        "publisher": "Supabase",
+        "url": "https://lsyimggqennkyxgajzvn.supabase.co/functions/v1/approve-volunteer-hours",
+        "title": "Edge Function: approve-volunteer-hours",
+        "info": "Admin approval workflow for volunteer hour submissions"
+      },
+      "https://lsyimggqennkyxgajzvn.supabase.co/functions/v1/volunteer-analytics": {
+        "id": 12,
+        "publisher": "Supabase",
+        "url": "https://lsyimggqennkyxgajzvn.supabase.co/functions/v1/volunteer-analytics",
+        "title": "Edge Function: volunteer-analytics",
+        "info": "Analytics and metrics aggregation for volunteer program management"
+      },
+      "https://fvkx52b660xj.space.minimax.io/volunteers": {
+        "id": 13,
+        "publisher": "ISSB Portal",
+        "url": "https://fvkx52b660xj.space.minimax.io/volunteers",
+        "title": "Production Portal (Member Volunteer Page)",
+        "info": "Live implementation of volunteer portal with real-time capacity tracking and membership management"
+      }
+    },
+    "Admin Dashboard State Management Analysis": {
+      "https://medium.com/@freeyeon96/zustand-react-query-new-state-management-7aad6090af56": {
+        "id": 14,
+        "publisher": "Medium",
+        "url": "https://medium.com/@freeyeon96/zustand-react-query-new-state-management-7aad6090af56",
+        "title": "Zustand + React Query: A New Approach to State Management",
+        "info": "Detailed guide on combining Zustand and React Query with practical code examples for friend list and request management, demonstrating separation of server and client state concerns"
+      },
+      "https://tkdodo.eu/blog/working-with-zustand": {
+        "id": 15,
+        "publisher": "TkDodo's Blog",
+        "url": "https://tkdodo.eu/blog/working-with-zustand",
+        "title": "Working with Zustand",
+        "info": "Comprehensive best practices for Zustand including custom hooks, atomic selectors, action separation, and integration with React Query for filtering patterns"
+      },
+      "https://www.dhiwise.com/post/rtk-query-vs-react-query-breaking-down-the-technicalities": {
+        "id": 16,
+        "publisher": "DhiWise",
+        "url": "https://www.dhiwise.com/post/rtk-query-vs-react-query-breaking-down-the-technicalities",
+        "title": "RTK Query Vs. React Query: A Comprehensive Comparison",
+        "info": "Technical comparison of RTK Query and React Query features, including automatic caching, optimistic updates, SSR support, and integration approaches"
+      },
+      "https://blog.logrocket.com/handling-user-authentication-redux-toolkit/": {
+        "id": 17,
+        "publisher": "LogRocket",
+        "url": "https://blog.logrocket.com/handling-user-authentication-redux-toolkit/",
+        "title": "Handling user authentication with Redux Toolkit",
+        "info": "Complete authentication workflow with Redux Toolkit and RTK Query, including JWT handling, protected routes, and user management patterns"
+      },
+      "https://dev.to/hamzakhan/state-management-in-react-comparing-redux-toolkit-vs-zustand-3no": {
+        "id": 18,
+        "publisher": "Dev.to",
+        "url": "https://dev.to/hamzakhan/state-management-in-react-comparing-redux-toolkit-vs-zustand-3no",
+        "title": "State Management in React: Comparing Redux Toolkit vs. Zustand",
+        "info": "Performance and usability comparison between Redux Toolkit and Zustand, covering bundle size, complexity, and use case recommendations"
+      },
+      "https://manishgcodes.medium.com/master-caching-in-react-query-reduce-network-requests-and-improve-performance-868291494d40": {
+        "id": 19,
+        "publisher": "Medium",
+        "url": "https://manishgcodes.medium.com/master-caching-in-react-query-reduce-network-requests-and-improve-performance-868291494d40",
+        "title": "Caching in React Query: Reduce Network Requests and Improve Performance",
+        "info": "React Query caching strategies including queryKey patterns, gcTime, staleTime configuration, and user data caching approaches"
+      },
+      "https://redux.js.org/tutorials/essentials/part-8-rtk-query-advanced": {
+        "id": 20,
+        "publisher": "Redux Documentation",
+        "url": "https://redux.js.org/tutorials/essentials/part-8-rtk-query-advanced",
+        "title": "Redux Essentials, Part 8: RTK Query Advanced Patterns",
+        "info": "Advanced RTK Query patterns including cache invalidation with providesTags, data transformation, manual fetching, and endpoint injection for scalable applications"
+      }
+    },
+    "Admin Dashboard Accessibility Analysis": {
+      "https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/": {
+        "id": 21,
+        "publisher": "W3C WAI ARIA Working Group",
+        "url": "https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/",
+        "title": "Developing a Keyboard Interface - ARIA Authoring Practices",
+        "info": "Comprehensive keyboard navigation patterns, tab order management, focus management strategies, and keyboard interaction guidelines for web interfaces"
+      },
+      "https://www.w3.org/WAI/ARIA/apg/patterns/": {
+        "id": 22,
+        "publisher": "W3C WAI ARIA Working Group",
+        "url": "https://www.w3.org/WAI/ARIA/apg/patterns/",
+        "title": "ARIA Authoring Practices Guide - Patterns",
+        "info": "Complete set of ARIA patterns for common design widgets including buttons, forms, dialogs, tables, grids, and navigation elements relevant to admin interfaces"
+      },
+      "https://webaim.org/techniques/aria/": {
+        "id": 23,
+        "publisher": "WebAIM",
+        "url": "https://webaim.org/techniques/aria/",
+        "title": "Introduction to ARIA - Web Accessibility Techniques",
+        "info": "ARIA implementation guidelines for forms, landmark roles, dynamic content updates, and accessibility rules for complex admin interfaces"
+      },
+      "https://webaim.org/techniques/keyboard/": {
+        "id": 24,
+        "publisher": "WebAIM",
+        "url": "https://webaim.org/techniques/keyboard/",
+        "title": "Keyboard Accessibility - WebAIM Techniques",
+        "info": "Comprehensive keyboard accessibility guidelines including focus indicators, navigation order, and accessibility for custom widgets in admin interfaces"
+      },
+      "https://www.w3.org/TR/WCAG21/": {
+        "id": 25,
+        "publisher": "W3C",
+        "url": "https://www.w3.org/TR/WCAG21/",
+        "title": "Web Content Accessibility Guidelines (WCAG) 2.1",
+        "info": "WCAG 2.1 Level A and AA compliance requirements specifically for admin dashboards, data tables, forms, and user management interfaces"
+      },
+      "https://www.loginradius.com/blog/engineering/introduction-to-web-accessibility-with-semantic-html5": {
+        "id": 26,
+        "publisher": "LoginRadius Engineering",
+        "url": "https://www.loginradius.com/blog/engineering/introduction-to-web-accessibility-with-semantic-html5",
+        "title": "Introduction to Web Accessibility with Semantic HTML5",
+        "info": "Semantic HTML5 best practices including proper element usage, accessibility hooks, and implementation patterns for accessible web interfaces"
+      }
+    },
+    "Admin Dashboard UI Patterns Analysis": {
+      "https://www.shadcn.io/template/satnaing-shadcn-admin": {
+        "id": 27,
+        "publisher": "Satnaing",
+        "url": "https://www.shadcn.io/template/satnaing-shadcn-admin",
+        "title": "Shadcn Admin - shadcn/ui Template",
+        "info": "Comprehensive admin dashboard template with over 10 pre-built pages, WAI-ARIA compliant components, light/dark mode, RTL support, and user management patterns"
+      },
+      "https://ui.shadcn.com/docs/components/data-table": {
+        "id": 28,
+        "publisher": "shadcn/ui",
+        "url": "https://ui.shadcn.com/docs/components/data-table",
+        "title": "Data Table Component Documentation",
+        "info": "Detailed implementation guide for TanStack Table integration with shadcn/ui components, including sorting, filtering, pagination, row selection, and admin interface patterns"
+      },
+      "https://www.shadcn.io/ui/data-table": {
+        "id": 29,
+        "publisher": "shadcn/ui",
+        "url": "https://www.shadcn.io/ui/data-table",
+        "title": "Data Table Examples and Patterns",
+        "info": "User management interface patterns, mobile responsiveness considerations, column visibility controls, and integration patterns with other shadcn/ui components"
+      },
+      "https://ui.shadcn.com/docs/forms/react-hook-form": {
+        "id": 30,
+        "publisher": "shadcn/ui",
+        "url": "https://ui.shadcn.com/docs/forms/react-hook-form",
+        "title": "React Hook Form Integration Patterns",
+        "info": "Form patterns for admin interfaces including validation with Zod, accessibility features, dynamic array fields, and various input types for user management"
+      },
+      "https://www.newline.co/@eyalcohen/alt-text-and-beyond-making-your-website-accessible-with-shadcnui--0dd38704": {
+        "id": 31,
+        "publisher": "Newline",
+        "url": "https://www.newline.co/@eyalcohen/alt-text-and-beyond-making-your-website-accessible-with-shadcnui--0dd38704",
+        "title": "Accessibility Features in shadcn/ui",
+        "info": "WCAG compliance details, ARIA guidelines implementation, keyboard navigation support, and accessibility testing tools for admin interfaces"
+      },
+      "https://marmelab.com/blog/2025/04/23/react-admin-with-shadcn.html": {
+        "id": 32,
+        "publisher": "Marmelab",
+        "url": "https://marmelab.com/blog/2025/04/23/react-admin-with-shadcn.html",
+        "title": "React-admin with shadcn/ui Integration",
+        "info": "Design-agnostic framework integration, component library development, CRUD operations patterns, and headless core leverage for admin applications"
+      },
+      "https://blog.openreplay.com/material-ui-vs-shadcn-ui/": {
+        "id": 33,
+        "publisher": "OpenReplay",
+        "url": "https://blog.openreplay.com/material-ui-vs-shadcn-ui/",
+        "title": "Material UI vs shadcn/ui Comparison",
+        "info": "Performance comparison showing 150KB vs 300KB bundle sizes, customization flexibility, design philosophy differences, and use case recommendations for admin interfaces"
+      },
+      "https://makersden.io/blog/react-ui-libs-2025-comparing-shadcn-radix-mantine-mui-chakra": {
+        "id": 34,
+        "publisher": "Makers Den",
+        "url": "https://makersden.io/blog/react-ui-libs-2025-comparing-shadcn-radix-mantine-mui-chakra",
+        "title": "React UI Libraries 2025 Comparison",
+        "info": "Copy-paste architecture benefits, community-driven development model, and optimization strategies for large-scale admin applications"
       }
     }
   }
