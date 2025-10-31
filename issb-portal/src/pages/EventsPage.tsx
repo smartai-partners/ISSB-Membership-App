@@ -80,17 +80,28 @@ export function EventsPage() {
           </p>
         </div>
         
-        {/* Official Prayer Times Widget */}
-        <div className="bg-white rounded-lg overflow-hidden shadow-lg">
-          <iframe 
-            src="https://timing.athanplus.com/masjid/widgets/embed?theme=1&masjid_id=QL010DAZ" 
-            width="100%" 
-            height="560" 
-            frameBorder={0} 
-            allowTransparency={true}
-            title="ISSB Prayer Times"
-            className="w-full"
-          />
+        {/* Official Prayer Times Widget with Green Branding */}
+        <div className="bg-white rounded-lg overflow-hidden shadow-lg relative">
+          {/* Green Header Overlay */}
+          <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4 rounded-t-lg">
+            <div className="text-center">
+              <h3 className="text-lg font-bold">Islamic Society of Sarasota & Bradenton</h3>
+              <p className="text-sm text-green-100">Accurate Prayer Times</p>
+            </div>
+          </div>
+          
+          {/* Prayer Times Widget */}
+          <div className="pt-20">
+            <iframe 
+              src="https://timing.athanplus.com/masjid/widgets/embed?theme=2&masjid_id=QL010DAZ" 
+              width="100%" 
+              height="540" 
+              frameBorder={0} 
+              allowTransparency={true}
+              title="ISSB Prayer Times"
+              className="w-full"
+            />
+          </div>
         </div>
         
         <div className="mt-4 text-center">
