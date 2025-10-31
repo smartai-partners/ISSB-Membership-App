@@ -8,6 +8,33 @@
 ✓ Browser DevTools open (F12)  
 ✓ Test users in database (various roles/statuses)
 
+### Get Admin Access (Choose One Method):
+
+**Method 1: Use create-admin Edge Function (Easiest)**
+```bash
+# After deploying Edge Functions (see EDGE_FUNCTIONS_DEPLOYMENT.md):
+curl -X POST \
+  'https://lsyimggqennkyxgajzvn.supabase.co/functions/v1/create-admin' \
+  -H 'Content-Type: application/json' \
+  -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzeWltZ2dxZW5ua3l4Z2FqenZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE4MjEyNDIsImV4cCI6MjA3NzM5NzI0Mn0.M805YQcX85823c1sQB2xHhRV8rKr0RhMSLKfkpoB3Fc' \
+  -d '{"email":"your@email.com","verificationCode":"ISSB_ADMIN_2024"}'
+
+# Then: Logout → Login → Access /admin/users
+```
+**Verification Code**: `ISSB_ADMIN_2024`  
+**Full Guide**: `docs/ADMIN_ACCESS_SETUP.md`
+
+**Method 2: SQL Command (If Edge Function Not Deployed)**
+```sql
+-- Run in Supabase SQL Editor
+UPDATE auth.users 
+SET raw_user_meta_data = jsonb_set(
+  COALESCE(raw_user_meta_data, '{}'::jsonb),
+  '{role}', '"admin"'
+)
+WHERE email = 'your@email.com';
+```
+
 ---
 
 ## 🚀 Quick Test Sequence (15 minutes)
