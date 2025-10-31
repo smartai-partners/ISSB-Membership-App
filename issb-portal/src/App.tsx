@@ -13,6 +13,7 @@ import { MemberDashboardPage } from '@/pages/MemberDashboardPage';
 import { AdminDashboardPage } from '@/pages/AdminDashboardPage';
 import { ApplicationsPage } from '@/pages/ApplicationsPage';
 import { UsersManagementPage } from '@/pages/UsersManagementPage';
+import { EnhancedUsersManagementPage } from '@/pages/EnhancedUsersManagementPage';
 import { MembershipsManagementPage } from '@/pages/MembershipsManagementPage';
 import { EventsManagementPage } from '@/pages/EventsManagementPage';
 import { AdminVolunteerManagement } from '@/pages/AdminVolunteerManagementPage';
@@ -89,7 +90,7 @@ function App() {
               path="/admin/users"
               element={
                 <ProtectedRoute roles={['admin', 'board']}>
-                  <UsersManagementPage />
+                  <EnhancedUsersManagementPage />
                 </ProtectedRoute>
               }
             />

@@ -6,6 +6,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { memberApi } from './api/memberApi';
+import { adminApi } from './api/adminApi';
 import authReducer from './slices/authSlice';
 
 /**
@@ -17,6 +18,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     [memberApi.reducerPath]: memberApi.reducer,
+    [adminApi.reducerPath]: adminApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -26,6 +28,8 @@ export const store = configureStore({
           'auth/setSession',
           'memberApi/executeQuery/fulfilled',
           'memberApi/executeMutation/fulfilled',
+          'adminApi/executeQuery/fulfilled',
+          'adminApi/executeMutation/fulfilled',
         ],
         // Ignore these field paths in all actions
         ignoredActionPaths: [
@@ -39,9 +43,11 @@ export const store = configureStore({
           'auth.user',
           'memberApi.queries',
           'memberApi.mutations',
+          'adminApi.queries',
+          'adminApi.mutations',
         ],
       },
-    }).concat(memberApi.middleware),
+    }).concat(memberApi.middleware, adminApi.middleware),
   devTools: import.meta.env.DEV,
 });
 
