@@ -3,59 +3,45 @@
     "Coordinator": {
       "1": {
         "id": "1",
-        "content": "Complete ISSB Mosque Portal Overhaul",
-        "details": "Successfully completed comprehensive rebrand and transformation from membership organization to Islamic Society of Sarasota and Bradenton mosque platform",
-        "status": "completed",
+        "content": "Enhanced Volunteer Portal - Database Schema Design",
+        "details": "Create new database tables and enhance existing ones:\n- volunteer_opportunities table (id, title, description, date, duration_hours, location, max_volunteers, current_volunteers, required_skills, status, admin_id)\n- volunteer_signups table (id, opportunity_id, member_id, status, signed_up_at)\n- Enhanced volunteer_hours table (link to opportunities and signups, approval_status, approved_by)\n- Add approval workflows and capacity tracking",
+        "status": "pending",
         "priority": "high"
       },
       "2": {
         "id": "2",
-        "content": "Implement Green Color Scheme",
-        "details": "Updated entire application with Islamic-appropriate green color palette (emerald, forest green tones)",
-        "status": "completed",
+        "content": "Member Volunteer Portal - Browse & Sign-up System",
+        "details": "Create enhanced member experience:\n- Browse volunteer opportunities with filtering (date, location, skills, capacity)\n- Opportunity detail pages with sign-up/withdraw functionality\n- Personal volunteer dashboard showing signed-up opportunities\n- Enhanced hour logging interface linked to specific opportunities\n- Visual progress tracking toward 30-hour waiver goal\n- Volunteer history and participation analytics",
+        "status": "pending",
         "priority": "high"
       },
       "3": {
         "id": "3",
-        "content": "Integrate Mosque Facility Images",
-        "details": "Optimized and integrated provided mosque images with 97.8% file size reduction for better performance",
-        "status": "completed",
+        "content": "Admin Volunteer Management System",
+        "details": "Build comprehensive admin controls:\n- Create/edit/delete volunteer opportunities\n- Capacity management and waitlist functionality\n- Approve/reject hour logs with approval tracking\n- View all member sign-ups and participation\n- Volunteer program analytics and reporting\n- Enhanced membership management with volunteer tracking columns",
+        "status": "pending",
         "priority": "high"
       },
       "4": {
         "id": "4",
-        "content": "Implement Islamic Features",
-        "details": "Added prayer times API integration, Islamic calendar, Islamic donation categories, Islamic events management",
-        "status": "completed",
+        "content": "Business Logic & Edge Functions",
+        "details": "Implement complex business logic using Supabase Edge Functions:\n- Opportunity capacity management with transaction safety\n- Automatic hour-to-waiver calculation logic\n- Hour approval workflow with notifications\n- Real-time capacity updates and waitlist management\n- Integration with existing membership waiver system\n- Volunteer opportunity scheduling and conflict detection",
+        "status": "pending",
         "priority": "high"
       },
       "5": {
         "id": "5",
-        "content": "Deploy Strategic Plan Dashboard",
-        "details": "Implemented Strategic Plan 2025-2035 focus areas: Budget monitoring, Community engagement, Risk management, KPI tracking",
-        "status": "completed",
-        "priority": "high"
+        "content": "Enhanced UI/UX & Mobile Optimization",
+        "details": "Create polished volunteer portal interface:\n- Modern opportunity cards with filtering and search\n- Interactive volunteer sign-up flow\n- Dashboard widgets for volunteer progress\n- Mobile-responsive design matching site theme\n- Real-time updates for capacity and availability\n- Integration with existing green branding and mosque styling",
+        "status": "pending",
+        "priority": "medium"
       },
       "6": {
         "id": "6",
-        "content": "Update Portal Structure for Mosque Operations",
-        "details": "Reconfigured portals for mosque/community operations: Events (prayers, Islamic education), Community (service programs), Donations (Zakat, Sadaqah), Admin (facility management)",
-        "status": "completed",
-        "priority": "high"
-      },
-      "7": {
-        "id": "7",
-        "content": "Setup Payment Processing Infrastructure",
-        "details": "Created Stripe payment integration for Islamic donations (Zakat, Sadaqah, Building Fund) - ready for API keys",
-        "status": "completed",
+        "content": "Testing & Deployment",
+        "details": "Comprehensive testing and production deployment:\n- Test all volunteer workflows (browse, sign-up, hour logging, approval)\n- Verify integration with existing membership and waiver systems\n- Test admin controls and capacity management\n- Mobile and desktop compatibility testing\n- Performance testing with concurrent volunteer activities\n- Final deployment and user acceptance testing",
+        "status": "pending",
         "priority": "medium"
-      },
-      "8": {
-        "id": "8",
-        "content": "Simplify Membership Structure",
-        "details": "Updated from multiple tiers to single $360/year membership that can be waived with 30 volunteer hours, plus donation-to-fee application logic",
-        "status": "completed",
-        "priority": "high"
       }
     }
   }
