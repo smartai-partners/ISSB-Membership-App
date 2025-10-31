@@ -110,9 +110,10 @@ export interface EventRegistration {
 
 // Volunteer Types
 export type OpportunityType = 'event' | 'ongoing' | 'project' | 'administrative';
-export type OpportunityStatus = 'open' | 'filled' | 'closed' | 'cancelled';
+export type OpportunityStatus = 'DRAFT' | 'ACTIVE' | 'open' | 'filled' | 'closed' | 'cancelled';
 export type AssignmentStatus = 'assigned' | 'completed' | 'cancelled' | 'no_show';
-export type HoursStatus = 'pending' | 'approved' | 'rejected';
+export type HoursStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'pending' | 'approved' | 'rejected';
+export type SignupStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
 
 export interface VolunteerOpportunity {
   id: string;
@@ -122,15 +123,21 @@ export interface VolunteerOpportunity {
   status: OpportunityStatus;
   start_date?: string;
   end_date?: string;
+  date_time?: string;
   hours_required: number;
+  duration_hours?: number;
   capacity?: number;
+  max_volunteers?: number;
   current_volunteers: number;
   location?: string;
+  category?: string;
+  image_url?: string;
   contact_person?: string;
   contact_email?: string;
   contact_phone?: string;
   required_skills?: string[];
   created_by: string;
+  admin_id?: string;
   created_at: string;
   updated_at: string;
 }
@@ -155,6 +162,7 @@ export interface VolunteerHours {
   user_id: string;
   opportunity_id?: string;
   assignment_id?: string;
+  signup_id?: string;
   hours: number;
   date: string;
   description: string;
@@ -164,6 +172,21 @@ export interface VolunteerHours {
   approved_by?: string;
   approved_at?: string;
   rejection_reason?: string;
+  admin_notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VolunteerSignup {
+  id: string;
+  opportunity_id: string;
+  member_id: string;
+  status: SignupStatus;
+  notes?: string;
+  signed_up_at: string;
+  confirmed_at?: string;
+  cancelled_at?: string;
+  completed_at?: string;
   created_at: string;
   updated_at: string;
 }
