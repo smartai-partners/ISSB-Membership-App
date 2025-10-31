@@ -139,6 +139,59 @@ export function VolunteersPage() {
         </div>
       </div>
 
+      {/* Membership Waiver Progress - Featured */}
+      <div className="bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl shadow-2xl p-8 text-white">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="flex-1">
+            <div className="flex items-center mb-3">
+              <HandHeart className="w-10 h-10 mr-3" />
+              <h2 className="text-3xl font-bold">Membership Fee Waiver Progress</h2>
+            </div>
+            <p className="text-green-100 text-lg mb-4">
+              Complete 30 volunteer hours to waive your $360 annual membership fee
+            </p>
+            {totalHours >= 30 ? (
+              <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border-2 border-white">
+                <div className="flex items-center">
+                  <CheckCircle className="w-8 h-8 mr-3" />
+                  <div>
+                    <p className="text-xl font-bold">Congratulations!</p>
+                    <p className="text-green-100">You have qualified for membership fee waiver</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-2xl font-bold">{totalHours} / 30 hours</span>
+                  <span className="text-green-100">{Math.round((totalHours / 30) * 100)}% complete</span>
+                </div>
+                <div className="w-full bg-white/30 rounded-full h-6 overflow-hidden mb-3">
+                  <div 
+                    className="bg-white h-6 rounded-full transition-all duration-500" 
+                    style={{ width: `${Math.min((totalHours / 30) * 100, 100)}%` }}
+                  ></div>
+                </div>
+                <p className="text-green-100 text-lg">
+                  <span className="font-bold">{(30 - totalHours).toFixed(1)} hours remaining</span> to waive your membership fee
+                </p>
+              </div>
+            )}
+          </div>
+          <div className="bg-white text-green-700 rounded-lg p-6 min-w-[200px]">
+            <div className="text-center">
+              <div className="text-5xl font-bold mb-2">${(360 * Math.min(totalHours / 30, 1)).toFixed(0)}</div>
+              <div className="text-sm font-semibold mb-3">Value Earned</div>
+              {totalHours < 30 && (
+                <div className="text-xs text-gray-600">
+                  ${((30 - totalHours) * 12).toFixed(0)} more to save
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Community Impact & Personal Stats */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Community Progress */}

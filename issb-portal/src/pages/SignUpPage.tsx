@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { HandHeart, CheckCircle, DollarSign, Info } from 'lucide-react';
 
 export function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -10,6 +11,8 @@ export function SignUpPage() {
     first_name: '',
     last_name: '',
     phone: '',
+    volunteer_commitment: false,
+    initial_donation: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,8 +20,16 @@ export function SignUpPage() {
   const { signUp } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, type, checked } = e.target;
+    setFormData({ 
+      ...formData, 
+      [name]: type === 'checkbox' ? checked : value 
+    });
   };
+
+  const membershipFee = 360;
+  const donationAmount = parseFloat(formData.initial_donation) || 0;
+  const balanceDue = Math.max(0, membershipFee - donationAmount);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,7 +133,7 @@ export function SignUpPage() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
               />
             </div>
 
@@ -136,8 +147,92 @@ export function SignUpPage() {
                 type="tel"
                 value={formData.phone}
                 onChange={handleChange}
-                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
               />
+            </div>
+
+            {/* Membership Information */}
+            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+              <div className="flex items-start mb-3">
+                <Info className="w-5 h-5 text-green-600 mr-2 mt-0.5" />
+                <div>
+                  <h3 className="text-sm font-semibold text-green-900">Community Membership</h3>
+                  <p className="text-xs text-green-700 mt-1">
+                    One simple membership for everyone - $360/year or 30 volunteer hours
+                  </p>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                {/* Volunteer Commitment Checkbox */}
+                <div className="flex items-start">
+                  <input
+                    id="volunteer_commitment"
+                    name="volunteer_commitment"
+                    type="checkbox"
+                    checked={formData.volunteer_commitment}
+                    onChange={handleChange}
+                    className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded mt-0.5"
+                  />
+                  <label htmlFor="volunteer_commitment" className="ml-2 block text-sm text-gray-700">
+                    <span className="font-medium">I commit to volunteering 30 hours to waive my membership fee</span>
+                    <span className="block text-xs text-gray-600 mt-0.5">
+                      Volunteer hours never expire and count toward your membership
+                    </span>
+                  </label>
+                </div>
+
+                {/* Optional Initial Donation */}
+                <div>
+                  <label htmlFor="initial_donation" className="block text-sm font-medium text-gray-700">
+                    Optional: Make an Initial Donation
+                  </label>
+                  <div className="mt-1 relative rounded-md shadow-sm">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <DollarSign className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      id="initial_donation"
+                      name="initial_donation"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={formData.initial_donation}
+                      onChange={handleChange}
+                      placeholder="0.00"
+                      className="pl-8 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Any donation will be applied to your $360 membership fee
+                  </p>
+                  
+                  {donationAmount > 0 && (
+                    <div className="mt-2 p-2 bg-white rounded border border-green-200">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Membership Fee:</span>
+                        <span className="font-medium text-gray-900">${membershipFee.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-green-600">
+                        <span>Donation Applied:</span>
+                        <span className="font-medium">-${Math.min(donationAmount, membershipFee).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm font-semibold border-t border-gray-200 mt-1 pt-1">
+                        <span className="text-gray-900">Balance Due:</span>
+                        <span className={balanceDue === 0 ? 'text-green-600' : 'text-amber-600'}>
+                          ${balanceDue.toFixed(2)}
+                        </span>
+                      </div>
+                      {donationAmount > membershipFee && (
+                        <div className="flex justify-between text-xs text-gray-600 mt-1">
+                          <span>Remaining Donation:</span>
+                          <span>${(donationAmount - membershipFee).toFixed(2)}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div>
@@ -152,7 +247,7 @@ export function SignUpPage() {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
               />
             </div>
 
@@ -168,7 +263,7 @@ export function SignUpPage() {
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
               />
             </div>
 

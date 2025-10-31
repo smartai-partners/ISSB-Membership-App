@@ -147,10 +147,16 @@ export function MembershipsManagementPage() {
                   Amount
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Start Date
+                  Donation Applied
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  End Date
+                  Balance Due
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Waiver Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Dates
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Payment
@@ -167,8 +173,8 @@ export function MembershipsManagementPage() {
                     {membership.user_id.substring(0, 8)}...
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 capitalize">
-                      {membership.tier}
+                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 capitalize">
+                      {membership.tier || 'standard'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -187,11 +193,41 @@ export function MembershipsManagementPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     ${membership.amount.toFixed(2)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {new Date(membership.start_date).toLocaleDateString()}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {membership.donation_amount_applied > 0 ? (
+                      <span className="text-green-600 font-medium">
+                        ${membership.donation_amount_applied.toFixed(2)}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {membership.balance_due > 0 ? (
+                      <span className="text-amber-600 font-medium">
+                        ${membership.balance_due.toFixed(2)}
+                      </span>
+                    ) : (
+                      <span className="text-green-600 font-medium">$0.00</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {membership.waived_through_volunteering ? (
+                      <div>
+                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800">
+                          Waived
+                        </span>
+                        <div className="text-xs text-gray-600 mt-1">
+                          {membership.waiver_volunteer_hours}h
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-xs">-</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {new Date(membership.end_date).toLocaleDateString()}
+                    <div>{new Date(membership.start_date).toLocaleDateString()}</div>
+                    <div className="text-xs text-gray-500">to {new Date(membership.end_date).toLocaleDateString()}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span

@@ -8,6 +8,7 @@ import { SignUpPage } from '@/pages/SignUpPage';
 import { EventsPage } from '@/pages/EventsPage';
 import { VolunteersPage } from '@/pages/VolunteersPage';
 import { DonationsPage } from '@/pages/DonationsPage';
+import { MemberDashboardPage } from '@/pages/MemberDashboardPage';
 import { AdminDashboardPage } from '@/pages/AdminDashboardPage';
 import { ApplicationsPage } from '@/pages/ApplicationsPage';
 import { UsersManagementPage } from '@/pages/UsersManagementPage';
@@ -44,6 +45,15 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/donations" element={<DonationsPage />} />
+            
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <MemberDashboardPage />
+                </ProtectedRoute>
+              }
+            />
             
             <Route
               path="/volunteers"

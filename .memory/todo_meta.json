@@ -49,6 +49,13 @@
         "details": "Created Stripe payment integration for Islamic donations (Zakat, Sadaqah, Building Fund) - ready for API keys",
         "status": "completed",
         "priority": "medium"
+      },
+      "8": {
+        "id": "8",
+        "content": "Simplify Membership Structure",
+        "details": "Updated from multiple tiers to single $360/year membership that can be waived with 30 volunteer hours, plus donation-to-fee application logic",
+        "status": "completed",
+        "priority": "high"
       }
     }
   }

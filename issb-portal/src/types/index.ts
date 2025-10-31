@@ -1,7 +1,7 @@
 // User and Profile Types
 export type UserRole = 'admin' | 'board' | 'member' | 'student' | 'applicant';
 export type UserStatus = 'active' | 'inactive' | 'suspended' | 'pending';
-export type MembershipTier = 'student' | 'individual' | 'family';
+export type MembershipTier = 'standard'; // Simplified to single tier
 
 export interface Profile {
   id: string;
@@ -20,6 +20,9 @@ export interface Profile {
   date_of_birth?: string;
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
+  total_volunteer_hours: number;
+  membership_fee_waived: boolean;
+  waiver_granted_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -37,6 +40,10 @@ export interface Membership {
   end_date: string;
   auto_renewal: boolean;
   amount: number;
+  donation_amount_applied: number;
+  balance_due: number;
+  waived_through_volunteering: boolean;
+  waiver_volunteer_hours: number;
   payment_status: PaymentStatus;
   payment_method?: string;
   transaction_id?: string;
@@ -152,6 +159,8 @@ export interface VolunteerHours {
   date: string;
   description: string;
   status: HoursStatus;
+  counts_toward_waiver: boolean;
+  membership_year?: number;
   approved_by?: string;
   approved_at?: string;
   rejection_reason?: string;
@@ -181,6 +190,10 @@ export interface Donation {
   next_donation_date?: string;
   campaign?: string;
   purpose?: string;
+  applied_to_membership: boolean;
+  membership_id?: string;
+  amount_applied_to_membership: number;
+  remaining_donation_amount: number;
   tax_receipt_sent: boolean;
   tax_receipt_sent_at?: string;
   notes?: string;
@@ -212,6 +225,8 @@ export interface Application {
   emergency_contact_relationship: string;
   reason_for_joining?: string;
   how_did_you_hear?: string;
+  volunteer_commitment: boolean;
+  donation_amount: number;
   agreed_to_terms: boolean;
   agreed_to_code_of_conduct: boolean;
   reference_1_name?: string;

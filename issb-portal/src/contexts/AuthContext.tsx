@@ -111,7 +111,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           last_name: '',
           role: 'member',
           status: 'active',
-          membership_tier: 'individual'
+          membership_tier: 'standard',
+          total_volunteer_hours: 0,
+          membership_fee_waived: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         } as Profile);
       }
     } finally {

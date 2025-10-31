@@ -393,52 +393,88 @@ export function HomePage() {
         </div>
       </div>
 
-      {/* Membership Tiers - Streamlined */}
-      <div className="bg-gray-50 rounded-lg p-8">
-        <h2 className="text-2xl font-bold mb-4 text-gray-900 text-center">Membership Plans</h2>
-        <p className="text-gray-600 text-center mb-6">Join our community and get access to all facilities and programs</p>
-        <div className="grid md:grid-cols-4 gap-4">
-          <div className="bg-white border border-gray-200 rounded-lg p-5 hover:border-green-500 transition">
-            <h3 className="text-xl font-bold mb-2 text-green-700">Student</h3>
-            <p className="text-2xl font-bold mb-3 text-gray-900">$60<span className="text-sm text-gray-500">/year</span></p>
-            <ul className="space-y-1 text-sm text-gray-700">
-              <li>Full facility access</li>
-              <li>Educational programs</li>
-              <li>Youth activities</li>
-            </ul>
-          </div>
+      {/* Membership - Simplified Single Tier */}
+      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-xl p-8 border-t-4 border-green-600">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold mb-3 text-gray-900">Join Our Community</h2>
+          <p className="text-lg text-gray-700 max-w-2xl mx-auto">
+            One simple membership for everyone. Support our mosque through annual dues or volunteering.
+          </p>
+        </div>
+        
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-xl shadow-lg p-8 border-2 border-green-500">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+              {/* Main Membership Option */}
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-3xl font-bold text-green-700 mb-2">Community Membership</h3>
+                <div className="flex items-baseline justify-center md:justify-start gap-2 mb-4">
+                  <span className="text-5xl font-bold text-gray-900">$360</span>
+                  <span className="text-xl text-gray-600">/year</span>
+                </div>
+                <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-center justify-center md:justify-start">
+                    <FileCheck className="w-5 h-5 text-green-600 mr-2" />
+                    Full facility access for all members
+                  </li>
+                  <li className="flex items-center justify-center md:justify-start">
+                    <Users className="w-5 h-5 text-green-600 mr-2" />
+                    Priority event registration
+                  </li>
+                  <li className="flex items-center justify-center md:justify-start">
+                    <Award className="w-5 h-5 text-green-600 mr-2" />
+                    Voting rights in community decisions
+                  </li>
+                  <li className="flex items-center justify-center md:justify-start">
+                    <Calendar className="w-5 h-5 text-green-600 mr-2" />
+                    All educational programs and activities
+                  </li>
+                </ul>
+              </div>
 
-          <div className="bg-white border-2 border-green-500 rounded-lg p-5 relative">
-            <div className="absolute top-0 right-0 bg-green-600 text-white px-2 py-1 rounded-bl-lg text-xs font-bold">
-              Popular
+              {/* Volunteer Waiver Option */}
+              <div className="flex-1 bg-gradient-to-br from-green-600 to-emerald-600 text-white rounded-lg p-6 shadow-lg">
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-3">
+                    <HandHeart className="w-10 h-10" />
+                  </div>
+                  <h4 className="text-2xl font-bold mb-2">Volunteer Waiver</h4>
+                  <div className="text-4xl font-bold mb-3">30 Hours</div>
+                  <p className="text-green-100 mb-4">
+                    Complete 30 volunteer hours to waive your membership fee
+                  </p>
+                  <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 text-sm">
+                    <p className="font-semibold">Give your time, not just money</p>
+                    <p className="text-green-100 mt-1">Volunteer hours never expire and count toward future years</p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <h3 className="text-xl font-bold mb-2 text-green-700">Resident</h3>
-            <p className="text-2xl font-bold mb-3 text-gray-900">$360<span className="text-sm text-gray-500">/year</span></p>
-            <ul className="space-y-1 text-sm text-gray-700">
-              <li>All student benefits</li>
-              <li>Priority registration</li>
-              <li>Voting rights</li>
-            </ul>
-          </div>
 
-          <div className="bg-white border border-gray-200 rounded-lg p-5 hover:border-green-500 transition">
-            <h3 className="text-xl font-bold mb-2 text-green-700">Associate</h3>
-            <p className="text-2xl font-bold mb-3 text-gray-900">$240<span className="text-sm text-gray-500">/year</span></p>
-            <ul className="space-y-1 text-sm text-gray-700">
-              <li>Extended member</li>
-              <li>Most programs</li>
-              <li>Event participation</li>
-            </ul>
-          </div>
+            {/* Additional Info */}
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <div className="grid md:grid-cols-2 gap-6 text-sm text-gray-600">
+                <div>
+                  <h5 className="font-semibold text-gray-900 mb-2">Donation Application</h5>
+                  <p>Any donation you make can be applied to your membership fee. Donate $200, pay only $160 for membership.</p>
+                </div>
+                <div>
+                  <h5 className="font-semibold text-gray-900 mb-2">Flexible Payment</h5>
+                  <p>Combine donations and volunteer hours. Every contribution counts toward building our community.</p>
+                </div>
+              </div>
+            </div>
 
-          <div className="bg-white border border-gray-200 rounded-lg p-5 hover:border-green-500 transition">
-            <h3 className="text-xl font-bold mb-2 text-green-700">Family</h3>
-            <p className="text-2xl font-bold mb-3 text-gray-900">$560<span className="text-sm text-gray-500">/year</span></p>
-            <ul className="space-y-1 text-sm text-gray-700">
-              <li>All resident benefits</li>
-              <li>Up to 5 members</li>
-              <li>Family discounts</li>
-            </ul>
+            {/* CTA Button */}
+            <div className="mt-6 text-center">
+              <Link
+                to="/signup"
+                className="inline-flex items-center px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold text-lg shadow-lg transform hover:scale-105 transition"
+              >
+                Become a Member Today
+                <ArrowRight className="ml-2 w-6 h-6" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>

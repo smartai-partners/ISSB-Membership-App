@@ -26,6 +26,10 @@ export function Navbar({ className = '' }: NavbarProps) {
     { name: 'Events', path: '/events', icon: Calendar, public: true },
   ];
 
+  const memberItems = [
+    { name: 'My Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['member', 'student'] },
+  ];
+
   const adminItems = [
     { name: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard, roles: ['admin', 'board'] },
     { name: 'Applications', path: '/admin/applications', icon: FileCheck, roles: ['admin', 'board'] },
@@ -69,6 +73,20 @@ export function Navbar({ className = '' }: NavbarProps) {
                   }`}
                 >
                   <item.icon className={`w-4 h-4 mr-2 ${item.highlight ? 'text-green-600' : ''}`} />
+                  {item.name}
+                </Link>
+              ))}
+              {user && profile && memberItems.filter(canAccess).map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`inline-flex items-center px-3 pt-1 border-b-2 text-sm font-medium ${
+                    isActive(item.path)
+                      ? 'border-green-600 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                  }`}
+                >
+                  <item.icon className="w-4 h-4 mr-2" />
                   {item.name}
                 </Link>
               ))}
@@ -159,6 +177,21 @@ export function Navbar({ className = '' }: NavbarProps) {
                 }`}
               >
                 <item.icon className={`w-5 h-5 mr-3 ${item.highlight ? 'text-green-600' : ''}`} />
+                {item.name}
+              </Link>
+            ))}
+            {user && profile && memberItems.filter(canAccess).map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center px-3 py-3 rounded-md text-base font-medium ${
+                  isActive(item.path)
+                    ? 'bg-green-100 text-green-900'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <item.icon className="w-5 h-5 mr-3" />
                 {item.name}
               </Link>
             ))}
