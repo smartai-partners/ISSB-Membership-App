@@ -1,0 +1,63 @@
+{
+  "_source_id": 8,
+  "sources": {
+    "State Management Evaluation": {
+      "https://redux-toolkit.js.org/rtk-query/overview": {
+        "id": 1,
+        "publisher": "Redux Toolkit",
+        "url": "https://redux-toolkit.js.org/rtk-query/overview",
+        "title": "RTK Query Overview - Redux Toolkit",
+        "info": "Comprehensive RTK Query overview including data fetching, caching, bundle size (~9kb for RTK Query), and integration patterns with createApi() and fetchBaseQuery()"
+      },
+      "https://redux-toolkit.js.org/rtk-query/usage/cache-behavior": {
+        "id": 2,
+        "publisher": "Redux Toolkit",
+        "url": "https://redux-toolkit.js.org/rtk-query/usage/cache-behavior",
+        "title": "Cache Behavior - RTK Query",
+        "info": "RTK Query caching mechanisms including default 60-second cache lifetime, configurable cache settings, refetching strategies, and automated cache management for performance optimization"
+      },
+      "https://redux.js.org/tutorials/essentials/part-6-performance-normalization": {
+        "id": 3,
+        "publisher": "Redux.js",
+        "url": "https://redux.js.org/tutorials/essentials/part-6-performance-normalization",
+        "title": "Redux Essentials, Part 6: Performance, Normalizing Data, and Reactive Logic",
+        "info": "Performance optimization techniques including createEntityAdapter for normalized data, createSelector for memoization, and createListenerMiddleware for reactive logic in large-scale applications"
+      },
+      "https://redux.js.org/usage/usage-with-typescript": {
+        "id": 4,
+        "publisher": "Redux.js",
+        "url": "https://redux.js.org/usage/usage-with-typescript",
+        "title": "Usage With TypeScript - Redux",
+        "info": "TypeScript integration patterns for Redux including type safety benefits, store setup, slice definitions, component usage, and middleware typing for improved developer experience"
+      },
+      "https://medium.com/@donald.walters/supabase-rtk-query-typescript-like-an-absolute-chad-6f477a32b0cc": {
+        "id": 5,
+        "publisher": "Medium",
+        "url": "https://medium.com/@donald.walters/supabase-rtk-query-typescript-like-an-absolute-chad-6f477a32b0cc",
+        "title": "Supabase + RTK Query + Typescript like an absolute Chad!",
+        "info": "RTK Query integration patterns with Supabase including TypeScript setup, custom baseQuery implementation, type generation, and best practices for reducing boilerplate code"
+      },
+      "https://medium.com/@vaati.faith79/building-a-volunteer-management-system-a-journey-from-concept-to-deployment-45147810f4b1": {
+        "id": 6,
+        "publisher": "Medium",
+        "url": "https://medium.com/@vaati.faith79/building-a-volunteer-management-system-a-journey-from-concept-to-deployment-45147810f4b1",
+        "title": "Building a Volunteer Management System: A Journey from Concept to Deployment",
+        "info": "Volunteer management system architecture using React.js frontend, Flask backend, and PostgreSQL database. Key challenges include authentication integration and state management for volunteer scheduling and profile management"
+      },
+      "https://medium.com/@sandhyasrinivasan.1502/state-management-in-react-context-api-vs-redux-toolkit-90b94d0448ed": {
+        "id": 7,
+        "publisher": "Medium",
+        "url": "https://medium.com/@sandhyasrinivasan.1502/state-management-in-react-context-api-vs-redux-toolkit-90b94d0448ed",
+        "title": "State Management in React: Context API vs Redux Toolkit",
+        "info": "Performance comparison showing Context API suitable for smaller applications while Redux Toolkit excels in large-scale applications with complex state management, predictable transitions, and middleware support"
+      },
+      "https://redux.js.org/faq/performance": {
+        "id": 8,
+        "publisher": "Redux.js",
+        "url": "https://redux.js.org/faq/performance",
+        "title": "Performance | Redux",
+        "info": "Performance guidelines for Redux applications including scaling considerations, rendering optimization with normalized state, memory usage patterns, and batching strategies for large-scale applications with hundreds of components"
+      }
+    }
+  }
+}
