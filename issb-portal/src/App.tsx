@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { AuthBridge } from '@/components/AuthBridge';
 import { Layout } from '@/components/layout/Layout';
 import { HomePage } from '@/pages/HomePage';
 import { LoginPage } from '@/pages/LoginPage';
@@ -37,6 +38,7 @@ function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?
 function App() {
   return (
     <AuthProvider>
+      <AuthBridge />
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
