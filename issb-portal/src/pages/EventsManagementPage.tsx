@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Event, EventType, EventStatus } from '@/types';
+import { toast } from 'sonner';
 
 export function EventsManagementPage() {
   const { user, profile } = useAuth();
@@ -47,8 +48,40 @@ export function EventsManagementPage() {
     }
   }
 
+  function validateEventForm() {
+    const errors: string[] = [];
+    
+    if (!newEvent.title.trim()) errors.push('Title is required');
+    if (!newEvent.description.trim()) errors.push('Description is required');
+    if (!newEvent.start_date) errors.push('Start date is required');
+    if (!newEvent.end_date) errors.push('End date is required');
+    if (newEvent.start_date && newEvent.end_date && new Date(newEvent.start_date) >= new Date(newEvent.end_date)) {
+      errors.push('End date must be after start date');
+    }
+    if (newEvent.is_virtual && !newEvent.virtual_link.trim()) {
+      errors.push('Virtual link is required for virtual events');
+    }
+    if (!newEvent.is_virtual && !newEvent.location.trim()) {
+      errors.push('Location is required for non-virtual events');
+    }
+    
+    return errors;
+  }
+
   async function handleCreateEvent() {
-    if (!user) return;
+    if (!user) {
+      toast.error('You must be logged in to create events');
+      return;
+    }
+
+    // Validate form
+    const validationErrors = validateEventForm();
+    if (validationErrors.length > 0) {
+      toast.error(`Please fix the following: ${validationErrors.join(', ')}`);
+      return;
+    }
+
+    toast.loading('Creating event...', { id: 'create-event' });
 
     try {
       const { error } = await supabase
@@ -75,14 +108,18 @@ export function EventsManagementPage() {
         capacity: 50,
         status: 'draft',
       });
+      
+      toast.success('Event created successfully!', { id: 'create-event' });
       loadEvents();
     } catch (error) {
       console.error('Error creating event:', error);
-      alert('Failed to create event');
+      toast.error('Failed to create event. Please try again.', { id: 'create-event' });
     }
   }
 
   async function handlePublishEvent(eventId: string) {
+    toast.loading('Publishing event...', { id: 'publish-event' });
+    
     try {
       const { error } = await supabase
         .from('events')
@@ -90,16 +127,21 @@ export function EventsManagementPage() {
         .eq('id', eventId);
 
       if (error) throw error;
+      
+      toast.success('Event published successfully!', { id: 'publish-event' });
       loadEvents();
     } catch (error) {
       console.error('Error publishing event:', error);
-      alert('Failed to publish event');
+      toast.error('Failed to publish event. Please try again.', { id: 'publish-event' });
     }
   }
 
   async function handleDeleteEvent(eventId: string) {
-    if (!confirm('Are you sure you want to delete this event?')) return;
+    const confirmed = confirm('Are you sure you want to delete this event?');
+    if (!confirmed) return;
 
+    toast.loading('Deleting event...', { id: 'delete-event' });
+    
     try {
       const { error } = await supabase
         .from('events')
@@ -107,10 +149,12 @@ export function EventsManagementPage() {
         .eq('id', eventId);
 
       if (error) throw error;
+      
+      toast.success('Event deleted successfully!', { id: 'delete-event' });
       loadEvents();
     } catch (error) {
       console.error('Error deleting event:', error);
-      alert('Failed to delete event');
+      toast.error('Failed to delete event. Please try again.', { id: 'delete-event' });
     }
   }
 
