@@ -29,7 +29,7 @@ export function UserFilters({ onFilterChange, className = '' }: UserFiltersProps
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRoles, setSelectedRoles] = useState<UserRole[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<UserStatus[]>([]);
-  const [selectedMembership, setSelectedMembership] = useState('');
+  const [selectedMembership, setSelectedMembership] = useState('all');
 
   // ARIA live region for announcing filter changes
   const [announcement, setAnnouncement] = useState('');
@@ -41,7 +41,7 @@ export function UserFilters({ onFilterChange, className = '' }: UserFiltersProps
         searchQuery,
         roles: selectedRoles,
         statuses: selectedStatuses,
-        membershipTier: selectedMembership,
+        membershipTier: selectedMembership === 'all' ? '' : selectedMembership,
       });
 
       // Announce filter changes for screen readers
@@ -49,7 +49,7 @@ export function UserFilters({ onFilterChange, className = '' }: UserFiltersProps
       if (searchQuery) announcements.push(`Search: ${searchQuery}`);
       if (selectedRoles.length > 0) announcements.push(`${selectedRoles.length} roles selected`);
       if (selectedStatuses.length > 0) announcements.push(`${selectedStatuses.length} statuses selected`);
-      if (selectedMembership) announcements.push(`Membership tier: ${selectedMembership}`);
+      if (selectedMembership && selectedMembership !== 'all') announcements.push(`Membership tier: ${selectedMembership}`);
 
       if (announcements.length > 0) {
         setAnnouncement(`Filters updated. ${announcements.join('. ')}`);
@@ -80,7 +80,7 @@ export function UserFilters({ onFilterChange, className = '' }: UserFiltersProps
   }, []);
 
   const hasActiveFilters =
-    searchQuery || selectedRoles.length > 0 || selectedStatuses.length > 0 || selectedMembership;
+    searchQuery || selectedRoles.length > 0 || selectedStatuses.length > 0 || (selectedMembership && selectedMembership !== 'all');
 
   return (
     <div className={`bg-white rounded-lg shadow-md p-6 space-y-6 ${className}`}>
@@ -191,7 +191,7 @@ export function UserFilters({ onFilterChange, className = '' }: UserFiltersProps
               <SelectValue placeholder="All Members" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Members</SelectItem>
+              <SelectItem value="all">All Members</SelectItem>
               <SelectItem value="standard">Standard</SelectItem>
             </SelectContent>
           </Select>
@@ -247,11 +247,11 @@ export function UserFilters({ onFilterChange, className = '' }: UserFiltersProps
                 </button>
               </span>
             ))}
-            {selectedMembership && (
+            {selectedMembership && selectedMembership !== 'all' && (
               <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
                 Tier: {selectedMembership}
                 <button
-                  onClick={() => setSelectedMembership('')}
+                  onClick={() => setSelectedMembership('all')}
                   className="hover:text-green-900"
                   aria-label="Remove membership tier filter"
                 >
