@@ -33,6 +33,8 @@ export function Navbar({ className = '' }: NavbarProps) {
   const adminItems = [
     { name: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard, roles: ['admin', 'board'] },
     { name: 'Applications', path: '/admin/applications', icon: FileCheck, roles: ['admin', 'board'] },
+    { name: 'Users', path: '/admin/users', icon: Users, roles: ['admin', 'board'] },
+    { name: 'Events', path: '/admin/events', icon: Calendar, roles: ['admin', 'board'] },
     { name: 'Volunteer Mgmt', path: '/admin/volunteers', icon: Users, roles: ['admin', 'board'] },
   ];
 
