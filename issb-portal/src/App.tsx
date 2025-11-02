@@ -19,6 +19,7 @@ import { EventsManagementPage } from '@/pages/EventsManagementPage';
 import { AdminVolunteerManagement } from '@/pages/AdminVolunteerManagementPage';
 import { AdminHelpAssistantPage } from '@/pages/AdminHelpAssistantPage';
 import EnhancedAdminAccessibilityAuditPage from '@/pages/EnhancedAdminAccessibilityAuditPage';
+import { AccessibilityAnalyticsPage } from '@/pages/AccessibilityAnalyticsPage';
 
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
   const { user, profile, loading } = useAuth();
@@ -138,6 +139,15 @@ function App() {
               element={
                 <ProtectedRoute roles={['admin', 'board']}>
                   <EnhancedAdminAccessibilityAuditPage />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/admin/accessibility-analytics"
+              element={
+                <ProtectedRoute roles={['admin', 'board']}>
+                  <AccessibilityAnalyticsPage />
                 </ProtectedRoute>
               }
             />

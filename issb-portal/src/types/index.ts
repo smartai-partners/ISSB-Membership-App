@@ -485,3 +485,172 @@ export interface AuditAnalytics {
     resolved: number;
   }>;
 }
+
+// Phase 3C.3: Automated Testing & Analytics Types
+
+export type ScheduleFrequency = 'daily' | 'weekly' | 'monthly' | 'custom';
+export type TestRunType = 'scheduled' | 'manual' | 'ci_cd' | 'ad_hoc';
+export type TestRunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+export type MetricPeriod = 'daily' | 'weekly' | 'monthly';
+export type ComplianceTrend = 'improving' | 'declining' | 'stable';
+export type SnapshotType = 'daily' | 'weekly' | 'monthly' | 'quarterly';
+
+export interface AuditSchedule {
+  id: string;
+  schedule_name: string;
+  description?: string;
+  target_urls: string[];
+  frequency: ScheduleFrequency;
+  cron_expression?: string;
+  wcag_level: WCAGLevel;
+  is_active: boolean;
+  notify_on_completion: boolean;
+  notification_emails?: string[];
+  last_run_at?: string;
+  next_run_at?: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TestRun {
+  id: string;
+  schedule_id?: string;
+  audit_id?: string;
+  run_type: TestRunType;
+  target_url: string;
+  status: TestRunStatus;
+  started_at?: string;
+  completed_at?: string;
+  duration_seconds?: number;
+  issues_detected: number;
+  compliance_score?: number;
+  test_results?: any; // JSON containing full axe-core results
+  error_message?: string;
+  executed_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ComplianceMetrics {
+  id: string;
+  metric_date: string;
+  metric_period: MetricPeriod;
+  total_audits: number;
+  total_pages_audited: number;
+  average_compliance_score?: number;
+  total_issues: number;
+  critical_issues: number;
+  high_issues: number;
+  medium_issues: number;
+  low_issues: number;
+  issues_opened: number;
+  issues_resolved: number;
+  average_resolution_time_hours?: number;
+  compliance_trend?: ComplianceTrend;
+  metadata?: any; // JSON with additional metrics
+  created_at: string;
+}
+
+export interface AnalyticsSnapshot {
+  id: string;
+  snapshot_date: string;
+  snapshot_type: SnapshotType;
+  total_audits: number;
+  average_compliance_score?: number;
+  total_issues: number;
+  status_breakdown?: any;
+  severity_breakdown?: any;
+  priority_breakdown?: any;
+  team_performance?: any;
+  component_breakdown?: any;
+  trend_data?: any;
+  top_issues?: any;
+  created_at: string;
+}
+
+export interface QualityGate {
+  id: string;
+  gate_name: string;
+  description?: string;
+  repository?: string;
+  branch?: string;
+  min_compliance_score: number;
+  max_critical_issues: number;
+  max_high_issues: number;
+  block_deployment: boolean;
+  is_active: boolean;
+  last_check_at?: string;
+  last_check_passed?: boolean;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QualityGateResult {
+  id: string;
+  gate_id: string;
+  test_run_id?: string;
+  check_timestamp: string;
+  passed: boolean;
+  compliance_score?: number;
+  critical_issues: number;
+  high_issues: number;
+  medium_issues: number;
+  low_issues: number;
+  failure_reasons?: string[];
+  commit_hash?: string;
+  build_number?: string;
+  metadata?: any;
+  created_at: string;
+}
+
+// Phase 3C.3: Extended Analytics
+export interface TrendDataPoint {
+  date: string;
+  label: string;
+  created: number;
+  resolved: number;
+  compliance_score?: number;
+}
+
+export interface TopIssue {
+  type: string;
+  count: number;
+  severity?: IssueSeverity;
+}
+
+export interface TeamPerformanceMetrics {
+  team_name: string;
+  resolved: number;
+  total: number;
+  avg_time_hours: number;
+  members?: number;
+}
+
+export interface ComprehensiveAnalytics {
+  overview: {
+    totalAudits: number;
+    totalPages: number;
+    averageComplianceScore: number;
+    totalIssues: number;
+    trend: ComplianceTrend;
+  };
+  issueBreakdown: {
+    bySeverity: Record<string, number>;
+    byStatus: Record<string, number>;
+    byPriority: Record<string, number>;
+    byComponent: Record<string, number>;
+  };
+  trends: {
+    daily: TrendDataPoint[];
+    weekly: TrendDataPoint[];
+    monthly: TrendDataPoint[];
+  };
+  teamPerformance: TeamPerformanceMetrics[];
+  topIssues: TopIssue[];
+  complianceHistory: Array<{
+    date: string;
+    score: number;
+  }>;
+}
