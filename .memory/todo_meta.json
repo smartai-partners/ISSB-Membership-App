@@ -10,31 +10,31 @@
       },
       "25": {
         "id": "25",
-        "content": "Design database schema for volunteer opportunities system",
-        "details": "Create Supabase tables for: volunteer_opportunities, volunteer_assignments, volunteer_logs. Integrate with existing volunteer_hours table.",
-        "status": "pending",
+        "content": "Design integrated volunteer system database schema",
+        "details": "Create volunteer_opportunities, volunteer_assignments tables that INTEGRATE with existing volunteer_hours table. No duplication - enhance the current system.",
+        "status": "in_progress",
         "priority": "high"
       },
       "26": {
         "id": "26",
-        "content": "Develop volunteer opportunities management backend",
-        "details": "Create edge functions for: CRUD operations on opportunities, member sign-up system, assignment management, enhanced hour logging.",
+        "content": "Develop migration path for existing volunteer hours",
+        "details": "Create migration plan to convert existing volunteer_hours entries to new opportunities-based system. Ensure no duplicate data.",
         "status": "pending",
         "priority": "high"
       },
       "27": {
         "id": "27",
-        "content": "Build volunteer opportunities frontend pages",
-        "details": "Create: Admin opportunity management page, Member opportunity browse/sign-up page, Assignment tracking dashboard, Enhanced volunteer progress tracking.",
+        "content": "Build unified volunteer management backend",
+        "details": "Create edge functions that provide opportunities AND enhanced hour logging. Replace existing volunteer functions, not add to them.",
         "status": "pending",
         "priority": "high"
       },
       "28": {
         "id": "28",
-        "content": "Integrate opportunities with membership activation",
-        "details": "Connect volunteer opportunities system with the 30-hour membership requirement. Track progress toward membership activation through opportunities.",
+        "content": "Build unified volunteer frontend experience",
+        "details": "Replace current volunteer pages with enhanced opportunities-based interface. Single volunteer dashboard, not multiple systems.",
         "status": "pending",
-        "priority": "medium"
+        "priority": "high"
       }
     }
   }
