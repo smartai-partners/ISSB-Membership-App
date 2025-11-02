@@ -1,39 +1,60 @@
 {
   "todos": {
     "Coordinator": {
-      "24": {
-        "id": "24",
-        "content": "Analyze Volunteer Management System benefits for ISSB Portal",
-        "details": "Review the detailed technical specification and identify key enhancements over current volunteer system. Focus on benefits for single $360/year membership model.",
+      "1": {
+        "id": "1",
+        "content": "Analyze Communication Portal Integration Strategy",
+        "details": "Review specification and determine integration approach with existing ISSB Portal infrastructure. Focus on database schema design, component architecture, and seamless integration with existing volunteer management system.",
         "status": "completed",
         "priority": "high"
       },
-      "25": {
-        "id": "25",
-        "content": "Design integrated volunteer system database schema",
-        "details": "Create volunteer_opportunities, volunteer_assignments tables that INTEGRATE with existing volunteer_hours table. No duplication - enhance the current system.",
-        "status": "completed",
+      "2": {
+        "id": "2",
+        "content": "Design Database Schema for Announcements System",
+        "details": "Create announcements table with proper relationships to existing profiles table. Include fields for title, content, recipient groups, publication status, email notification flags, and timestamps. Design email tracking table for optional email functionality.",
+        "status": "pending",
         "priority": "high"
       },
-      "26": {
-        "id": "26",
-        "content": "Develop migration path for existing volunteer hours",
-        "details": "Create migration plan to convert existing volunteer_hours entries to new opportunities-based system. Ensure no duplicate data.",
-        "status": "completed",
+      "3": {
+        "id": "3",
+        "content": "Implement Backend API (Supabase Edge Functions)",
+        "details": "Create edge functions for: list-announcements (public), create-announcement (admin only), update-announcement (admin only), delete-announcement (admin only), and send-announcement-emails (optional email notifications). Implement proper role-based access control.",
+        "status": "pending",
         "priority": "high"
       },
-      "27": {
-        "id": "27",
-        "content": "Build unified volunteer management backend",
-        "details": "Create edge functions that provide opportunities AND enhanced hour logging. Replace existing volunteer functions, not add to them.",
-        "status": "completed",
-        "priority": "high"
+      "4": {
+        "id": "4",
+        "content": "Build Frontend Member Interface",
+        "details": "Create announcements page with announcement list and individual announcement cards. Integrate with existing member dashboard by adding 'Announcements' tab. Use TanStack Query for data fetching and Shadcn/ui components for consistent design.",
+        "status": "pending",
+        "priority": "medium"
       },
-      "28": {
-        "id": "28",
-        "content": "Build unified volunteer frontend experience",
-        "details": "Replace current volunteer pages with enhanced opportunities-based interface. Single volunteer dashboard, not multiple systems.",
-        "status": "completed",
+      "5": {
+        "id": "5",
+        "content": "Create Admin Announcement Management Interface",
+        "details": "Build admin interface for creating, editing, and deleting announcements. Include form with rich text editor, recipient group selection, publication toggle, and email notification options. Integrate with existing admin pages structure.",
+        "status": "pending",
+        "priority": "medium"
+      },
+      "6": {
+        "id": "6",
+        "content": "Implement Email Notification System (Optional)",
+        "details": "Create Supabase Edge Function for sending announcement emails to selected recipient groups. Build email templates and integrate with existing authentication system. Ensure opt-out functionality and deliverability monitoring.",
+        "status": "pending",
+        "priority": "low"
+      },
+      "7": {
+        "id": "7",
+        "content": "Ensure Full Accessibility Compliance",
+        "details": "Implement WCAG 2.1 AA standards including semantic HTML, ARIA attributes, keyboard navigation, color contrast compliance, form labels, and screen reader compatibility. Test with assistive technologies.",
+        "status": "pending",
+        "priority": "medium"
+      },
+      "8": {
+        "id": "8",
+        "content": "Deploy and Test Complete System",
+        "details": "Deploy backend functions to Supabase, build and deploy frontend changes, create test announcements, and verify all functionality works correctly. Ensure backward compatibility with existing volunteer system.",
+        "status": "pending",
         "priority": "high"
       }
     }
