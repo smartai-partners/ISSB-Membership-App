@@ -26,6 +26,8 @@ import { MembershipPlansPage } from '@/pages/MembershipPlansPage';
 import { MembershipDashboardPage } from '@/pages/MembershipDashboardPage';
 import { AdminMembershipAnalyticsPage } from '@/pages/AdminMembershipAnalyticsPage';
 import { AdminVolunteerHoursPage } from '@/pages/AdminVolunteerHoursPage';
+import { AdminAnnouncementsPage } from '@/pages/AdminAnnouncementsPage';
+import { AnnouncementsPage } from '@/pages/AnnouncementsPage';
 
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
   const { user, profile, loading } = useAuth();
@@ -74,6 +76,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <VolunteersPage />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/announcements"
+              element={
+                <ProtectedRoute>
+                  <AnnouncementsPage />
                 </ProtectedRoute>
               }
             />
@@ -182,6 +193,15 @@ function App() {
               element={
                 <ProtectedRoute roles={['admin', 'board']}>
                   <AdminVolunteerHoursPage />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/admin/announcements"
+              element={
+                <ProtectedRoute roles={['admin', 'board']}>
+                  <AdminAnnouncementsPage />
                 </ProtectedRoute>
               }
             />

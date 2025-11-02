@@ -1,0 +1,282 @@
+Sub-tasks
+
+AdminDashboardLayout: (Existing) Provides global navigation, header, and footer.
+
+
+EventGamificationManagementPage: The main entry point for this feature, coordinating the sub-sections.
+
+
+NavigationTabs / Sidebar: For switching between Event, Gallery, Badge, and Contest management.
+
+
+EventManager:
+
+
+EventList: Displays all events, with search, filter, sort, and pagination.
+
+
+EventCard / EventRow: Individual event display.
+
+
+EventForm: For creating/editing events (could be a modal or dedicated page). Includes fields like title, description (rich text editor), dates, location, capacity, etc.
+
+
+PhotoGalleryManager:
+
+
+PhotoGalleryList: Lists all galleries.
+
+
+GalleryCard / GalleryRow: Individual gallery display.
+
+
+PhotoGalleryForm: For creating/editing gallery metadata.
+
+
+PhotoUploadModal: Handles image uploads for a specific gallery.
+
+
+PhotoDetailModal: To view individual photos within a gallery, possibly with moderation options.
+
+
+BadgeManager:
+
+
+BadgeList: Displays all badges.
+
+
+BadgeCard / BadgeRow: Individual badge display.
+
+
+BadgeForm: For creating/editing badges (name, description, icon/image).
+
+
+BadgeAssignmentModal: Allows admins to assign badges to specific members.
+
+
+ContestManager:
+
+
+ContestList: Displays all contests.
+
+
+ContestCard / ContestRow: Individual contest display.
+
+
+ContestForm: For creating/editing contests (title, rules, prize, sponsor, start/end dates, entry requirements).
+
+
+ContestEntriesViewer: To review submitted entries for a contest.
+
+
+ContestWinnerSelectionModal: Interface to select and announce winners.
+
+
+DataTable: Generic component for displaying tabular data with sorting and pagination.
+
+
+Modal: For forms, confirmations, and detail views.
+
+
+Button: Various styles (primary, secondary, danger).
+
+
+Input, Select, TextArea: Form controls.
+
+
+DatePicker: For date/time selections.
+
+
+RichTextEditor: For event descriptions, contest rules.
+
+
+ImageUpload: For gallery photos, badge icons.
+
+
+SearchFilter: For filtering lists.
+
+
+Pagination: For large datasets.
+
+
+Lightweight & Performant: Minimal boilerplate, simple API, and highly optimized for performance (does not trigger unnecessary re-renders).
+
+
+Modular Stores: Allows creating distinct, independent stores for each feature (e.g., useEventStore, useGalleryStore, useBadgeStore, useContestStore). This isolates concerns and prevents monolithic state.
+
+
+Developer Experience: Easy to learn and use, integrates seamlessly with React and TypeScript.
+
+
+Scalability: Scales well for features with growing complexity, offering a balance between simplicity and power.
+
+
+Each manager (EventManager, PhotoGalleryManager, etc.) will primarily interact with its dedicated Zustand store.
+
+
+Stores will hold lists of items, current selections (for editing), loading states, and error messages.
+
+
+Asynchronous operations (data fetching, mutations) will be handled within the store actions, updating the state accordingly.
+
+
+Forms will typically use local component state (e.g., useState or a form library like React Hook Form) to manage input values, pushing changes to the Zustand store or triggering an API mutation on submission.
+
+
+TailwindCSS First: Shadcn/ui components are explicitly designed to be styled with TailwindCSS. You get the benefits of pre-built functionality and accessibility while maintaining full control over the styling with your existing utility classes.
+
+
+Radix UI Foundation: It leverages Radix UI primitives, which are renowned for their headless (unstyled), accessible, and composable nature. This ensures a high level of accessibility out-of-the-box, covering keyboard navigation, ARIA attributes, and focus management.
+
+
+"Copy and Paste" Model: You copy the component code directly into your project, allowing for easy customization and auditing. This avoids traditional dependency hell and ensures you only include the code you truly need.
+
+
+Comprehensive Set: Provides a rich set of common UI components needed for an admin dashboard (tables, forms, dialogs, dropdowns, date pickers, etc.).
+
+
+Install Radix UI dependencies.
+
+
+Use the Shadcn/ui CLI to add components (e.g., npx shadcn-ui add button).
+
+
+Customize the copied component styles directly in your project's .tsx files using TailwindCSS classes.
+
+
+Server State Management: React Query excels at managing "server state" (data fetched from APIs), distinguishing it from local UI state. It handles caching, revalidation, background refetching, pagination, and optimistic updates.
+
+
+Reduced Boilerplate: Significantly reduces the amount of code needed for data fetching, loading states, and error handling compared to manual useEffect or even plain fetch/Axios.
+
+
+Performance & UX: Intelligent caching and background refetching provide a snappier user experience by serving stale data instantly while updating it in the background.
+
+
+Strong TypeScript Support: Excellent type inference and safety.
+
+
+Independent: Works perfectly with any state management library (like Zustand) or even just React's useState.
+
+
+Wrap your application with QueryClientProvider.
+
+
+Use useQuery for fetching lists of items (events, galleries, etc.).
+
+
+Use useMutation for CUD operations (Create, Update, Delete) with options for invalidating queries to keep the UI up-to-date.
+
+
+Define API utility functions (e.g., getEvents, createEvent) that can be used by useQuery and useMutation.
+
+
+Use native HTML elements (<button>, <a href>, <form>, <table>, <h1>-<h6>, <label>, <input>) whenever appropriate.
+
+
+Avoid generic divs or spans for interactive elements.
+
+
+Structure content logically with headings (h1 for page title, h2 for section titles).
+
+
+Ensure all interactive elements (buttons, links, form fields) are reachable and operable via keyboard (Tab, Shift+Tab, Enter, Spacebar).
+
+
+Provide clear and visible focus indicators (browser default outlines are good, but can be styled).
+
+
+Manage focus for modals: when a modal opens, focus should move inside it; when it closes, focus should return to the triggering element. Use a library like Radix UI's Dialog or custom solutions for this.
+
+
+Implement "trap focus" within modals to prevent users from tabbing outside.
+
+
+Use aria-label for buttons or icons that don't have visible text (e.g., an "Edit" icon button).
+
+
+Use aria-describedby to link elements to descriptive text (e.g., associating an input with its error message).
+
+
+Use role attributes for custom components that mimic native HTML roles (e.g., role="tablist", role="tab", role="tabpanel" for tabbed navigation).
+
+
+Utilize aria-live regions for dynamic content updates (e.g., success messages, error alerts, search results loading) to announce changes to screen readers.
+
+
+Ensure a minimum color contrast ratio of 4.5:1 for normal text and 3:1 for large text, against its background (WCAG 2.1 AA standard).
+
+
+Tools like browser developer tools (Lighthouse, Accessibility Inspector) or standalone contrast checkers can help.
+
+
+Always associate <label> elements with their <input> elements using the for attribute (matching the input's id).
+
+
+Provide clear and concise error messages, explicitly linking them to the problematic input using aria-describedby and visually positioning them near the input.
+
+
+Use placeholder text sparingly, as it disappears on focus and can be problematic for some users.
+
+
+All meaningful images (photos in galleries, badge icons) must have descriptive alt attributes.
+
+
+Decorative images should have an empty alt="" or be handled via CSS to be ignored by screen readers.
+
+
+When new content appears or disappears (e.g., a form submitted, a filter applied), ensure screen readers are informed. aria-live is crucial here.
+
+
+Modals should be correctly marked with role="dialog" or role="alertdialog", and have an aria-modal="true".
+
+
+While not strictly a11y, ensuring the UI adapts gracefully to different screen sizes and orientations improves usability for everyone, including those using assistive technologies or non-traditional input devices.
+
+
+Shadcn/ui (powered by Radix UI) provides an excellent foundation for accessibility. By using it, you inherently adopt well-tested and accessible primitives for common UI patterns. However, proper implementation and custom styling choices are still crucial.
+
+
+Adhere to RESTful principles: Use appropriate HTTP methods (GET, POST, PUT, DELETE) and clear, resource-based URLs (/api/events, /api/galleries/:id/photos).
+
+
+Implement robust Role-Based Access Control (RBAC) to ensure only Admins can access and modify these interfaces. Middleware in Express is ideal for this.
+
+
+Server-side validation: Even with client-side validation, all incoming data must be validated on the server using libraries like Joi or Zod to prevent malicious or malformed data.
+
+
+Consistent error handling: Standardize API error responses (e.g., { message: "...", code: "..." }).
+
+
+Leverage existing JWT-based authentication for securing API endpoints.
+
+
+Middleware on Express to check for valid tokens and user roles for every admin-specific request.
+
+
+Define shared TypeScript interfaces/types for API responses and request bodies between frontend and backend to ensure consistency and prevent errors (e.g., via a shared types package or OpenAPI/Swagger generation).
+
+
+Consider React Hook Form for managing complex forms within the dashboard. It integrates well with validation libraries (like Zod) and provides excellent performance.
+
+
+For photo galleries and contest attachments, implement secure file uploads. On the backend, consider libraries like Multer for handling multipart form data and storing files on a cloud storage service (e.g., AWS S3, Google Cloud Storage) rather than directly on the server.
+
+
+Unit Tests: For individual components (React Testing Library) and backend utility functions (Jest).
+
+
+Integration Tests: For component interactions and API routes.
+
+
+End-to-End (E2E) Tests: Using Playwright or Cypress for critical admin workflows.
+
+
+Enforce strict ESLint rules and Prettier formatting for consistent code style across the team.
+
+
+Implement Husky hooks for pre-commit checks.
+
+
+Ensure proper logging on the backend for debugging and auditing admin actions. Implement monitoring tools for API performance and error rates.

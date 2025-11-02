@@ -1,0 +1,254 @@
+AI Suggestions:
+As a world-class senior software architect, I've developed a detailed implementation plan and technical suggestions for your Admin Dashboard: Event & Gamification Management task. This plan prioritizes scalability, maintainability, performance, and an excellent developer experience, all while adhering to modern web standards.
+
+---
+
+## Admin Dashboard: Event & Gamification Management
+
+Goal: Create robust admin interfaces for managing events, photo galleries, badges, and sponsor-branded contests within the membership application.
+
+Context: React, TypeScript, TailwindCSS frontend; Node.js/Express backend. Membership application with Admin, Board, Regular Member roles.
+
+---
+
+### 1. Component Structure
+
+The component structure will follow a modular, hierarchical approach, promoting reusability and separation of concerns.
+
+``
+├── src/
+│ ├── App.tsx
+│ ├── index.tsx
+│ ├── components/
+│ │ ├── common/ // Reusable UI primitives
+│ │ │ ├── Button.tsx
+│ │ │ ├── Input.tsx
+│ │ │ ├── Select.tsx
+│ │ │ ├── Checkbox.tsx
+│ │ │ ├── Textarea.tsx
+│ │ │ ├── Modal.tsx
+│ │ │ ├── DataTable.tsx // Generic table with sorting, pagination
+│ │ │ ├── LoadingSpinner.tsx
+│ │ │ ├── Toast.tsx // Notification component
+│ │ │ └── DatePicker.tsx // Shadcn/ui or similar integrated
+│ │ ├── layout/
+│ │ │ ├── AdminDashboardLayout.tsx // Overall dashboard frame (existing)
+│ │ │ └── AdminSidebar.tsx
+│ │ └── admin/ // Admin-specific components
+│ │ ├── EventGamificationModule.tsx // Main parent for this task
+│ │ │ ├── AdminFeatureTabs.tsx // For navigation (Events, Galleries, Badges, Contests)
+│ │ │ ├── events/
+│ │ │ │ ├── EventManagementView.tsx // Main view for Events
+│ │ │ │ ├── EventList.tsx
+│ │ │ │ ├── EventForm.tsx
+│ │ │ │ └── EventEditorModal.tsx // Wrapper for create/edit
+│ │ │ ├── galleries/
+│ │ │ │ ├── PhotoGalleryManagementView.tsx
+│ │ │ │ ├── GalleryList.tsx
+│ │ │ │ ├── GalleryForm.tsx
+│ │ │ │ ├── GalleryEditorModal.tsx
+│ │ │ │ └── ImageUploadPreview.tsx // For individual image uploads
+│ │ │ ├── badges/
+│ │ │ │ ├── BadgeManagementView.tsx
+│ │ │ │ ├── BadgeList.tsx
+│ │ │ │ ├── BadgeForm.tsx
+│ │ │ │ └── BadgeEditorModal.tsx
+│ │ │ └── contests/
+│ │ │ ├── ContestManagementView.tsx
+│ │ │ ├── ContestList.tsx
+│ │ │ ├── ContestForm.tsx
+│ │ │ ├── ContestEditorModal.tsx
+│ │ │ ├── SponsorPicker.tsx // For selecting existing sponsors
+│ │ │ └── ContestSubmissionReview.tsx // View contest entries
+│ ├── hooks/
+│ │ ├── useAuth.ts
+│ │ └── useDebounce.ts
+│ ├── pages/
+│ │ ├── AdminDashboardPage.tsx // Entry point for admin dashboard
+│ │ └── LoginPage.tsx
+│ ├── store/ // State management (Redux Toolkit)
+│ │ ├── index.ts
+│ │ ├── authSlice.ts
+│ │ └── api/ // RTK Query API slices
+│ │ ├── eventsApi.ts
+│ │ ├── galleriesApi.ts
+│ │ ├── badgesApi.ts
+│ │ ├── contestsApi.ts
+│ │ └── sponsorsApi.ts // For common data like sponsors
+│ ├── types/
+│ │ ├── index.d.ts // Global type definitions
+│ │ ├── event.d.ts
+│ │ ├── gallery.d.ts
+│ │ ├── badge.d.ts
+│ │ └── contest.d.ts
+│ └── utils/
+│ ├── api.ts // Axios instance if not using RTK Query exclusively
+│ ├── validationSchemas.ts
+│ └── helpers.ts
+`
+
+Hierarchy Breakdown:
+
+* AdminDashboardLayout: The top-level layout for all admin pages, providing consistent navigation and branding.
+* EventGamificationModule: The primary parent component for this specific task, likely rendered within the AdminDashboardLayout. It will manage the routing or tab selection for its sub-features.
+* AdminFeatureTabs: A reusable component for switching between "Events", "Photo Galleries", "Badges", and "Contests".
+* Feature Views (EventManagementView, etc.): Each view acts as a container for its respective feature. It orchestrates the display of lists, triggers modals for creation/editing, and handles feature-specific logic.
+* List Components (EventList, etc.): Display data in a tabular format, leveraging a generic DataTable component for common features like pagination, sorting, and filtering.
+* Form Components (EventForm, etc.): Pure components responsible for rendering the input fields and validation logic for creating/editing an entity. They should be decoupled from data fetching.
+* Editor Modals (EventEditorModal, etc.): Encapsulate the form and its associated state/data fetching logic within a modal, providing a consistent user experience for CRUD operations.
+* Common Components (DataTable, Input, Button, Modal, DatePicker, ImageUploadPreview): Highly reusable, styled with TailwindCSS, and accessible.
+
+---
+
+### 2. State Management
+
+For an admin dashboard with multiple CRUD interfaces, complex forms, and server-side data, Redux Toolkit (RTK) combined with RTK Query is the recommended state management approach.
+
+Justification:
+
+1. RTK Query for Server State:
+* Automated Data Fetching & Caching: Eliminates boilerplate for API calls, caching responses, re-fetching, and managing loading/error states. This is a game-changer for data-heavy applications like admin dashboards.
+* Automatic Cache Invalidation: tagTypes and invalidatesTags simplify keeping the UI in sync with server changes after mutations (create, update, delete).
+* Type Safety: Excellent TypeScript integration ensures robust data handling.
+* Performance: Built-in memoization and deduplication of requests.
+2. Redux Toolkit for UI State:
+* Centralized & Predictable: Provides a single source of truth for global UI state (e.g., user authentication, global notifications, modal visibility) using createSlice.
+* Developer Experience: Simplifies Redux setup and boilerplate with opinionated utilities.
+* Debugging: Redux DevTools provide powerful insights into state changes.
+3. Scalability: RTK and RTK Query are designed for large applications, making it easier to add new admin features without increasing complexity proportionally.
+
+Implementation Details:
+
+* Store Setup: Configure the Redux store in src/store/index.ts, integrating RTK Query's API services and any custom slices (e.g., authSlice).
+* API Slices: Create separate RTK Query API slices (e.g., eventsApi.ts, galleriesApi.ts) under src/store/api/ for each major domain. Each slice will define endpoints for fetching, creating, updating, and deleting data.
+* Authentication State: Manage user authentication (JWT token, user role) in a dedicated authSlice.ts. The JWT will be included in RTK Query's prepareHeaders callback for all API requests.
+* Local Component State: For simple form inputs or transient UI states (e.g., dropdown open/closed), useState and useReducer remain appropriate within individual components.
+
+---
+
+### 3. Component Libraries
+
+Recommendation: Shadcn/ui is the optimal choice for this project.
+
+Justification:
+
+1. Native TailwindCSS Integration: Shadcn/ui components are explicitly built and styled using TailwindCSS. This ensures perfect compatibility, no styling conflicts, and leverages the full power of Tailwind for customization.
+2. "You Own the Components": Unlike traditional libraries, Shadcn/ui encourages you to copy the component code directly into your project. This provides absolute control over customization, allowing precise adjustments to fit your application's design system and specific requirements without fighting library defaults.
+3. Accessibility (Radix UI Foundation): The components are built on top of Radix UI primitives, which are renowned for their focus on accessibility, providing robust keyboard navigation, ARIA attributes, and focus management out-of-the-box. This significantly reduces the effort required to meet a11y standards.
+4. TypeScript First: Excellent TypeScript support for type safety and autocompletion.
+5. Modular & Performant: Only the necessary components are included in your bundle, as you copy only what you need.
+
+Usage:
+
+* Utilize Shadcn/ui for fundamental building blocks like Table, Dialog (for modals), Form (with react-hook-form), Input, Select, Button, Tabs, DatePicker, Toast, etc.
+* Extend these components with custom logic and styling using TailwindCSS classes.
+
+---
+
+### 4. Data Fetching
+
+The frontend will communicate with the Node.js/Express backend API primarily through RESTful API endpoints managed by RTK Query.
+
+Detailed Plan:
+
+1. API Endpoints Design (Backend - Node.js/Express):
+* Follow a consistent RESTful pattern (e.g., /api/v1/events, /api/v1/galleries/:id/photos).
+* Use appropriate HTTP methods (GET, POST, PUT, DELETE).
+* Implement CRUD operations for Events, Photo Galleries, Badges, and Contests.
+* Example Endpoints:
+* GET /api/v1/events - Get all events (with optional filtering, pagination, sorting)
+* POST /api/v1/events - Create a new event
+* GET /api/v1/events/:id - Get a single event
+* PUT /api/v1/events/:id - Update an event
+* DELETE /api/v1/events/:id - Delete an event
+* POST /api/v1/galleries/:galleryId/photos - Upload photos to a specific gallery (multipart/form-data)
+* GET /api/v1/sponsors - Fetch a list of sponsors for contest management.
+
+2. Authentication & Authorization (Backend & Frontend):
+* Backend: Implement JWT (JSON Web Token) authentication.
+* Login endpoint (POST /api/v1/auth/admin/login) returns a signed JWT.
+* Middleware to verify JWT on protected routes.
+* Middleware to check user roles (Admin role required for dashboard actions).
+* Frontend:
+* Store the JWT securely (e.g., in localStorage or sessionStorage for persistence, or in memory for shorter sessions).
+* RTK Query prepareHeaders: Automatically inject the JWT into the Authorization header (Bearer ) for every API request. This is configured in the baseQuery for the createApi instance.
+
+`typescript
+// src/store/api/baseApi.ts (or similar)
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { RootState } from '../index'; // Assuming RootState type
+
+const baseQuery = fetchBaseQuery({
+baseUrl: '/api/v1', // Proxy this in development, full URL in production
+prepareHeaders: (headers, { getState }) => {
+const token = (getState() as RootState).auth.token; // Get token from auth state
+if (token) {
+headers.set('Authorization', Bearer ${token});
+}
+return headers;
+},
+});
+
+export const appApi = createApi({
+reducerPath: 'appApi',
+baseQuery: baseQuery,
+tagTypes: ['Event', 'Gallery', 'Badge', 'Contest', 'Sponsor'],
+endpoints: () => ({}), // Empty base, extended by feature-specific APIs
+});
+`
+
+3. File Uploads (e.g., Photos, Badge Icons):
+* Use FormData API on the frontend when making POST requests for file uploads.
+* Set the Content-Type header to multipart/form-data (handled automatically by FormData).
+* Backend: Use a library like multer with Node.js/Express to parse and save uploaded files. Store file paths/URLs in the database.
+
+4. Error Handling:
+* Backend: Standardized error responses (e.g., JSON objects with statusCode, message, errorType).
+* Frontend (RTK Query): RTK Query provides isError and error properties. Implement a global error handler or display specific error messages using the Toast component. Handle 401 Unauthorized errors by redirecting to the login page.
+
+5. Loading States:
+* Frontend (RTK Query): Leverage isLoading, isFetching, and isSuccess properties provided by RTK Query hooks to display loading spinners or skeleton loaders while data is being fetched, improving UX.
+
+---
+
+### 5. Accessibility (a11y)
+
+Ensuring an accessible admin dashboard is critical for usability for all administrators.
+
+1. Semantic HTML5: Use appropriate HTML elements for their intended meaning (e.g.,
+,
+, , , , 
+, ). This provides a strong foundation for screen readers and assistive technologies.
+* Example: Use
+for DataTable, , ,
+,	.
+2. ARIA Attributes: Supplement semantic HTML where necessary.
+* aria-label or aria-labelledby for clear identification of interactive elements (e.g., buttons with only icons, complex regions).
+* aria-live regions for dynamic content updates (e.g., success/error messages from Toast component).
+* role="dialog" for modals with aria-modal="true".
+* aria-expanded for togglable elements (dropdowns, accordions).
+3. Keyboard Navigation:
+* Logical Tab Order: Ensure the natural tab order (tabindex=0) flows logically through all interactive elements.
+* Keyboard Controls: Implement Esc key to close modals, Enter/Space to activate buttons/links. Provide arrow key navigation for complex components like data tables, tabs, or date pickers.
+* Visible Focus Indicators: Ensure :focus styles are clearly visible (e.g., a strong outline) so users know which element is currently active. Shadcn/ui and Radix UI handle this well by default.
+4. Color Contrast: Adhere to WCAG 2.1 AA contrast ratios (at least 4.5:1 for normal text, 3:1 for large text and UI components). Use TailwindCSS's utility classes to manage colors effectively, and verify with contrast checkers during design and development.
+5. Form Accessibility:
+* Labels: Always associate elements with their form controls using for and id attributes.
+* Validation Feedback: Provide clear, accessible error messages for invalid input, ideally linked to the input using aria-describedby.
+* aria-required: Mark mandatory fields using aria-required="true".
+* Provide helpful hints or instructions where inputs are complex.
+6. Image Alt Text: All images, especially in photo galleries and badge management, must have descriptive alt attributes. Decorative images should have alt="".
+7. Focus Management (Modals/Dynamic Content):
+* When a modal opens, programmatically move focus to the first interactive element *inside* the modal.
+* Trap keyboard focus within the modal while it's open.
+* When the modal closes, return focus to the element that triggered its opening.
+8. Responsive Design: While not strictly an a11y point, a responsive design ensures content is usable and readable on various screen sizes, benefiting users with different visual needs or device preferences.
+9. Language Attribute: Specify the primary language of the document using the lang attribute on the tag (e.g., ).
+10. Testing:
+* Automated Tools: Integrate tools like Lighthouse, axe-core (via eslint-plugin-jsx-a11y`), and Pa11y CI into your CI/CD pipeline.
+* Manual Testing: Crucially, perform manual accessibility testing using only a keyboard and with common screen readers (e.g., NVDA on Windows, VoiceOver on macOS) to catch issues automated tools might miss.
+
+---
+
+This detailed plan provides a robust framework for successfully implementing the Admin Dashboard: Event & Gamification Management feature, ensuring a high-quality, maintainable, and accessible solution.
+

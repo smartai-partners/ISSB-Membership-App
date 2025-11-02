@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Calendar, Users, Heart, LayoutDashboard, FileCheck, LogOut, Menu, X, MessageSquare, CheckSquare, BarChart3, CreditCard } from 'lucide-react';
+import { Home, Calendar, Users, Heart, LayoutDashboard, FileCheck, LogOut, Menu, X, MessageSquare, CheckSquare, BarChart3, CreditCard, Bell } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -29,6 +29,7 @@ export function Navbar({ className = '' }: NavbarProps) {
 
   const memberItems = [
     { name: 'My Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['member', 'student'] },
+    { name: 'Announcements', path: '/announcements', icon: Bell, roles: ['admin', 'board', 'member', 'student'] },
   ];
 
   const adminItems = [
@@ -42,6 +43,7 @@ export function Navbar({ className = '' }: NavbarProps) {
     { name: 'Accessibility', path: '/admin/accessibility-audit', icon: CheckSquare, roles: ['admin', 'board'] },
     { name: 'Analytics', path: '/admin/accessibility-analytics', icon: BarChart3, roles: ['admin', 'board'] },
     { name: 'Membership Analytics', path: '/admin/membership-analytics', icon: CreditCard, roles: ['admin', 'board'] },
+    { name: 'Announcements', path: '/admin/announcements', icon: Bell, roles: ['admin', 'board'] },
   ];
 
   const isActive = (path: string) => {

@@ -120,6 +120,25 @@ export interface VolunteerAssignment {
   total_approved_hours?: number;
 }
 
+export interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  author_id: string;
+  recipient_groups: string[];
+  is_published: boolean;
+  send_email: boolean;
+  created_at: string;
+  updated_at: string;
+  published_at?: string;
+  profiles?: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+  };
+}
+
 export interface VolunteerProgress {
   subscription: Subscription | null;
   volunteerHours: VolunteerHour[];
@@ -161,7 +180,7 @@ export interface MembershipAnalytics {
 export const membershipApi = createApi({
   reducerPath: 'membershipApi',
   baseQuery: fetchBaseQuery({ baseUrl: SUPABASE_URL }),
-  tagTypes: ['Subscription', 'FamilyMembers', 'Analytics', 'VolunteerHours', 'Opportunities', 'Assignments'],
+  tagTypes: ['Subscription', 'FamilyMembers', 'Analytics', 'VolunteerHours', 'Opportunities', 'Assignments', 'Announcements'],
   endpoints: (builder) => ({
     // Get current user's subscription status
     getSubscriptionStatus: builder.query<SubscriptionStatus, void>({
@@ -477,6 +496,82 @@ export const membershipApi = createApi({
       },
       providesTags: ['Assignments'],
     }),
+
+    // List announcements
+    listAnnouncements: builder.query<{ announcements: Announcement[]; total: number; limit: number; offset: number }, { limit?: number; offset?: number; includeUnpublished?: boolean }>({
+      queryFn: async ({ limit = 20, offset = 0, includeUnpublished = false }) => {
+        try {
+          const params = new URLSearchParams();
+          params.append('limit', limit.toString());
+          params.append('offset', offset.toString());
+          if (includeUnpublished) params.append('includeUnpublished', 'true');
+          
+          const queryString = params.toString();
+          const url = `list-announcements${queryString ? `?${queryString}` : ''}`;
+          
+          const { data, error } = await supabase.functions.invoke(url);
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      providesTags: ['Announcements'],
+    }),
+
+    // Create announcement (Admin only)
+    createAnnouncement: builder.mutation<{ announcement: Announcement; message: string }, Partial<Announcement>>({
+      queryFn: async (announcementData) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('create-announcement', {
+            body: announcementData
+          });
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Announcements'],
+    }),
+
+    // Update announcement (Admin only)
+    updateAnnouncement: builder.mutation<{ announcement: Announcement; message: string }, { id: string; updates: Partial<Announcement> }>({
+      queryFn: async ({ id, updates }) => {
+        try {
+          const { data, error } = await supabase.functions.invoke(`update-announcement?id=${id}`, {
+            body: updates
+          });
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Announcements'],
+    }),
+
+    // Delete announcement (Admin only)
+    deleteAnnouncement: builder.mutation<{ message: string }, string>({
+      queryFn: async (announcementId) => {
+        try {
+          const { data, error } = await supabase.functions.invoke(`delete-announcement?id=${announcementId}`);
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Announcements'],
+    }),
   }),
 });
 
@@ -499,4 +594,8 @@ export const {
   useSignupForOpportunityMutation,
   useWithdrawFromOpportunityMutation,
   useGetMemberAssignmentsQuery,
+  useListAnnouncementsQuery,
+  useCreateAnnouncementMutation,
+  useUpdateAnnouncementMutation,
+  useDeleteAnnouncementMutation,
 } = membershipApi;
