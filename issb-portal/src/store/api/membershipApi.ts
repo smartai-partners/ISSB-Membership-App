@@ -20,6 +20,9 @@ export interface Subscription {
   stripe_customer_id: string;
   price_id: string;
   status: string;
+  activation_method?: string;
+  volunteer_hours_required?: number;
+  volunteer_hours_completed?: number;
   created_at: string;
   updated_at: string;
   plans?: Plan;
@@ -58,6 +61,33 @@ export interface SubscriptionStatus {
   history: SubscriptionHistory[];
 }
 
+export interface VolunteerHour {
+  id: string;
+  user_id: string;
+  hours: number;
+  date: string;
+  description: string;
+  status: string;
+  approved_by?: string;
+  approved_at?: string;
+  rejection_reason?: string;
+  admin_notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VolunteerProgress {
+  subscription: Subscription | null;
+  volunteerHours: VolunteerHour[];
+  summary: {
+    totalApprovedHours: number;
+    totalPendingHours: number;
+    hoursNeeded: number;
+    percentageComplete: number;
+    membershipActivated: boolean;
+  };
+}
+
 export interface MembershipAnalytics {
   summary: {
     totalSubscriptions: number;
@@ -76,7 +106,7 @@ export interface MembershipAnalytics {
 export const membershipApi = createApi({
   reducerPath: 'membershipApi',
   baseQuery: fetchBaseQuery({ baseUrl: SUPABASE_URL }),
-  tagTypes: ['Subscription', 'FamilyMembers', 'Analytics'],
+  tagTypes: ['Subscription', 'FamilyMembers', 'Analytics', 'VolunteerHours'],
   endpoints: (builder) => ({
     // Get current user's subscription status
     getSubscriptionStatus: builder.query<SubscriptionStatus, void>({
@@ -197,6 +227,74 @@ export const membershipApi = createApi({
       },
       providesTags: ['Analytics'],
     }),
+
+    // Create volunteer-based subscription
+    createVolunteerSubscription: builder.mutation<{ subscription: Subscription }, void>({
+      queryFn: async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke('create-volunteer-subscription');
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Subscription', 'VolunteerHours'],
+    }),
+
+    // Log volunteer hours
+    logVolunteerHours: builder.mutation<any, { hours: number; date: string; description: string; opportunityId?: string }>({
+      queryFn: async ({ hours, date, description, opportunityId }) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('log-volunteer-hours', {
+            body: { hours, date, description, opportunityId }
+          });
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['VolunteerHours', 'Subscription'],
+    }),
+
+    // Get volunteer progress
+    getVolunteerProgress: builder.query<VolunteerProgress, void>({
+      queryFn: async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke('get-volunteer-progress');
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      providesTags: ['VolunteerHours', 'Subscription'],
+    }),
+
+    // Admin approve volunteer hours
+    approveVolunteerHours: builder.mutation<any, { volunteerHourId: string; action: 'approve' | 'reject'; rejectionReason?: string; adminNotes?: string }>({
+      queryFn: async ({ volunteerHourId, action, rejectionReason, adminNotes }) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('admin-approve-volunteer-hours', {
+            body: { volunteerHourId, action, rejectionReason, adminNotes }
+          });
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['VolunteerHours', 'Subscription', 'Analytics'],
+    }),
   }),
 });
 
@@ -208,4 +306,8 @@ export const {
   useAddFamilyMemberMutation,
   useRemoveFamilyMemberMutation,
   useGetMembershipAnalyticsQuery,
+  useCreateVolunteerSubscriptionMutation,
+  useLogVolunteerHoursMutation,
+  useGetVolunteerProgressQuery,
+  useApproveVolunteerHoursMutation,
 } = membershipApi;

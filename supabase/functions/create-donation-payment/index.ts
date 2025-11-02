@@ -67,6 +67,37 @@ Deno.serve(async (req) => {
             }
         }
 
+        // Check if user has active membership
+        let hasActiveMembership = false;
+        if (userId) {
+            const membershipCheck = await fetch(
+                `${supabaseUrl}/rest/v1/subscriptions?user_id=eq.${userId}&status=eq.active&select=id`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${serviceRoleKey}`,
+                        'apikey': serviceRoleKey
+                    }
+                }
+            );
+            if (membershipCheck.ok) {
+                const memberships = await membershipCheck.json();
+                hasActiveMembership = memberships.length > 0;
+                console.log('Active membership status:', hasActiveMembership);
+            }
+        }
+
+        // Calculate membership application for donations >= $360
+        const membershipAmount = 360;
+        const canApplyToMembership = userId && !hasActiveMembership && amount >= membershipAmount;
+        const amountAppliedToMembership = canApplyToMembership ? membershipAmount : 0;
+        const remainingDonationAmount = amount - amountAppliedToMembership;
+
+        console.log('Membership application calculation:', {
+            canApplyToMembership,
+            amountAppliedToMembership,
+            remainingDonationAmount
+        });
+
         // Prepare Stripe payment intent data
         const stripeParams = new URLSearchParams();
         stripeParams.append('amount', Math.round(amount * 100).toString()); // Convert to cents
@@ -78,6 +109,9 @@ Deno.serve(async (req) => {
         stripeParams.append('metadata[donor_name]', donorName || '');
         stripeParams.append('metadata[user_id]', userId || 'anonymous');
         stripeParams.append('metadata[organization]', 'ISSB Mosque');
+        stripeParams.append('metadata[apply_to_membership]', canApplyToMembership.toString());
+        stripeParams.append('metadata[membership_amount]', amountAppliedToMembership.toString());
+        stripeParams.append('metadata[remaining_donation]', remainingDonationAmount.toString());
 
         // Add description
         const purposeNames = {
@@ -88,7 +122,10 @@ Deno.serve(async (req) => {
             'community_services': 'Community Services',
             'general': 'General Fund'
         };
-        const description = `ISSB Donation: ${purposeNames[purpose] || purpose}`;
+        let description = `ISSB Donation: ${purposeNames[purpose] || purpose}`;
+        if (canApplyToMembership) {
+            description += ` (includes $${membershipAmount} membership)`;
+        }
         stripeParams.append('description', description);
 
         // Create payment intent with Stripe
@@ -112,7 +149,7 @@ Deno.serve(async (req) => {
         const paymentIntent = await stripeResponse.json();
         console.log('Payment intent created successfully:', paymentIntent.id);
 
-        // Create donation record in database
+        // Create donation record in database with membership application data
         const donationData = {
             user_id: userId,
             amount: amount,
@@ -122,6 +159,9 @@ Deno.serve(async (req) => {
             donor_email: donorEmail || null,
             payment_status: 'pending',
             stripe_payment_intent_id: paymentIntent.id,
+            applied_to_membership: canApplyToMembership,
+            amount_applied_to_membership: amountAppliedToMembership,
+            remaining_donation_amount: remainingDonationAmount,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
@@ -168,7 +208,12 @@ Deno.serve(async (req) => {
                 donationId: donation[0].id,
                 amount: amount,
                 purpose: purpose,
-                status: 'pending'
+                status: 'pending',
+                membershipInfo: canApplyToMembership ? {
+                    appliedToMembership: true,
+                    membershipAmount: amountAppliedToMembership,
+                    remainingDonation: remainingDonationAmount
+                } : null
             }
         };
 

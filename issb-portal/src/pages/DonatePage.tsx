@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, Shield, DollarSign, TrendingUp } from 'lucide-react';
+import { Heart, Shield, DollarSign, TrendingUp, CheckCircle } from 'lucide-react';
 import { EnhancedDonationForm, DonationSuccessModal } from '@/components/EnhancedDonationForm';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
@@ -26,6 +26,23 @@ export function DonatePage() {
             <p className="text-xl text-green-100 mb-6">
               Your donation helps us serve the community and strengthen our mission
             </p>
+            
+            {/* Membership Benefit Highlight */}
+            <div className="bg-white/10 backdrop-blur-sm border-2 border-white/30 rounded-xl p-6 mb-6">
+              <div className="flex items-start">
+                <CheckCircle className="w-6 h-6 text-yellow-300 mr-3 mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    Special Benefit: Donation Includes Membership!
+                  </h3>
+                  <p className="text-green-50">
+                    When you donate <strong>$360 or more</strong>, the first $360 automatically covers your annual membership 
+                    ($360 value), and the remainder goes toward your chosen cause. It's our way of saying thank you!
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="flex flex-wrap gap-4">
               <button
                 onClick={() => setShowForm(true)}
@@ -93,9 +110,10 @@ export function DonatePage() {
               <div className="text-4xl font-bold text-green-600 mb-2">$250</div>
               <p className="text-gray-600">Funds community outreach initiatives</p>
             </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-green-600 mb-2">$500+</div>
-              <p className="text-gray-600">Contributes to facility upgrades</p>
+            <div className="text-center p-4 bg-blue-50 rounded-lg border-2 border-blue-300">
+              <div className="text-4xl font-bold text-blue-600 mb-2">$360+</div>
+              <p className="text-gray-700 font-semibold">Includes FREE Membership!</p>
+              <p className="text-xs text-gray-600 mt-1">Plus supports chosen cause</p>
             </div>
           </div>
         </div>

@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
         const userData = await userResponse.json();
         const userId = userData.id;
 
-        const { action, newTier } = await req.json();
+        const { action } = await req.json();
 
         // Get current subscription
         const subsResponse = await fetch(
@@ -62,110 +62,46 @@ Deno.serve(async (req) => {
             throw new Error('No active subscription found');
         }
 
-        const subscriptionId = currentSubscription.stripe_subscription_id;
-
+        // Only cancel action is supported in single-tier model
         if (action === 'cancel') {
-            // Cancel subscription at period end
-            const cancelResponse = await fetch(
-                `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${stripeSecretKey}`,
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'cancel_at_period_end=true'
-                }
-            );
+            const subscriptionId = currentSubscription.stripe_subscription_id;
 
-            if (!cancelResponse.ok) {
-                const errorText = await cancelResponse.text();
-                throw new Error(`Failed to cancel subscription: ${errorText}`);
-            }
-
-            // Log to history
-            await fetch(`${supabaseUrl}/rest/v1/subscription_history`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${serviceRoleKey}`,
-                    'apikey': serviceRoleKey,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    user_id: userId,
-                    subscription_id: subscriptionId,
-                    action: 'cancel',
-                    from_tier: currentSubscription.price_id
-                })
-            });
-
-            return new Response(JSON.stringify({
-                data: {
-                    message: 'Subscription will be cancelled at the end of the billing period'
-                }
-            }), {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            });
-
-        } else if (action === 'change_tier') {
-            if (!newTier) {
-                throw new Error('New tier is required for tier change');
-            }
-
-            // Get new plan
-            const plansResponse = await fetch(
-                `${supabaseUrl}/rest/v1/plans?plan_type=eq.${newTier}`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${serviceRoleKey}`,
-                        'apikey': serviceRoleKey,
+            // Only cancel Stripe subscriptions (not volunteer-activated ones)
+            if (subscriptionId && currentSubscription.activation_method === 'payment') {
+                const cancelResponse = await fetch(
+                    `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${stripeSecretKey}`,
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: 'cancel_at_period_end=true'
                     }
+                );
+
+                if (!cancelResponse.ok) {
+                    const errorText = await cancelResponse.text();
+                    throw new Error(`Failed to cancel subscription: ${errorText}`);
                 }
-            );
-
-            const plans = await plansResponse.json();
-            const newPlan = plans[0];
-
-            if (!newPlan) {
-                throw new Error('Invalid plan type');
+            } else if (currentSubscription.activation_method === 'volunteer') {
+                // For volunteer-activated subscriptions, mark as cancelled directly
+                await fetch(
+                    `${supabaseUrl}/rest/v1/subscriptions?id=eq.${currentSubscription.id}`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `Bearer ${serviceRoleKey}`,
+                            'apikey': serviceRoleKey,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            status: 'cancelled',
+                            updated_at: new Date().toISOString()
+                        })
+                    }
+                );
             }
-
-            // Update subscription in Stripe
-            const updateResponse = await fetch(
-                `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${stripeSecretKey}`,
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `items[0][price]=${newPlan.price_id}&proration_behavior=always_invoice`
-                }
-            );
-
-            if (!updateResponse.ok) {
-                const errorText = await updateResponse.text();
-                throw new Error(`Failed to update subscription: ${errorText}`);
-            }
-
-            const updatedSubscription = await updateResponse.json();
-
-            // Update in database
-            await fetch(
-                `${supabaseUrl}/rest/v1/subscriptions?stripe_subscription_id=eq.${subscriptionId}`,
-                {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `Bearer ${serviceRoleKey}`,
-                        'apikey': serviceRoleKey,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        price_id: newPlan.price_id,
-                        updated_at: new Date().toISOString()
-                    })
-                }
-            );
 
             // Log to history
             await fetch(`${supabaseUrl}/rest/v1/subscription_history`, {
@@ -177,25 +113,24 @@ Deno.serve(async (req) => {
                 },
                 body: JSON.stringify({
                     user_id: userId,
-                    subscription_id: subscriptionId,
-                    action: 'tier_change',
-                    from_tier: currentSubscription.price_id,
-                    to_tier: newPlan.price_id,
-                    amount: newPlan.price
+                    subscription_id: subscriptionId || `volunteer_${currentSubscription.id}`,
+                    action: 'cancel',
+                    from_tier: currentSubscription.price_id || 'volunteer_membership'
                 })
             });
 
+            const message = currentSubscription.activation_method === 'payment' 
+                ? 'Subscription will be cancelled at the end of the billing period'
+                : 'Membership has been cancelled';
+
             return new Response(JSON.stringify({
-                data: {
-                    message: 'Subscription tier updated successfully',
-                    subscription: updatedSubscription
-                }
+                data: { message }
             }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
 
         } else {
-            throw new Error('Invalid action. Use "cancel" or "change_tier"');
+            throw new Error('Invalid action. Only "cancel" is supported in single-tier model');
         }
 
     } catch (error: any) {

@@ -1,32 +1,25 @@
 
-        const planConfigs = {
-  "individual": {
-    "amount": 5000,
-    "name": "Individual Membership",
+const planConfig = {
+  "individual_annual": {
+    "amount": 36000, // $360/year
+    "name": "Individual Annual Membership",
     "currency": "usd",
-    "interval": "month",
+    "interval": "year",
     "monthlyLimit": 1
-  },
-  "family": {
-    "amount": 15000,
-    "name": "Family Membership",
-    "currency": "usd",
-    "interval": "month",
-    "monthlyLimit": 6
   }
-}
-        const tableName = "plans"
+};
 
-async function createDynamicPrice(planType: string, stripeSecretKey: string) {
-  const config = planConfigs[planType];
-  if (!config) throw new Error(`Unsupported plan type: ${planType}`);
+const tableName = "plans";
+
+async function createDynamicPrice(stripeSecretKey: string) {
+  const config = planConfig.individual_annual;
 
   const priceParams = new URLSearchParams({
     currency: config.currency,
     unit_amount: config.amount.toString(),
     'recurring[interval]': config.interval,
     'product_data[name]': config.name,
-    'metadata[plan_type]': planType
+    'metadata[plan_type]': 'individual_annual'
   });
 
   const response = await fetch('https://api.stripe.com/v1/prices', {
@@ -58,7 +51,7 @@ async function createDynamicPrice(planType: string, stripeSecretKey: string) {
         },
         body: JSON.stringify({
           price_id: priceId,
-          plan_type: planType,
+          plan_type: 'individual_annual',
           price: config.amount,
           monthly_limit: config.monthlyLimit,
           created_at: new Date().toISOString(),
@@ -66,7 +59,7 @@ async function createDynamicPrice(planType: string, stripeSecretKey: string) {
         })
       });
       
-      console.log(`Plan synced to database: ${planType} -> ${priceId} (table: ${tableName})`);
+      console.log(`Plan synced to database: individual_annual -> ${priceId}`);
     } catch (syncError) {
       console.error('Failed to sync plan to database:', syncError);
       throw new Error(`Failed to sync plan to database`)
@@ -76,18 +69,14 @@ async function createDynamicPrice(planType: string, stripeSecretKey: string) {
   return priceId;
 }
 
-
-async function getOrCreatePrice(planType: string, stripeSecretKey: string) {
-  const config = planConfigs[planType];
-  if (!config) throw new Error(`Unsupported plan type: ${planType}`);
-
+async function getOrCreatePrice(stripeSecretKey: string) {
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
 
   if (serviceRoleKey && supabaseUrl) {
     try {
       const localResponse = await fetch(
-        `${supabaseUrl}/rest/v1/${tableName}?plan_type=eq.${planType}&select=price_id`,
+        `${supabaseUrl}/rest/v1/${tableName}?plan_type=eq.individual_annual&select=price_id`,
         { 
           headers: { 
             'Authorization': `Bearer ${serviceRoleKey}`, 
@@ -99,7 +88,7 @@ async function getOrCreatePrice(planType: string, stripeSecretKey: string) {
       if (localResponse.ok) {
         const localData = await localResponse.json();
         if (localData?.length > 0) {
-          console.log(`Found existing plan in local database: ${planType} -> ${localData[0].price_id}`);
+          console.log(`Found existing plan in local database: individual_annual -> ${localData[0].price_id}`);
           return localData[0].price_id;
         }
       }
@@ -107,8 +96,8 @@ async function getOrCreatePrice(planType: string, stripeSecretKey: string) {
       console.error('Local database query failed:', error);
     }
   }
-  console.log(`Plan not found locally, creating new price for: ${planType}`);
-  return await createDynamicPrice(planType, stripeSecretKey);
+  console.log(`Plan not found locally, creating new price for individual_annual`);
+  return await createDynamicPrice(stripeSecretKey);
 }
 
 Deno.serve(async (req) => {
@@ -124,18 +113,18 @@ Deno.serve(async (req) => {
   try {
     const origin = req.headers.get('origin') || req.headers.get('referer')
       
-    const { planType, customerEmail } = await req.json();
-    if (!planType || !customerEmail) throw new Error('Missing required params');
+    const { customerEmail } = await req.json();
+    if (!customerEmail) throw new Error('Missing required params');
 
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     if (!stripeSecretKey || !serviceRoleKey || !supabaseUrl) throw new Error('Missing env config');
 
-    // Get or create dynamic price based on planType
-    const priceId = await getOrCreatePrice(planType, stripeSecretKey);
+    // Get or create price for single annual plan
+    const priceId = await getOrCreatePrice(stripeSecretKey);
 
-    // 获取 userId
+    // Get userId
     let userId = null;
     const token = req.headers.get('authorization')?.replace('Bearer ', '');
     if (token) {
@@ -145,17 +134,21 @@ Deno.serve(async (req) => {
       if (userRes.ok) userId = (await userRes.json()).id;
     }
 
-    // 查找或创建 Stripe customer
+    // Find or create Stripe customer
     let customerId = null;
     const customerRes = await fetch(`https://api.stripe.com/v1/customers/search?query=metadata['user_id']:'${userId}'&limit=1`, {
-    headers: { 'Authorization': `Bearer ${stripeSecretKey}` }
+      headers: { 'Authorization': `Bearer ${stripeSecretKey}` }
     });
     const customerData = await customerRes.json();
     if (customerData.data?.length) {
-        customerId = customerData.data[0].id;
-        console.log(`Found customer by user_id: ${userId} -> ${customerId}`);
+      customerId = customerData.data[0].id;
+      console.log(`Found customer by user_id: ${userId} -> ${customerId}`);
     } else {
-      const params = new URLSearchParams({ email: customerEmail, 'metadata[user_id]': userId || '', 'metadata[plan_type]': planType });
+      const params = new URLSearchParams({ 
+        email: customerEmail, 
+        'metadata[user_id]': userId || '', 
+        'metadata[plan_type]': 'individual_annual' 
+      });
       const createRes = await fetch('https://api.stripe.com/v1/customers', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${stripeSecretKey}`, 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -165,11 +158,15 @@ Deno.serve(async (req) => {
     }
 
     const checkoutParams = new URLSearchParams({
-      customer: customerId, mode: 'subscription',
-      'line_items[0][price]': priceId, 'line_items[0][quantity]': '1',
+      customer: customerId, 
+      mode: 'subscription',
+      'line_items[0][price]': priceId, 
+      'line_items[0][quantity]': '1',
       success_url: `${origin}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing?subscription=cancelled`,
-      'metadata[user_id]': userId || '', 'metadata[plan_type]': planType
+      'metadata[user_id]': userId || '', 
+      'metadata[plan_type]': 'individual_annual',
+      'metadata[activation_method]': 'payment'
     });
     const checkoutRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
@@ -178,14 +175,13 @@ Deno.serve(async (req) => {
     });
     const checkoutSession = await checkoutRes.json();
 
-    // 返回 checkout url
     return new Response(JSON.stringify({
       data: {
         checkoutSessionId: checkoutSession.id,
         checkoutUrl: checkoutSession.url,
         customerId,
-        planType,
-        priceId // Return dynamic price ID
+        planType: 'individual_annual',
+        priceId
       }
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
@@ -195,4 +191,3 @@ Deno.serve(async (req) => {
     });
   }
 });
-        

@@ -1,146 +1,70 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { 
-  useGetSubscriptionStatusQuery,
-  useManageSubscriptionMutation,
-  useAddFamilyMemberMutation,
-  useRemoveFamilyMemberMutation,
-  FamilyMember
-} from '@/store/api/membershipApi';
+import { useGetSubscriptionStatusQuery, useGetVolunteerProgressQuery, useLogVolunteerHoursMutation } from '@/store/api/membershipApi';
+import { CheckCircle, Clock, XCircle, Calendar, FileText, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { 
-  CreditCard, 
-  Users, 
-  Calendar, 
-  Loader2, 
-  UserPlus, 
-  Trash2,
-  CheckCircle2,
-  ArrowUpCircle,
-  ArrowDownCircle,
-  XCircle
-} from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-export const MembershipDashboardPage: React.FC = () => {
+export const MembershipDashboardPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const success = searchParams.get('success');
+  const success = searchParams.get('subscription');
   
-  const { data: subscriptionStatus, isLoading, refetch } = useGetSubscriptionStatusQuery();
-  const [manageSubscription, { isLoading: managing }] = useManageSubscriptionMutation();
-  const [addFamilyMember, { isLoading: adding }] = useAddFamilyMemberMutation();
-  const [removeFamilyMember, { isLoading: removing }] = useRemoveFamilyMemberMutation();
+  const { data: subscriptionData, isLoading: isLoadingSubscription } = useGetSubscriptionStatusQuery();
+  const { data: volunteerData, isLoading: isLoadingVolunteer } = useGetVolunteerProgressQuery();
+  const [logVolunteerHours] = useLogVolunteerHoursMutation();
 
-  const [showAddMember, setShowAddMember] = useState(false);
-  const [newMember, setNewMember] = useState({
-    first_name: '',
-    last_name: '',
-    relationship: '',
-    email: '',
-    phone: '',
-    date_of_birth: ''
+  const [formData, setFormData] = useState({
+    hours: '',
+    date: '',
+    description: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const subscription = subscriptionStatus?.subscription;
-  const familyMembers = subscriptionStatus?.familyMembers || [];
-  const history = subscriptionStatus?.history || [];
+  const subscription = subscriptionData?.subscription;
+  const volunteerProgress = volunteerData?.summary;
+  const volunteerHours = volunteerData?.volunteerHours || [];
 
-  const getTierName = (priceId: string) => {
-    if (priceId === 'student_free') return 'Student';
-    if (priceId.includes('individual')) return 'Individual';
-    if (priceId.includes('family')) return 'Family';
-    return priceId;
-  };
-
-  const getTierPrice = (priceId: string) => {
-    if (priceId === 'student_free') return '$0';
-    if (priceId.includes('individual')) return '$50';
-    if (priceId.includes('family')) return '$150';
-    return 'N/A';
-  };
-
-  const handleCancelSubscription = async () => {
-    if (!confirm('Are you sure you want to cancel your subscription? It will remain active until the end of the current billing period.')) {
-      return;
-    }
-
-    try {
-      await manageSubscription({ action: 'cancel' }).unwrap();
-      alert('Subscription will be cancelled at the end of the billing period');
-      refetch();
-    } catch (error: any) {
-      alert(error.data || 'Failed to cancel subscription');
-    }
-  };
-
-  const handleChangeTier = async (newTier: string) => {
-    if (!confirm(`Are you sure you want to change your subscription to ${newTier}? You will be charged or credited prorated amount.`)) {
-      return;
-    }
-
-    try {
-      await manageSubscription({ action: 'change_tier', newTier }).unwrap();
-      alert('Subscription tier updated successfully');
-      refetch();
-    } catch (error: any) {
-      alert(error.data || 'Failed to change subscription tier');
-    }
-  };
-
-  const handleAddFamilyMember = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitMessage(null);
 
     try {
-      await addFamilyMember(newMember).unwrap();
-      setShowAddMember(false);
-      setNewMember({
-        first_name: '',
-        last_name: '',
-        relationship: '',
-        email: '',
-        phone: '',
-        date_of_birth: ''
-      });
-      refetch();
+      await logVolunteerHours({
+        hours: parseFloat(formData.hours),
+        date: formData.date,
+        description: formData.description
+      }).unwrap();
+
+      setSubmitMessage({ type: 'success', text: 'Volunteer hours logged successfully! Awaiting admin approval.' });
+      setFormData({ hours: '', date: '', description: '' });
     } catch (error: any) {
-      alert(error.data || 'Failed to add family member');
+      setSubmitMessage({ type: 'error', text: error.data?.error?.message || 'Failed to log volunteer hours' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleRemoveFamilyMember = async (memberId: string) => {
-    if (!confirm('Are you sure you want to remove this family member?')) {
-      return;
-    }
-
-    try {
-      await removeFamilyMember(memberId).unwrap();
-      refetch();
-    } catch (error: any) {
-      alert(error.data || 'Failed to remove family member');
-    }
-  };
-
-  if (isLoading) {
+  if (isLoadingSubscription || isLoadingVolunteer) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading membership dashboard...</p>
+        </div>
       </div>
     );
   }
 
   if (!subscription) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="text-3xl font-bold mb-4">No Active Membership</h1>
           <p className="text-gray-600 mb-6">
-            You don't have an active membership. Choose a plan to get started.
+            You don't have an active membership. Choose your path to get started.
           </p>
           <Button onClick={() => navigate('/membership')}>
             View Membership Plans
@@ -150,310 +74,308 @@ export const MembershipDashboardPage: React.FC = () => {
     );
   }
 
-  const isFamilyTier = subscription.price_id.includes('family');
-  const isStudentTier = subscription.price_id === 'student_free';
+  const activationMethod = subscription?.activation_method || 'none';
+  const isPaymentActivated = activationMethod === 'payment';
+  const isVolunteerActivated = activationMethod === 'volunteer';
+  const hasActiveSubscription = subscription?.status === 'active';
+
+  const progressPercentage = volunteerProgress ? Math.min((volunteerProgress.totalApprovedHours / 30) * 100, 100) : 0;
+  const hoursRemaining = Math.max(30 - (volunteerProgress?.totalApprovedHours || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Success Alert */}
-        {success === 'true' && (
+        {success === 'success' && (
           <Alert className="mb-6 bg-green-50 border-green-200">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-800">
               Your membership has been activated successfully! Welcome to ISSB.
             </AlertDescription>
           </Alert>
         )}
 
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Membership Dashboard
-          </h1>
-          <p className="text-gray-600">
-            Manage your subscription and family members
-          </p>
-        </div>
+        <h1 className="text-4xl font-bold text-gray-900 mb-8">Membership Dashboard</h1>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Subscription Info */}
-          <Card className="lg:col-span-2 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">Current Subscription</h2>
-              <Badge className={
-                subscription.status === 'active' ? 'bg-green-600' :
-                subscription.status === 'cancelled' ? 'bg-red-600' :
-                'bg-gray-600'
-              }>
-                {subscription.status}
-              </Badge>
+        {/* Membership Status Card */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
+          <div className="flex items-start justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Membership Status</h2>
+              <p className="text-gray-600">Individual Annual Membership - $360/year</p>
             </div>
-
-            <div className="space-y-4 mb-6">
-              <div className="flex items-center">
-                <CreditCard className="h-5 w-5 text-gray-500 mr-3" />
-                <div>
-                  <p className="text-sm text-gray-500">Membership Tier</p>
-                  <p className="font-semibold">{getTierName(subscription.price_id)}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <Calendar className="h-5 w-5 text-gray-500 mr-3" />
-                <div>
-                  <p className="text-sm text-gray-500">Monthly Price</p>
-                  <p className="font-semibold">{getTierPrice(subscription.price_id)}/month</p>
-                </div>
-              </div>
-
-              {isFamilyTier && (
-                <div className="flex items-center">
-                  <Users className="h-5 w-5 text-gray-500 mr-3" />
-                  <div>
-                    <p className="text-sm text-gray-500">Family Members</p>
-                    <p className="font-semibold">{familyMembers.length} / 6</p>
-                  </div>
-                </div>
+            <div className="flex items-center space-x-2">
+              {hasActiveSubscription ? (
+                <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Active
+                </span>
+              ) : (
+                <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-800">
+                  <Clock className="w-4 h-4 mr-2" />
+                  Inactive
+                </span>
               )}
             </div>
+          </div>
 
-            {/* Actions */}
-            <div className="border-t pt-6 space-y-3">
-              <h3 className="font-semibold mb-3">Manage Subscription</h3>
-              
-              {!isStudentTier && (
-                <>
-                  {!subscription.price_id.includes('family') && (
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start"
-                      onClick={() => handleChangeTier('family')}
-                      disabled={managing}
-                    >
-                      <ArrowUpCircle className="h-4 w-4 mr-2" />
-                      Upgrade to Family ($150/month)
-                    </Button>
-                  )}
-                  
-                  {!subscription.price_id.includes('individual') && !isStudentTier && (
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start"
-                      onClick={() => handleChangeTier('individual')}
-                      disabled={managing}
-                    >
-                      <ArrowDownCircle className="h-4 w-4 mr-2" />
-                      Downgrade to Individual ($50/month)
-                    </Button>
-                  )}
-
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-                    onClick={handleCancelSubscription}
-                    disabled={managing}
-                  >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Cancel Subscription
-                  </Button>
-                </>
-              )}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-4 bg-blue-50 rounded-xl">
+              <p className="text-sm font-medium text-blue-900 mb-1">Activation Method</p>
+              <p className="text-lg font-bold text-blue-700">
+                {isPaymentActivated && 'Payment ($360)'}
+                {isVolunteerActivated && 'Volunteer Hours (30 hrs)'}
+                {!hasActiveSubscription && 'Not Activated'}
+              </p>
             </div>
-          </Card>
-
-          {/* Quick Stats */}
-          <div className="space-y-4">
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Membership Benefits</h3>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start">
-                  <CheckCircle2 className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
-                  <span>Full portal access</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle2 className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
-                  <span>Priority event registration</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle2 className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
-                  <span>Volunteer opportunities</span>
-                </li>
-                {isFamilyTier && (
-                  <>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
-                      <span>Family events access</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
-                      <span>Up to 6 family members</span>
-                    </li>
-                  </>
-                )}
-              </ul>
-            </Card>
+            <div className="p-4 bg-purple-50 rounded-xl">
+              <p className="text-sm font-medium text-purple-900 mb-1">Status</p>
+              <p className="text-lg font-bold text-purple-700 capitalize">
+                {subscription?.status || 'No Subscription'}
+              </p>
+            </div>
+            <div className="p-4 bg-amber-50 rounded-xl">
+              <p className="text-sm font-medium text-amber-900 mb-1">Member Since</p>
+              <p className="text-lg font-bold text-amber-700">
+                {subscription?.created_at 
+                  ? new Date(subscription.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+                  : 'N/A'}
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Family Members Section (Only for Family Tier) */}
-        {isFamilyTier && (
-          <Card className="mt-6 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">Family Members</h2>
-              <Dialog open={showAddMember} onOpenChange={setShowAddMember}>
-                <DialogTrigger asChild>
-                  <Button disabled={familyMembers.length >= 6}>
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Add Member
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add Family Member</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleAddFamilyMember} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="first_name">First Name</Label>
-                        <Input
-                          id="first_name"
-                          value={newMember.first_name}
-                          onChange={(e) => setNewMember({ ...newMember, first_name: e.target.value })}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="last_name">Last Name</Label>
-                        <Input
-                          id="last_name"
-                          value={newMember.last_name}
-                          onChange={(e) => setNewMember({ ...newMember, last_name: e.target.value })}
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="relationship">Relationship</Label>
-                      <Input
-                        id="relationship"
-                        value={newMember.relationship}
-                        onChange={(e) => setNewMember({ ...newMember, relationship: e.target.value })}
-                        placeholder="e.g., Spouse, Child, Parent"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="email">Email (Optional)</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={newMember.email}
-                        onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="phone">Phone (Optional)</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        value={newMember.phone}
-                        onChange={(e) => setNewMember({ ...newMember, phone: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="date_of_birth">Date of Birth (Optional)</Label>
-                      <Input
-                        id="date_of_birth"
-                        type="date"
-                        value={newMember.date_of_birth}
-                        onChange={(e) => setNewMember({ ...newMember, date_of_birth: e.target.value })}
-                      />
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                      <Button type="button" variant="outline" onClick={() => setShowAddMember(false)}>
-                        Cancel
-                      </Button>
-                      <Button type="submit" disabled={adding}>
-                        {adding ? 'Adding...' : 'Add Member'}
-                      </Button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
+        {/* Volunteer Hours Progress Section */}
+        {!isPaymentActivated && (
+          <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
+            <div className="flex items-center mb-6">
+              <Award className="w-8 h-8 text-blue-600 mr-3" />
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Volunteer Hours Progress</h2>
+                <p className="text-gray-600">Track your progress toward membership activation</p>
+              </div>
             </div>
 
-            {familyMembers.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">
-                No family members added yet. Click "Add Member" to get started.
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {familyMembers.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-                  >
-                    <div>
-                      <p className="font-semibold">
-                        {member.first_name} {member.last_name}
-                        {member.is_primary && (
-                          <Badge className="ml-2 bg-blue-600">Primary</Badge>
-                        )}
-                      </p>
-                      <p className="text-sm text-gray-600">{member.relationship}</p>
-                      {member.email && (
-                        <p className="text-sm text-gray-500">{member.email}</p>
-                      )}
-                    </div>
-                    {!member.is_primary && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveFamilyMember(member.id)}
-                        disabled={removing}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-semibold text-gray-700">
+                  {volunteerProgress?.totalApprovedHours || 0} / 30 hours completed
+                </span>
+                <span className="text-sm font-semibold text-blue-600">
+                  {progressPercentage.toFixed(0)}%
+                </span>
               </div>
-            )}
-          </Card>
-        )}
-
-        {/* Subscription History */}
-        {history.length > 0 && (
-          <Card className="mt-6 p-6">
-            <h2 className="text-2xl font-bold mb-4">Recent Activity</h2>
-            <div className="space-y-3">
-              {history.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded"
-                >
+              <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                <div 
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 h-4 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${progressPercentage}%` }}
+                ></div>
+              </div>
+              {progressPercentage >= 100 ? (
+                <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start">
+                  <CheckCircle className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium capitalize">{item.action.replace('_', ' ')}</p>
-                    {item.from_tier && item.to_tier && (
-                      <p className="text-sm text-gray-600">
-                        From {getTierName(item.from_tier)} to {getTierName(item.to_tier)}
-                      </p>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    {item.amount !== null && item.amount !== undefined && (
-                      <p className="font-semibold">${item.amount}</p>
-                    )}
-                    <p className="text-sm text-gray-500">
-                      {new Date(item.created_at).toLocaleDateString()}
+                    <p className="font-semibold text-green-900">Congratulations! Goal Reached!</p>
+                    <p className="text-sm text-green-700 mt-1">
+                      You've completed 30 hours of volunteering. Your membership has been activated!
                     </p>
                   </div>
                 </div>
-              ))}
+              ) : (
+                <p className="mt-3 text-sm text-gray-600">
+                  {hoursRemaining} hours remaining to activate your membership
+                </p>
+              )}
             </div>
-          </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
+                <p className="text-sm font-medium text-blue-900 mb-1">Approved Hours</p>
+                <p className="text-3xl font-bold text-blue-700">{volunteerProgress?.totalApprovedHours || 0}</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl">
+                <p className="text-sm font-medium text-amber-900 mb-1">Pending Review</p>
+                <p className="text-3xl font-bold text-amber-700">{volunteerProgress?.totalPendingHours || 0}</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
+                <p className="text-sm font-medium text-purple-900 mb-1">Hours Needed</p>
+                <p className="text-3xl font-bold text-purple-700">{hoursRemaining}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Log Volunteer Hours Form */}
+        {!isPaymentActivated && (
+          <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Log Volunteer Hours</h2>
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="hours" className="block text-sm font-semibold text-gray-700 mb-2">
+                    Number of Hours
+                  </label>
+                  <input
+                    type="number"
+                    id="hours"
+                    min="0.5"
+                    step="0.5"
+                    max="24"
+                    value={formData.hours}
+                    onChange={(e) => setFormData({ ...formData, hours: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., 4"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="date" className="block text-sm font-semibold text-gray-700 mb-2">
+                    Date Completed
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      id="date"
+                      value={formData.date}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      max={new Date().toISOString().split('T')[0]}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                    <Calendar className="absolute right-3 top-3.5 w-5 h-5 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Activity Description
+                </label>
+                <textarea
+                  id="description"
+                  rows={4}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Describe your volunteer activity (e.g., Event setup, Community outreach, Administrative support)"
+                  required
+                />
+              </div>
+
+              {submitMessage && (
+                <div className={`p-4 rounded-lg ${
+                  submitMessage.type === 'success' 
+                    ? 'bg-green-50 border border-green-200' 
+                    : 'bg-red-50 border border-red-200'
+                }`}>
+                  <p className={`text-sm ${
+                    submitMessage.type === 'success' ? 'text-green-800' : 'text-red-800'
+                  }`}>
+                    {submitMessage.text}
+                  </p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Volunteer Hours'}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* Volunteer Hours History */}
+        {!isPaymentActivated && volunteerHours.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Volunteer Hours History</h2>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Hours</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Description</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {volunteerHours.map((hour) => (
+                    <tr key={hour.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="py-4 px-4">
+                        <div className="flex items-center text-sm text-gray-900">
+                          <Calendar className="w-4 h-4 mr-2 text-gray-400" />
+                          {new Date(hour.date).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          })}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="text-sm font-semibold text-gray-900">{hour.hours} hrs</span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-start text-sm text-gray-600 max-w-md">
+                          <FileText className="w-4 h-4 mr-2 text-gray-400 mt-0.5 flex-shrink-0" />
+                          <span className="line-clamp-2">{hour.description}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        {hour.status === 'approved' && (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Approved
+                          </span>
+                        )}
+                        {hour.status === 'pending' && (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                            <Clock className="w-3 h-3 mr-1" />
+                            Pending
+                          </span>
+                        )}
+                        {hour.status === 'rejected' && (
+                          <div>
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 mb-2">
+                              <XCircle className="w-3 h-3 mr-1" />
+                              Rejected
+                            </span>
+                            {hour.admin_notes && (
+                              <p className="text-xs text-red-600 mt-1">Note: {hour.admin_notes}</p>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Payment-Activated Membership Message */}
+        {isPaymentActivated && (
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl shadow-lg p-8 border border-blue-100">
+            <div className="flex items-start">
+              <CheckCircle className="w-8 h-8 text-blue-600 mr-4 flex-shrink-0" />
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Active Paid Membership</h3>
+                <p className="text-gray-700 mb-4">
+                  Your membership has been activated through payment. Thank you for your support!
+                </p>
+                <p className="text-sm text-gray-600">
+                  While volunteer hours tracking is available for volunteer-activated memberships, 
+                  you can still contribute to the community through our volunteer opportunities.
+                </p>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

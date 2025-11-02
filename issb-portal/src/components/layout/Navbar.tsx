@@ -37,6 +37,7 @@ export function Navbar({ className = '' }: NavbarProps) {
     { name: 'Users', path: '/admin/users', icon: Users, roles: ['admin', 'board'] },
     { name: 'Events', path: '/admin/events', icon: Calendar, roles: ['admin', 'board'] },
     { name: 'Volunteer Mgmt', path: '/admin/volunteers', icon: Users, roles: ['admin', 'board'] },
+    { name: 'Volunteer Hours', path: '/admin/volunteer-hours', icon: CheckSquare, roles: ['admin', 'board'] },
     { name: 'Help Assistant', path: '/admin/help-assistant', icon: MessageSquare, roles: ['admin', 'board'] },
     { name: 'Accessibility', path: '/admin/accessibility-audit', icon: CheckSquare, roles: ['admin', 'board'] },
     { name: 'Analytics', path: '/admin/accessibility-analytics', icon: BarChart3, roles: ['admin', 'board'] },
