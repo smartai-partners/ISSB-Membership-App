@@ -1,0 +1,362 @@
+AI Suggestions:
+As a world-class senior software architect, here is a detailed implementation plan and technical suggestions for the Volunteer Portal, focusing on conciseness and thoroughness.
+
+---
+
+## Volunteer Portal: Implementation Plan & Technical Suggestions
+
+### 1. API Design
+
+We will adopt a RESTful API approach, organized by resource. All endpoints will be prefixed with /api/v1.
+
+#### Core Entities:
+* VolunteerOpportunity: Represents a specific volunteering event.
+* VolunteerAssignment: Represents a member's sign-up for an opportunity.
+* VolunteerLog: Represents hours logged by a member for an assignment.
+
+#### A. Volunteer Opportunities (Admin & Member)
+
+| Method | URL Pattern | Description | Permissions | Request Body (Example) | Response Body (Example) |
+| :----- | :---------- | :---------- | :---------- | :--------------------- | :---------------------- |
+| GET | /opportunities | List all opportunities. Filters: status, startDate, search. | Member: Active only.
+Admin: All. | _N/A_ | [ { "id": "uuid1", "title": "Garden Cleanup", "status": "ACTIVE", "signedUpVolunteers": 5, ... } ] |
+| GET | /opportunities/:id | Get details of a specific opportunity. | Member: Active only.
+Admin: Any. | _N/A_ | { "id": "uuid1", "title": "Garden Cleanup", "description": "...", "startDate": "...", "endDate": "...", "location": "...", "neededVolunteers": 10, "status": "ACTIVE", "contactInfo": { "name": "Jane Doe", "email": "jane@example.com" }, ... } |
+| POST | /opportunities | Create a new opportunity. | Admin | { "title": "New Event", "description": "...", "startDate": "...", "endDate": "...", "location": "...", "neededVolunteers": 15, "skillsRequired": ["teamwork"], "status": "DRAFT" } | { "id": "uuid2", "title": "New Event", ... } |
+| PUT | /opportunities/:id | Update an existing opportunity. | Admin | { "title": "Updated Event Title", "status": "ACTIVE", ... } | { "id": "uuid1", "title": "Updated Event Title", ... } |
+| DELETE| /opportunities/:id | Delete an opportunity. | Admin | _N/A_ | 204 No Content |
+
+#### B. Volunteer Assignments (Member & Admin)
+
+| Method | URL Pattern | Description | Permissions | Request Body (Example) | Response Body (Example) |
+| :----- | :---------- | :---------- | :---------- | :--------------------- | :---------------------- |
+| POST | /opportunities/:opportunityId/signup | Member signs up for an opportunity. | Member (for self) | _N/A_ (memberId derived from token) | { "id": "uuid3", "opportunityId": "uuid1", "memberId": "member_uuid", "assignmentDate": "...", "status": "PENDING" } |
+| DELETE| /opportunities/:opportunityId/signup | Member withdraws from an opportunity. | Member (for self) | _N/A_ | 204 No Content |
+| GET | /members/:memberId/assignments | List all assignments for a specific member. | Member: For req.user.id.
+Admin: Any memberId. | _N/A_ | [ { "id": "uuid3", "opportunity": { "id": "uuid1", "title": "Garden Cleanup", ... }, "status": "PENDING", ... } ] |
+| GET | /opportunities/:opportunityId/assignments | List all members assigned to an opportunity. | Admin | _N/A_ | [ { "id": "uuid3", "member": { "id": "member_uuid", "name": "John Doe", ... }, "status": "PENDING", ... } ] |
+| PUT | /assignments/:id/status | Update assignment status (e.g., CONFIRMED, COMPLETED). | Admin | { "status": "CONFIRMED" } | { "id": "uuid3", "status": "CONFIRMED", ... } |
+
+#### C. Volunteer Hours Logging (Member & Admin)
+
+| Method | URL Pattern | Description | Permissions | Request Body (Example) | Response Body (Example) |
+| :----- | :---------- | :---------- | :---------- | :--------------------- | :---------------------- |
+| POST | /assignments/:assignmentId/hours | Member logs hours for their assignment. | Member: For own assignment.
+Admin: Any assignment. | { "date": "2024-05-15", "hours": 4.5, "description": "Weeding and planting." } | { "id": "uuid4", "assignmentId": "uuid3", "date": "2024-05-15", "hours": 4.5, "loggedAt": "...", ... } |
+| GET | /assignments/:assignmentId/hours | List logged hours for an assignment. | Member: For own assignment.
+Admin: Any assignment. | _N/A_ | [ { "id": "uuid4", "hours": 4.5, "date": "...", ... } ] |
+| GET | /members/:memberId/hours | List all hours logged by a member. | Member: For req.user.id.
+Admin: Any memberId. | _N/A_ | [ { "id": "uuid4", "assignment": { "id": "uuid3", "opportunity": { "id": "uuid1", "title": "Garden Cleanup", ... } }, "hours": 4.5, ... } ] |
+| PUT | /hours/:id | Update a logged hours entry. | Member: For own entry.
+Admin: Any entry. | { "hours": 4.0, "description": "Revised." } | { "id": "uuid4", "hours": 4.0, ... } |
+| DELETE| /hours/:id | Delete a logged hours entry. | Member: For own entry.
+Admin: Any entry. | _N/A_ | 204 No Content |
+
+---
+
+### 2. Libraries & ORMs
+
+#### ORM: Prisma
+Prisma is recommended for its type safety with TypeScript, powerful query builder, and streamlined migration system.
+
+Prisma Schema (schema.prisma):
+
+``prisma
+// Extend existing User model or assume it exists in the same schema
+// model User {
+// id String @id @default(uuid())
+// email String @unique
+// role UserRole @default(MEMBER) // ADMIN, BOARD_MEMBER, MEMBER
+// // ... other user fields
+// VolunteerAssignments VolunteerAssignment[]
+// }
+
+// enum UserRole {
+// ADMIN
+// BOARD_MEMBER
+// MEMBER
+// }
+
+model VolunteerOpportunity {
+id String @id @default(uuid())
+title String
+description String
+startDate DateTime
+endDate DateTime
+location String
+neededVolunteers Int
+signedUpVolunteers Int @default(0) // Denormalized for efficient queries
+skillsRequired String[] // e.g., ["gardening", "communication"]
+status OpportunityStatus @default(DRAFT) // DRAFT, ACTIVE, COMPLETED, CANCELED
+contactInfo Json // e.g., { "name": "...", "email": "..." }
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+
+assignments VolunteerAssignment[]
+}
+
+enum OpportunityStatus {
+DRAFT
+ACTIVE
+COMPLETED
+CANCELED
+}
+
+model VolunteerAssignment {
+id String @id @default(uuid())
+opportunityId String
+memberId String // Reference to the User model
+assignmentDate DateTime @default(now())
+status AssignmentStatus @default(PENDING) // PENDING, CONFIRMED, COMPLETED, CANCELED
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+
+opportunity VolunteerOpportunity @relation(fields: [opportunityId], references: [id])
+member User @relation(fields: [memberId], references: [id])
+loggedHours VolunteerLog[]
+
+@@unique([opportunityId, memberId]) // A member can sign up only once per opportunity
+}
+
+enum AssignmentStatus {
+PENDING
+CONFIRMED
+COMPLETED
+CANCELED
+}
+
+model VolunteerLog {
+id String @id @default(uuid())
+assignmentId String
+date DateTime @db.Date // Store date only (YYYY-MM-DD)
+hours Float @db.Decimal(5, 2) // e.g., 8.50 hours
+description String?
+loggedAt DateTime @default(now())
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+
+assignment VolunteerAssignment @relation(fields: [assignmentId], references: [id])
+}
+`
+
+#### Node.js Libraries:
+
+* Validation:
+* Joi: For comprehensive schema-based input validation of request bodies, query parameters, and path parameters.
+* Logging:
+* Winston: A robust and flexible logger with support for various transports (console, file, database, external services), crucial for monitoring and debugging in production.
+* Security (Middleware):
+* Helmet: A collection of middleware functions to set various HTTP headers for enhanced security (e.g., XSS protection, CSP).
+* CORS: cors package for handling Cross-Origin Resource Sharing.
+* Express-Rate-Limit: To protect against brute-force attacks and abuse by limiting repeated requests to public APIs.
+* Authentication/Authorization:
+* JSON Web Token (JWT): jsonwebtoken for token-based authentication (assuming the existing app uses JWT).
+* Passport.js (optional, if complex auth strategies): If the existing authentication involves multiple strategies, Passport provides a flexible framework, but jsonwebtoken alone can suffice for token verification.
+* Environment Variables:
+* Dotenv: For loading environment variables from a .env file in development.
+
+---
+
+### 3. Logic & Service Layer
+
+A structured layered architecture promotes maintainability, testability, and separation of concerns.
+
+1. API Layer (Controllers/Routes):
+* Responsibilities: Handles HTTP requests, extracts request data (params, query, body), performs basic syntax/schema validation using Joi, calls the appropriate service layer methods, formats the response, and handles errors (e.g., catches service errors and sends appropriate HTTP status codes).
+* Includes: Authentication and Authorization middleware.
+* Example (src/controllers/opportunityController.ts):
+`typescript
+import { Request, Response, NextFunction } from 'express';
+import * as opportunityService from '../services/opportunityService';
+import { AuthenticatedRequest } from '../middlewares/authMiddleware'; // Custom type from auth
+import { createOpportunitySchema, updateOpportunitySchema } from '../validation/opportunityValidation';
+
+export const getOpportunities = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+try {
+// Assuming req.user is populated by auth middleware
+const opportunities = await opportunityService.getOpportunities(req.user!.role, req.user!.id, req.query);
+res.json(opportunities);
+} catch (error) {
+next(error); // Pass to centralized error handler
+}
+};
+
+export const createOpportunity = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+try {
+// Joi validation
+const { error, value } = createOpportunitySchema.validate(req.body);
+if (error) return res.status(400).json({ message: error.details[0].message });
+
+const newOpportunity = await opportunityService.createOpportunity(value);
+res.status(201).json(newOpportunity);
+} catch (error) {
+next(error);
+}
+};
+// ... other controller methods
+`
+
+2. Service Layer (Business Logic):
+* Responsibilities: Encapsulates core business rules, orchestrates interactions with the Data Access Layer, performs complex data transformations, and handles specific business rule validations (e.g., "cannot sign up if the opportunity is full," "start date must be before end date"). Should be HTTP-agnostic.
+* Example (src/services/opportunityService.ts):
+`typescript
+import * as opportunityRepository from '../repositories/opportunityRepository';
+import * as assignmentRepository from '../repositories/assignmentRepository';
+import { OpportunityStatus, UserRole, AssignmentStatus } from '@prisma/client';
+import { CustomError } from '../utils/errors';
+
+export const getOpportunities = async (userRole: UserRole, memberId: string, queryParams: any) => {
+if (userRole === UserRole.ADMIN) {
+return opportunityRepository.findAll(queryParams);
+} else {
+return opportunityRepository.findAll({ ...queryParams, status: OpportunityStatus.ACTIVE });
+}
+};
+
+export const createOpportunity = async (opportunityData: any) => {
+if (new Date(opportunityData.startDate) >= new Date(opportunityData.endDate)) {
+throw new CustomError('Validation Error: Start date must be before end date', 400);
+}
+return opportunityRepository.create(opportunityData);
+};
+
+export const signUpForOpportunity = async (opportunityId: string, memberId: string) => {
+const opportunity = await opportunityRepository.findById(opportunityId);
+if (!opportunity || opportunity.status !== OpportunityStatus.ACTIVE) {
+throw new CustomError('Opportunity not found or not active', 404);
+}
+if (opportunity.signedUpVolunteers >= opportunity.neededVolunteers) {
+throw new CustomError('Opportunity is currently full', 400);
+}
+
+const existingAssignment = await assignmentRepository.findByOpportunityAndMember(opportunityId, memberId);
+if (existingAssignment) {
+throw new CustomError('You are already signed up for this opportunity', 409);
+}
+
+const assignment = await assignmentRepository.create({
+opportunityId,
+memberId,
+status: AssignmentStatus.PENDING
+});
+await opportunityRepository.incrementSignedUpVolunteers(opportunityId); // Update denormalized count
+return assignment;
+};
+// ... other service methods
+`
+
+3. Data Access Layer (Repositories):
+* Responsibilities: Direct interaction with the database using Prisma. Provides simple CRUD operations and specific queries. Abstracts the database details from the service layer.
+* Example (src/repositories/opportunityRepository.ts):
+`typescript
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+
+export const findById = async (id: string) => {
+return prisma.volunteerOpportunity.findUnique({ where: { id } });
+};
+
+export const findAll = async (filters: any = {}) => {
+return prisma.volunteerOpportunity.findMany({
+where: filters,
+orderBy: { startDate: 'asc' }
+});
+};
+
+export const create = async (data: any) => {
+return prisma.volunteerOpportunity.create({ data });
+};
+
+export const incrementSignedUpVolunteers = async (id: string) => {
+return prisma.volunteerOpportunity.update({
+where: { id },
+data: { signedUpVolunteers: { increment: 1 } }
+});
+};
+// ... other repository methods for update, delete, etc.
+`
+
+---
+
+### 4. Security
+
+Robust security measures are paramount for any application handling user data and actions.
+
+1. Authentication & Authorization:
+* Authentication (Who are you?): Use existing JWT-based authentication. A middleware (authenticateJWT) will verify tokens from Authorization headers, ensuring the user is logged in and populating req.user with their ID and role.
+* Authorization (What can you do?):
+* Role-Based Access Control (RBAC): Implement authorizeRoles middleware. Routes for managing opportunities (CRUD) will be restricted to ADMINs. Routes for viewing/logging hours will be accessible to MEMBERs and ADMINs.
+* Resource-Based Authorization: For member actions (sign-up, log hours, view own assignments/hours), verify that req.user.id matches the memberId associated with the resource. Admins bypass this check. This will be handled in the service layer or a dedicated middleware.
+* Example Middleware (src/middlewares/authMiddleware.ts):
+`typescript
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import { UserRole } from '@prisma/client'; // Assuming UserRole enum from Prisma
+
+interface UserPayload {
+id: string;
+email: string;
+role: UserRole;
+}
+
+export interface AuthenticatedRequest extends Request {
+user?: UserPayload;
+}
+
+export const authenticateJWT = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const authHeader = req.headers.authorization;
+if (!authHeader || !authHeader.startsWith('Bearer ')) {
+return res.sendStatus(401); // No token or malformed header
+}
+
+const token = authHeader.split(' ')[1];
+try {
+const user = jwt.verify(token, process.env.JWT_SECRET as string) as UserPayload;
+req.user = user;
+next();
+} catch (error) {
+res.sendStatus(403); // Invalid or expired token
+}
+};
+
+export const authorizeRoles = (roles: UserRole[]) => {
+return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+if (!req.user || !roles.includes(req.user.role)) {
+return res.status(403).json({ message: 'Forbidden: Insufficient permissions' });
+}
+next();
+};
+};
+`
+* Implementation: Apply authenticateJWT globally or to all /api/v1 routes. Then apply authorizeRoles([UserRole.ADMIN]) or authorizeRoles([UserRole.MEMBER, UserRole.ADMIN]) as appropriate for specific routes.
+
+2. Input Validation & Sanitization:
+* Joi Schema Validation: All incoming request data (body, query, params) must be validated using Joi schemas in the API layer before processing. This catches malformed requests early.
+* Type Validation: Leverage TypeScript throughout the backend to enforce type correctness and prevent common programming errors.
+* Business Logic Validation: Service layer will contain specific validations for business rules (e.g., hours > 0, opportunity active, dates valid).
+* Sanitization: For any free-text user input (e.g., description in VolunteerLog), sanitize to prevent XSS attacks. While DOMPurify is typically client-side, server-side sanitization libraries or simple escaping before storing/rendering is crucial.
+
+3. Secure Headers (Helmet):
+* Integrate helmet middleware into the Express application to set security-related HTTP headers like Content-Security-Policy, X-Content-Type-Options, X-Frame-Options, and Strict-Transport-Security.
+
+4. CORS Configuration:
+* Properly configure the cors middleware to allow requests only from trusted frontend origins. Avoid wildcard (*) in production.
+
+5. Rate Limiting:
+* Apply express-rate-limit to critical endpoints (e.g., sign-up, hour logging, API key generation if applicable) to mitigate brute-force attacks and prevent resource exhaustion.
+
+6. Error Handling & Logging:
+* Implement a centralized error handling middleware in Express that catches errors, logs them using Winston (without exposing sensitive details), and returns generic, user-friendly error messages to the client in production.
+* Log all security-relevant events (failed authentications, authorization attempts, data modification errors).
+
+7. Environment Variables:
+* Store all sensitive configuration (database credentials, JWT secret, API keys) as environment variables (process.env.VARIABLE_NAME). Use dotenv for local development but ensure proper deployment practices for production.
+
+8. Database Security:
+* Prisma uses parameterized queries by default, protecting against common SQL injection attacks.
+* Ensure the database user configured for the application adheres to the principle of least privilege, having only the necessary permissions for CRUD operations on the relevant tables.
+
+9. Dependency Auditing:
+* Regularly use npm audit` and tools like Snyk to scan for and address known vulnerabilities in third-party libraries.
+
+By meticulously applying these security principles and practices, the Volunteer Portal will be developed with a strong and resilient security posture.

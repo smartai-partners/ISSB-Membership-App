@@ -1,0 +1,338 @@
+
+Opportunities (/opportunities): Represents a specific volunteering event or task.
+
+
+GET /api/v1/opportunities: Retrieve a list of all opportunities.
+
+
+Query Params: status (e.g., open, closed), dateRange, location, memberId (to show opportunities a member has signed up for).
+
+
+Response (200 OK): [{ id: "uuid", title: "...", status: "Open", ... }, ...]
+
+
+GET /api/v1/opportunities/:id: Retrieve details for a single opportunity.
+
+
+Response (200 OK): { id: "uuid", title: "...", description: "...", ... }
+
+
+POST /api/v1/opportunities: (Admin Only) Create a new opportunity.
+
+
+Request Body: { title: "Help with food drive", description: "...", date: "2023-10-26T09:00:00Z", durationHours: 4, location: "Community Hall", maxVolunteers: 20, requiredSkills: ["driving", "lifting"], contactEmail: "admin@example.com" }
+
+
+Response (201 Created): { id: "uuid", title: "...", status: "Open", ... }
+
+
+PUT /api/v1/opportunities/:id: (Admin Only) Update an existing opportunity.
+
+
+Request Body: { title: "Revised Title", maxVolunteers: 25, status: "Closed" }
+
+
+Response (200 OK): { id: "uuid", title: "Revised Title", ... }
+
+
+DELETE /api/v1/opportunities/:id: (Admin Only) Delete an opportunity.
+
+
+Volunteer Sign-ups (/signups): Represents a member's commitment to an opportunity.
+
+
+GET /api/v1/members/:memberId/signups: (Member/Admin/Board) Get all opportunities a specific member has signed up for.
+
+
+Response (200 OK): [{ id: "uuid", opportunityId: "uuid", memberId: "uuid", status: "Confirmed", signedUpAt: "...", opportunity: {title: "..."} }, ...]
+
+
+GET /api/v1/opportunities/:opportunityId/signups: (Admin/Board) Get all members signed up for a specific opportunity.
+
+
+Response (200 OK): [{ id: "uuid", opportunityId: "uuid", memberId: "uuid", member: {name: "...", email: "..."}, status: "Confirmed", ... }, ...]
+
+
+POST /api/v1/opportunities/:opportunityId/signups: (Regular Member Only) Sign up for an opportunity.
+
+
+Request Body: (Implicit user from JWT) {}
+
+
+Response (201 Created): { id: "uuid", opportunityId: "uuid", memberId: "uuid", status: "Pending", signedUpAt: "..." }
+
+
+DELETE /api/v1/signups/:id: (Member/Admin) Withdraw from a sign-up.
+
+
+Volunteer Hours Logs (/logs): Represents hours logged by a member for a specific sign-up.
+
+
+GET /api/v1/members/:memberId/logs: (Member/Admin/Board) Get all hours logs for a specific member.
+
+
+Response (200 OK): [{ id: "uuid", signupId: "uuid", date: "2023-10-26", hours: 4, description: "...", status: "Pending", ... }, ...]
+
+
+GET /api/v1/signups/:signupId/logs: (Member/Admin/Board) Get all logs for a specific sign-up.
+
+
+Response (200 OK): [{ id: "uuid", signupId: "uuid", date: "2023-10-26", hours: 4, ... }, ...]
+
+
+POST /api/v1/signups/:signupId/logs: (Regular Member Only) Log hours for a signed-up opportunity.
+
+
+Request Body: { date: "2023-10-26", hours: 4, description: "Assisted with sorting donations." }
+
+
+Response (201 Created): { id: "uuid", signupId: "uuid", date: "2023-10-26", hours: 4, status: "Pending", ... }
+
+
+PUT /api/v1/logs/:id: (Member/Admin/Board) Update an hours log.
+
+
+Request Body: { hours: 3.5, description: "Updated details." }
+
+
+Response (200 OK): { id: "uuid", hours: 3.5, ... }
+
+
+PATCH /api/v1/logs/:id/approve: (Admin/Board Only) Approve an hours log.
+
+
+Request Body: { approvedBy: "admin_id" } (Implicit from JWT, for audit trail)
+
+
+Response (200 OK): { id: "uuid", status: "Approved", approvedBy: "admin_id", ... }
+
+
+DELETE /api/v1/logs/:id: (Member/Admin) Delete an hours log.
+
+
+Validation: Zod
+
+
+Reasoning: Type-first schema declaration that infers TypeScript types. Excellent for validating request bodies, query params, and environment variables. Provides clear, descriptive errors.
+
+
+Logging: Pino
+
+
+Reasoning: Extremely fast, low-overhead logger, ideal for production environments. Integrates well with Express.
+
+
+Authentication/Authorization: jsonwebtoken & bcrypt
+
+
+Reasoning: Standard for JWT-based authentication. bcrypt for secure password hashing.
+
+
+Environment Variables: dotenv
+
+
+Reasoning: Simplifies loading environment variables from a .env file.
+
+
+Rate Limiting: express-rate-limit
+
+
+Reasoning: Essential for protecting API endpoints from abuse and brute-force attacks.
+
+
+CORS: cors
+
+
+Reasoning: Middleware to enable Cross-Origin Resource Sharing, configured to allow requests from your frontend's domain.
+
+
+Error Handling: http-errors
+
+
+Reasoning: Simplifies creating HTTP-friendly error objects with appropriate status codes.
+
+
+Routes (src/api/v1/routes):
+
+
+Define API endpoints and map them to controller methods.
+
+
+Apply authentication and authorization middleware.
+
+
+Controllers (src/api/v1/controllers):
+
+
+Handle incoming HTTP requests.
+
+
+Parse request parameters, body, and headers.
+
+
+Delegate business logic to the appropriate service layer.
+
+
+Format and send HTTP responses.
+
+
+Minimal business logic resides here; primarily acts as an orchestrator.
+
+
+Services (src/services):
+
+
+Encapsulate core business logic and rules for each domain (e.g., opportunity.service.ts, signup.service.ts).
+
+
+Interact with the database (via Prisma client directly or a repository layer).
+
+
+Perform data transformations and validations.
+
+
+Handle complex operations that might involve multiple database actions (e.g., a signup might check opportunity capacity and then create a record, potentially within a transaction).
+
+
+Data Access Layer (DAL) / Prisma Client (src/data/prisma.ts):
+
+
+Prisma Client will serve as our DAL, providing direct access to the database. For simpler applications, wrapping Prisma in custom repositories might be overkill, but for more complex scenarios or extensive unit testing, a repository pattern could be introduced here.
+
+
+Src/data/prisma.ts: Initialize and export the Prisma client instance.
+
+
+Validation (src/lib/validation):
+
+
+Centralized Zod schemas for all incoming data.
+
+
+Middleware or utility functions to apply these schemas.
+
+
+Utilities/Helpers (src/lib):
+
+
+Common functions, logging utilities, custom error classes.
+
+
+Request: POST /api/v1/opportunities/OPP_ID/signups
+
+
+Auth.middleware.ts: Verifies JWT, attaches req.user = { id: 'MEMBER_ID', role: 'REGULAR_MEMBER' }.
+
+
+Rbac.middleware.ts: Checks if REGULAR_MEMBER is allowed to create on signups.
+
+
+Signup.routes.ts: Maps to signupController.createSignUp.
+
+
+Signup.controller.ts:
+
+
+Extracts opportunityId from req.params.
+
+
+Extracts memberId from req.user.id.
+
+
+Calls signupService.createSignUp(memberId, opportunityId).
+
+
+Handles potential errors (e.g., 400, 404, 409) and sends appropriate HTTP response.
+
+
+Signup.service.ts:
+
+
+Validation: Use Zod (or internal logic) to ensure opportunityId and memberId are valid.
+
+
+Fetches Opportunity to check status (must be OPEN) and maxVolunteers.
+
+
+Checks if currentVolunteers is less than maxVolunteers. If maxVolunteers > 0 and currentVolunteers >= maxVolunteers, throw a "Full" error.
+
+
+Checks if the member is already signed up for this opportunity.
+
+
+Uses Prisma transaction ($transaction) for atomicity:
+
+
+Increments currentVolunteers on the Opportunity.
+
+
+Creates a new VolunteerSignUp record.
+
+
+Returns the created VolunteerSignUp object.
+
+
+JWT (JSON Web Tokens): All authenticated API requests will require a valid JWT in the Authorization: Bearer <token> header.
+
+
+Middleware: An auth.middleware.ts will verify the token's signature, expiry, and extract user identity (userId, role) into req.user.
+
+
+Password Hashing: bcrypt will be used for salting and hashing user passwords.
+
+
+Middleware (rbac.middleware.ts): This middleware will check req.user.role against predefined permissions for each route or action.
+
+
+Admins: Full CRUD on Opportunity, view all SignUp and Log data.
+
+
+Board Members: View all Opportunity, SignUp, and Log data. May have permission to APPROVE VolunteerLog entries.
+
+
+Regular Members: View Open Opportunity details, Sign Up/Withdraw from their opportunities, Log/Edit/Delete their hours logs, view their SignUp and Log history. Cannot view other members' data or admin-only fields.
+
+
+Service Layer Checks: For more complex, data-dependent authorization (e.g., "can user X edit log Y if user X is not the log owner AND user X is not an Admin/Board Member"), logic will reside in the service layer after the initial role check.
+
+
+Zod: Strict validation of all incoming data (request bodies, query parameters, URL parameters) using Zod schemas. This prevents common vulnerabilities like SQL injection (when combined with an ORM), XSS (by sanitizing output/input if user-generated content is displayed), and ensures data integrity.
+
+
+Middleware: Validation middleware will run early in the request lifecycle.
+
+
+Prisma & Database Constraints: Leverage Prisma's schema for database-level constraints (foreign keys, unique constraints).
+
+
+Transactions: Use Prisma's $transaction for operations involving multiple database writes (e.g., signing up for an opportunity requires decrementing available slots and creating a signup record). This ensures atomicity.
+
+
+Capacity Checks: Implement robust checks for maxVolunteers to prevent overbooking, including handling potential race conditions in the service layer using database transactions or optimistic locking if necessary.
+
+
+Implement express-rate-limit on all critical endpoints (e.g., login, sign-up, create opportunity) to prevent brute-force attacks and abuse.
+
+
+Utilize helmet middleware to set various HTTP headers that enhance security (e.g., X-XSS-Protection, Strict-Transport-Security).
+
+
+Strictly configure cors middleware to only allow requests from the known frontend domain(s).
+
+
+Implement centralized error handling to catch unhandled exceptions and send generic, non-informative error messages to the client, preventing leakage of sensitive server details.
+
+
+Use custom error classes for better control and clarity.
+
+
+Log security-relevant events (e.g., failed authentication attempts, authorization failures, critical data modifications) using Pino, ensuring logs are structured and auditable.
+
+
+All sensitive configurations (database credentials, JWT secrets, API keys) must be stored in environment variables, never hardcoded.
+
+
+Regularly audit and update project dependencies using tools like npm audit to address known vulnerabilities.
+
+
+Enforce HTTPS for all communication in production to protect data in transit.
