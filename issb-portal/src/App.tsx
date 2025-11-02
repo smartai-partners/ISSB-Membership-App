@@ -17,6 +17,7 @@ import { EnhancedUsersManagementPage } from '@/pages/EnhancedUsersManagementPage
 import { MembershipsManagementPage } from '@/pages/MembershipsManagementPage';
 import { EventsManagementPage } from '@/pages/EventsManagementPage';
 import { AdminVolunteerManagement } from '@/pages/AdminVolunteerManagementPage';
+import { AdminHelpAssistantPage } from '@/pages/AdminHelpAssistantPage';
 
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
   const { user, profile, loading } = useAuth();
@@ -118,6 +119,15 @@ function App() {
               element={
                 <ProtectedRoute roles={['admin', 'board']}>
                   <AdminVolunteerManagement />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/admin/help-assistant"
+              element={
+                <ProtectedRoute roles={['admin', 'board']}>
+                  <AdminHelpAssistantPage />
                 </ProtectedRoute>
               }
             />

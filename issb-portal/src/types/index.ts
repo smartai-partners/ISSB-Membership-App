@@ -298,3 +298,39 @@ export interface AuditLog {
   user_agent?: string;
   created_at: string;
 }
+
+// Help Assistant Types
+export interface FAQ {
+  id: string;
+  question: string;
+  answer: string;
+  category: string;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+}
+
+export type ConversationStatus = 'pending' | 'in_progress' | 'resolved' | 'closed';
+
+export interface ConversationMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
+
+export interface EscalatedConversation {
+  id: string;
+  user_id?: string;
+  conversation_data: {
+    messages: ConversationMessage[];
+    user_email?: string;
+    application_id?: string;
+    [key: string]: any;
+  };
+  status: ConversationStatus;
+  escalated_reason?: string;
+  assigned_to?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
