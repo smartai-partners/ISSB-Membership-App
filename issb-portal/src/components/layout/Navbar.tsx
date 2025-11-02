@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Calendar, Users, Heart, LayoutDashboard, FileCheck, LogOut, Menu, X, MessageSquare } from 'lucide-react';
+import { Home, Calendar, Users, Heart, LayoutDashboard, FileCheck, LogOut, Menu, X, MessageSquare, CheckSquare } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -37,6 +37,7 @@ export function Navbar({ className = '' }: NavbarProps) {
     { name: 'Events', path: '/admin/events', icon: Calendar, roles: ['admin', 'board'] },
     { name: 'Volunteer Mgmt', path: '/admin/volunteers', icon: Users, roles: ['admin', 'board'] },
     { name: 'Help Assistant', path: '/admin/help-assistant', icon: MessageSquare, roles: ['admin', 'board'] },
+    { name: 'Accessibility', path: '/admin/accessibility-audit', icon: CheckSquare, roles: ['admin', 'board'] },
   ];
 
   const isActive = (path: string) => {

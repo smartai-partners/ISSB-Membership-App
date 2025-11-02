@@ -334,3 +334,57 @@ export interface EscalatedConversation {
   created_at: string;
   updated_at: string;
 }
+
+
+// Accessibility Audit Types
+export type WCAGLevel = 'A' | 'AA' | 'AAA';
+export type IssueSeverity = 'critical' | 'high' | 'medium' | 'low';
+export type IssueStatus = 'open' | 'in_progress' | 'resolved' | 'wont_fix';
+
+export interface AccessibilityAudit {
+  id: string;
+  page_url: string;
+  page_title?: string;
+  audit_date: string;
+  compliance_score: number;
+  wcag_level: WCAGLevel;
+  auditor_id?: string;
+  total_issues: number;
+  critical_issues: number;
+  high_issues: number;
+  medium_issues: number;
+  low_issues: number;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AccessibilityIssue {
+  id: string;
+  audit_id: string;
+  issue_type: string;
+  severity: IssueSeverity;
+  wcag_criterion?: string;
+  description: string;
+  affected_component?: string;
+  recommended_fix?: string;
+  status: IssueStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AuditWithIssues extends AccessibilityAudit {
+  issues: AccessibilityIssue[];
+}
+
+export interface AuditSummaryMetrics {
+  totalAudits: number;
+  averageComplianceScore: number;
+  totalIssues: number;
+  criticalIssues: number;
+  highIssues: number;
+  mediumIssues: number;
+  lowIssues: number;
+  resolvedIssues: number;
+  openIssues: number;
+}

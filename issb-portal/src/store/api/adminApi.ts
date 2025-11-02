@@ -129,7 +129,7 @@ export const adminApi = createApi({
           const { data, error, count } = await query;
 
           if (error) {
-            return { error: { status: 'CUSTOM_ERROR', data: error.message } };
+            return { error: { status: 'CUSTOM_ERROR', data: { message: error.message } } };
           }
 
           const total = count || 0;
@@ -148,7 +148,7 @@ export const adminApi = createApi({
           return {
             error: {
               status: 'CUSTOM_ERROR',
-              data: error instanceof Error ? error.message : 'Failed to fetch users',
+              data: { message: error instanceof Error ? error.message : 'Failed to fetch users' },
             },
           };
         }
@@ -174,7 +174,7 @@ export const adminApi = createApi({
             .single();
 
           if (error) {
-            return { error: { status: 'CUSTOM_ERROR', data: error.message } };
+            return { error: { status: 'CUSTOM_ERROR', data: { message: error.message } } };
           }
 
           return { data: data as Profile };
@@ -182,7 +182,7 @@ export const adminApi = createApi({
           return {
             error: {
               status: 'CUSTOM_ERROR',
-              data: error instanceof Error ? error.message : 'Failed to update user',
+              data: { message: error instanceof Error ? error.message : 'Failed to update user' },
             },
           };
         }
@@ -200,7 +200,7 @@ export const adminApi = createApi({
           const { error } = await supabase.from('profiles').delete().eq('id', userId);
 
           if (error) {
-            return { error: { status: 'CUSTOM_ERROR', data: error.message } };
+            return { error: { status: 'CUSTOM_ERROR', data: { message: error.message } } };
           }
 
           return { data: { success: true } };
@@ -208,7 +208,7 @@ export const adminApi = createApi({
           return {
             error: {
               status: 'CUSTOM_ERROR',
-              data: error instanceof Error ? error.message : 'Failed to delete user',
+              data: { message: error instanceof Error ? error.message : 'Failed to delete user' },
             },
           };
         }
@@ -256,7 +256,7 @@ export const adminApi = createApi({
           return {
             error: {
               status: 'CUSTOM_ERROR',
-              data: error instanceof Error ? error.message : 'Bulk update failed',
+              data: { message: error instanceof Error ? error.message : 'Bulk update failed' },
             },
           };
         }
@@ -276,7 +276,7 @@ export const adminApi = createApi({
             .limit(100);
 
           if (error) {
-            return { error: { status: 'CUSTOM_ERROR', data: error.message } };
+            return { error: { status: 'CUSTOM_ERROR', data: { message: error.message } } };
           }
 
           return { data: (data as UserActivity[]) || [] };
@@ -284,7 +284,7 @@ export const adminApi = createApi({
           return {
             error: {
               status: 'CUSTOM_ERROR',
-              data: error instanceof Error ? error.message : 'Failed to fetch activity',
+              data: { message: error instanceof Error ? error.message : 'Failed to fetch activity' },
             },
           };
         }
@@ -344,7 +344,7 @@ export const adminApi = createApi({
           return {
             error: {
               status: 'CUSTOM_ERROR',
-              data: error instanceof Error ? error.message : 'Failed to fetch stats',
+              data: { message: error instanceof Error ? error.message : 'Failed to fetch stats' },
             },
           };
         }
