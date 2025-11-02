@@ -3,9 +3,11 @@ import { Calendar, MapPin, Users, Plus } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Event, EventRegistration } from '@/types';
+import { useNavigate } from 'react-router-dom';
 
 export function EventsPage() {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [events, setEvents] = useState<Event[]>([]);
   const [myRegistrations, setMyRegistrations] = useState<EventRegistration[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,7 +66,10 @@ export function EventsPage() {
           <p className="text-gray-600 mt-2">Daily prayers, Islamic programs, and community events</p>
         </div>
         {profile && ['admin', 'board'].includes(profile.role) && (
-          <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
+          <button 
+            onClick={() => navigate('/admin/events')}
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+          >
             <Plus className="w-4 h-4 mr-2" />
             Create Event
           </button>

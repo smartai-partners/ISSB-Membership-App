@@ -82,6 +82,7 @@ export function EnhancedUsersManagementPage() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [userToDelete, setUserToDelete] = useState<Profile | null>(null);
+  const [showAddUserDialog, setShowAddUserDialog] = useState(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
 
@@ -403,7 +404,10 @@ export function EnhancedUsersManagementPage() {
             Manage system users, roles, and permissions
           </p>
         </div>
-        <Button className="bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+        <Button 
+          onClick={() => setShowAddUserDialog(true)}
+          className="bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+        >
           <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />
           Add User
         </Button>
@@ -664,6 +668,35 @@ export function EnhancedUsersManagementPage() {
               ) : (
                 'Delete User'
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add User Dialog */}
+      <Dialog open={showAddUserDialog} onOpenChange={setShowAddUserDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New User</DialogTitle>
+            <DialogDescription>
+              Create a new user account. This will send an invitation email to the user.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="text-center py-8 text-gray-500">
+              <UserPlus className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium mb-2">Add User Feature Coming Soon</h3>
+              <p className="text-sm">This feature will be implemented in a future update.</p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              onClick={() => setShowAddUserDialog(false)}
+              className="bg-gray-600 hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
