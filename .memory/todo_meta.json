@@ -1,166 +1,40 @@
 {
   "todos": {
     "Coordinator": {
-      "1": {
-        "id": "1",
-        "content": "Phase 3B: Admin Dashboard - Help Assistant Management",
-        "details": "Implement comprehensive FAQ management and escalated conversation review system based on provided architecture plan. This builds directly on Phase 3A UX enhancements.",
+      "24": {
+        "id": "24",
+        "content": "Analyze Volunteer Management System benefits for ISSB Portal",
+        "details": "Review the detailed technical specification and identify key enhancements over current volunteer system. Focus on benefits for single $360/year membership model.",
         "status": "completed",
         "priority": "high"
       },
-      "2": {
-        "id": "2",
-        "content": "Help Assistant Management - Phase 1: FAQ System Core",
-        "details": "1. Create AdminHelpAssistantPage component with tab navigation\n2. Implement FAQManagementSection with CRUD operations\n3. Create FAQTable with search, filtering, and pagination\n4. Build FAQFormModal for create/edit functionality\n5. Integrate with existing toast notification system from Phase 3A\n6. Apply accessibility patterns from Phase 3A (focus traps, keyboard navigation)",
-        "status": "completed",
+      "25": {
+        "id": "25",
+        "content": "Design database schema for volunteer opportunities system",
+        "details": "Create Supabase tables for: volunteer_opportunities, volunteer_assignments, volunteer_logs. Integrate with existing volunteer_hours table.",
+        "status": "pending",
         "priority": "high"
       },
-      "3": {
-        "id": "3",
-        "content": "Help Assistant Management - Phase 2: Escalated Conversations",
-        "details": "1. Implement EscalatedConversationsSection\n2. Create ConversationTable with status/agent/date filters\n3. Build ConversationDetailModal with transcript view\n4. Add agent notes and status update functionality\n5. Integrate with existing admin user management system\n6. Apply Phase 3A loading states and error handling patterns",
-        "status": "completed",
+      "26": {
+        "id": "26",
+        "content": "Develop volunteer opportunities management backend",
+        "details": "Create edge functions for: CRUD operations on opportunities, member sign-up system, assignment management, enhanced hour logging.",
+        "status": "pending",
         "priority": "high"
       },
-      "4": {
-        "id": "4",
-        "content": "State Management & Data Layer Implementation",
-        "details": "1. Set up Zustand store for Help Assistant management\n2. Implement TanStack Query for data fetching and caching\n3. Create API endpoints for FAQ and conversation management\n4. Add Axios interceptors for authentication\n5. Implement optimistic updates using Phase 3A useOptimisticUpdate hook",
-        "status": "completed",
+      "27": {
+        "id": "27",
+        "content": "Build volunteer opportunities frontend pages",
+        "details": "Create: Admin opportunity management page, Member opportunity browse/sign-up page, Assignment tracking dashboard, Enhanced volunteer progress tracking.",
+        "status": "pending",
         "priority": "high"
       },
-      "5": {
-        "id": "5",
-        "content": "Navigation Integration & Admin Dashboard Enhancement",
-        "details": "1. Add Help Assistant tab to existing admin sidebar navigation\n2. Create navigation components following existing patterns\n3. Integrate with existing admin layout structure\n4. Ensure consistent styling with current admin interface\n5. Update routing configuration",
-        "status": "completed",
-        "priority": "medium"
-      },
-      "6": {
-        "id": "6",
-        "content": "Accessibility & UX Consistency Verification",
-        "details": "1. Ensure WCAG 2.1 AA compliance across all new components\n2. Apply Phase 3A accessibility patterns (focus management, ARIA labels)\n3. Implement keyboard navigation for all interactive elements\n4. Add screen reader support for dynamic content updates\n5. Test with assistive technologies",
-        "status": "completed",
-        "priority": "medium"
-      },
-      "7": {
-        "id": "7",
-        "content": "Integration with Existing Systems",
-        "details": "1. Link escalated conversations to user management system\n2. Integrate FAQ content with event-related questions\n3. Connect notification system for conversation escalations\n4. Ensure data consistency across admin modules\n5. Test integration points thoroughly",
-        "status": "completed",
-        "priority": "medium"
-      },
-      "8": {
-        "id": "8",
-        "content": "Phase 3B Testing & Deployment",
-        "details": "1. Manual testing of all Help Assistant features\n2. Integration testing with existing admin functionality\n3. Accessibility testing across different user scenarios\n4. Performance testing with realistic data volumes\n5. Deploy to production environment\n6. Create comprehensive testing documentation",
-        "status": "completed",
-        "priority": "medium"
-      },
-      "9": {
-        "id": "9",
-        "content": "Documentation & Knowledge Transfer",
-        "details": "1. Update admin user guides with Help Assistant features\n2. Create API documentation for new endpoints\n3. Document component architecture and design patterns\n4. Update project roadmap for future phases\n5. Create maintenance and troubleshooting guides",
-        "status": "completed",
-        "priority": "low"
-      },
-      "10": {
-        "id": "10",
-        "content": "Phase 3C: Admin Dashboard - Accessibility Audit Review System",
-        "details": "Implement comprehensive accessibility audit monitoring system following the provided architecture plan. This builds directly on Phase 3A and 3B foundations to provide automated WCAG compliance monitoring and issue management.",
-        "status": "completed",
-        "priority": "high"
-      },
-      "11": {
-        "id": "11",
-        "content": "Phase 3C.1: Core Accessibility Audit Infrastructure",
-        "details": "Successfully implemented core accessibility audit dashboard with WCAG compliance metrics, issue categorization, and summary analytics. Deployed at https://rteyghfhjrrd8.space.minimax.io/admin/accessibility-audit with full CRUD functionality and comprehensive documentation.",
-        "status": "completed",
-        "priority": "high"
-      },
-      "12": {
-        "id": "12",
-        "content": "Phase 3C.2: Advanced Filtering & Issue Management",
-        "details": "Successfully implemented advanced filtering and issue management features including multi-criteria filtering, filter presets, bulk operations, enhanced issue detail modals with tabs, team management, and progress tracking. Deployed at https://1dnr11xqb8pk.space.minimax.io with comprehensive verification and documentation.",
-        "status": "completed",
-        "priority": "high"
-      },
-      "13": {
-        "id": "13",
-        "content": "Phase 3C.3: Automated Integration & Analytics",
-        "details": "Successfully implemented automated accessibility testing tools integration, scheduled audit processes, and advanced analytics dashboard with CI/CD pipeline integration. Deployed at https://pjx494k05r46.space.minimax.io with comprehensive features including Analytics Dashboard, Automated Testing, Scheduled Audits, and Quality Gates.",
-        "status": "completed",
-        "priority": "medium"
-      },
-      "14": {
-        "id": "14",
-        "content": "Accessibility Testing Tools Integration",
-        "details": "1. Research and integrate accessibility testing libraries (axe-core, etc.)\n2. Set up automated WCAG compliance scanning workflows\n3. Implement manual accessibility testing guidelines and processes\n4. Create accessibility testing training materials for development team\n5. Establish accessibility quality gates for development workflow\n6. Set up continuous accessibility monitoring in production",
+      "28": {
+        "id": "28",
+        "content": "Integrate opportunities with membership activation",
+        "details": "Connect volunteer opportunities system with the 30-hour membership requirement. Track progress toward membership activation through opportunities.",
         "status": "pending",
         "priority": "medium"
-      },
-      "15": {
-        "id": "15",
-        "content": "Phase 3C Documentation & Training",
-        "details": "1. Create comprehensive accessibility audit user documentation\n2. Document accessibility development guidelines and best practices\n3. Train admin team on accessibility audit review processes\n4. Create accessibility compliance reporting templates and workflows\n5. Establish accessibility improvement processes and escalation procedures\n6. Document integration points with existing admin features (Help Assistant, User Management)",
-        "status": "pending",
-        "priority": "low"
-      },
-      "16": {
-        "id": "16",
-        "content": "Phase 3D: Donation Portal & Payment System Analysis",
-        "details": "Analyze and plan comprehensive donation management system with Stripe payment processing, donor management, and administrative oversight. Includes revenue generation, security compliance, and community engagement features.",
-        "status": "completed",
-        "priority": "high"
-      },
-      "17": {
-        "id": "17",
-        "content": "Phase 3D.1: Core Donation Infrastructure Implementation",
-        "details": "Successfully implemented Stripe Payment Intents API integration, secure webhook endpoints, donation form frontend, and database schema for donation tracking. Deployed at https://35a49r8q3n1o.space.minimax.io/donate with full PCI-compliant payment processing. Comprehensive documentation and testing guides provided.",
-        "status": "completed",
-        "priority": "high"
-      },
-      "18": {
-        "id": "18",
-        "content": "Administrative Donation Management",
-        "details": "Build donation management dashboard with real-time monitoring, transaction history, donor management tools, financial reporting, and analytics. Integrate with existing admin interface patterns.",
-        "status": "pending",
-        "priority": "medium"
-      },
-      "19": {
-        "id": "19",
-        "content": "Advanced Donor Experience Features",
-        "details": "Implement recurring donations, donor history, tax documentation, receipt management, and advanced donor segmentation. Include automated workflows for donor communication and impact reporting.",
-        "status": "pending",
-        "priority": "medium"
-      },
-      "20": {
-        "id": "20",
-        "content": "Phase 3E.1: Membership Foundation Implementation",
-        "details": "Successfully implemented complete membership management system with Stripe subscription integration, three membership tiers (Student $0, Individual $50, Family $150), family member management, and admin analytics dashboard. Deployed at https://3yfw1fsoobj2.space.minimax.io with comprehensive documentation and testing procedures.",
-        "status": "completed",
-        "priority": "high"
-      },
-      "21": {
-        "id": "21",
-        "content": "Phase 3E.2: Membership Structure Update - Single Tier Model",
-        "details": "Successfully updated membership system from 3-tier to single tier model: $360/year Individual membership with dual payment options (payment OR 30 hours volunteering). Updated database schema, Stripe integration, member dashboard, and admin interface. Deployed at https://f06lxqd7vgpw.space.minimax.io with comprehensive testing documentation.",
-        "status": "completed",
-        "priority": "high"
-      },
-      "22": {
-        "id": "22",
-        "content": "Phase 3E.3: Volunteer Hours Management System",
-        "details": "FIXED: Resolved missing volunteer portal section in member dashboard. Issue was API only returning 'active' subscriptions but volunteer memberships start as 'pending' status. Updated edge function to handle both active and pending subscriptions. All volunteer features now visible and functional on member dashboard.",
-        "status": "completed",
-        "priority": "high"
-      },
-      "23": {
-        "id": "23",
-        "content": "UI/UX Redesign - Modern Premium Interface",
-        "details": "COMPLETE: Transformed ISSB Portal from generic appearance to modern, premium SaaS interface incorporating beautiful green button design from reference image. Implemented Material Green (#4CAF50) color scheme, Inter typography, comprehensive design system, smooth transitions, and refined components. All core pages redesigned with professional appearance. Deployed at https://zeqv226knuy6.space.minimax.io with complete documentation.",
-        "status": "completed",
-        "priority": "high"
       }
     }
   }
