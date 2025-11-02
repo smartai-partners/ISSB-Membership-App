@@ -9,6 +9,7 @@ import { SignUpPage } from '@/pages/SignUpPage';
 import { EventsPage } from '@/pages/EventsPage';
 import { VolunteersPage } from '@/pages/VolunteersPage';
 import { DonationsPage } from '@/pages/DonationsPage';
+import { DonatePage } from '@/pages/DonatePage';
 import { MemberDashboardPage } from '@/pages/MemberDashboardPage';
 import { AdminDashboardPage } from '@/pages/AdminDashboardPage';
 import { ApplicationsPage } from '@/pages/ApplicationsPage';
@@ -52,6 +53,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/donations" element={<DonationsPage />} />
+            <Route path="/donate" element={<DonatePage />} />
             
             <Route
               path="/dashboard"
