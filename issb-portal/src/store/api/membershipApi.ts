@@ -91,12 +91,12 @@ export interface VolunteerProgress {
 export interface MembershipAnalytics {
   summary: {
     totalSubscriptions: number;
-    tierCounts: {
-      student: number;
-      individual: number;
-      family: number;
+    activationCounts: {
+      payment: number;
+      volunteer: number;
+      donation: number;
     };
-    totalFamilyMembers: number;
+    paidMemberships: number;
     monthlyRecurringRevenue: number;
     annualRecurringRevenue: number;
   };

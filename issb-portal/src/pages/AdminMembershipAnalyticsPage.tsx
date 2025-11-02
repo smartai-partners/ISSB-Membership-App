@@ -7,9 +7,9 @@ import {
   DollarSign, 
   TrendingUp, 
   Loader2,
-  UserCheck,
-  UsersIcon,
-  GraduationCap
+  CreditCard,
+  HandHeart,
+  Gift
 } from 'lucide-react';
 
 export const AdminMembershipAnalyticsPage: React.FC = () => {
@@ -42,65 +42,58 @@ export const AdminMembershipAnalyticsPage: React.FC = () => {
 
   const { summary, recentActivity } = analytics;
 
-  const getTierName = (tier: string) => {
-    if (tier === 'student' || tier === 'student_free') return 'Student';
-    if (tier.includes('individual')) return 'Individual';
-    if (tier.includes('family')) return 'Family';
-    return tier;
-  };
-
   const statsCards = [
     {
       title: 'Total Members',
       value: summary.totalSubscriptions,
       icon: Users,
       color: 'bg-blue-500',
-      description: 'Active subscriptions'
+      description: 'Active memberships'
+    },
+    {
+      title: 'Paid Members',
+      value: summary.paidMemberships,
+      icon: CreditCard,
+      color: 'bg-green-500',
+      description: 'Payment & donation-based'
     },
     {
       title: 'Monthly Revenue',
       value: `$${summary.monthlyRecurringRevenue.toLocaleString()}`,
       icon: DollarSign,
-      color: 'bg-green-500',
+      color: 'bg-emerald-500',
       description: 'Recurring monthly'
     },
     {
       title: 'Annual Revenue',
       value: `$${summary.annualRecurringRevenue.toLocaleString()}`,
       icon: TrendingUp,
-      color: 'bg-emerald-500',
+      color: 'bg-teal-500',
       description: 'Projected yearly'
-    },
-    {
-      title: 'Family Members',
-      value: summary.totalFamilyMembers,
-      icon: UsersIcon,
-      color: 'bg-purple-500',
-      description: 'Additional family members'
     }
   ];
 
-  const tierCards = [
+  const activationMethodCards = [
     {
-      name: 'Student',
-      count: summary.tierCounts.student,
-      icon: GraduationCap,
+      name: 'Direct Payment',
+      count: summary.activationCounts.payment,
+      icon: CreditCard,
+      color: 'bg-green-100 text-green-800',
+      description: 'Paid $360 annually'
+    },
+    {
+      name: 'Volunteer-Based',
+      count: summary.activationCounts.volunteer,
+      icon: HandHeart,
       color: 'bg-blue-100 text-blue-800',
-      revenue: 0
+      description: 'Earned through 30 hours'
     },
     {
-      name: 'Individual',
-      count: summary.tierCounts.individual,
-      icon: UserCheck,
-      color: 'bg-emerald-100 text-emerald-800',
-      revenue: summary.tierCounts.individual * 50
-    },
-    {
-      name: 'Family',
-      count: summary.tierCounts.family,
-      icon: Users,
+      name: 'Donation-Based',
+      count: summary.activationCounts.donation,
+      icon: Gift,
       color: 'bg-purple-100 text-purple-800',
-      revenue: summary.tierCounts.family * 150
+      description: 'Activated via $360+ donation'
     }
   ];
 
@@ -113,7 +106,7 @@ export const AdminMembershipAnalyticsPage: React.FC = () => {
             Membership Analytics
           </h1>
           <p className="text-gray-600">
-            Overview of membership subscriptions and revenue
+            Overview of Individual Membership ($360/year) subscriptions and revenue
           </p>
         </div>
 
@@ -138,25 +131,22 @@ export const AdminMembershipAnalyticsPage: React.FC = () => {
           })}
         </div>
 
-        {/* Tier Breakdown */}
+        {/* Activation Methods Breakdown */}
         <Card className="p-6 mb-8">
-          <h2 className="text-2xl font-bold mb-6">Membership Tiers</h2>
+          <h2 className="text-2xl font-bold mb-6">Membership Activation Methods</h2>
           <div className="grid md:grid-cols-3 gap-6">
-            {tierCards.map((tier, index) => {
-              const Icon = tier.icon;
+            {activationMethodCards.map((method, index) => {
+              const Icon = method.icon;
               return (
                 <div key={index} className="p-6 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between mb-4">
                     <Icon className="h-8 w-8 text-gray-600" />
-                    <Badge className={tier.color}>
-                      {tier.count} members
+                    <Badge className={method.color}>
+                      {method.count} members
                     </Badge>
                   </div>
-                  <h3 className="text-xl font-bold mb-2">{tier.name}</h3>
-                  <p className="text-2xl font-bold text-gray-900">
-                    ${tier.revenue.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-500">Monthly revenue</p>
+                  <h3 className="text-xl font-bold mb-2">{method.name}</h3>
+                  <p className="text-sm text-gray-500">{method.description}</p>
                 </div>
               );
             })}
@@ -164,7 +154,7 @@ export const AdminMembershipAnalyticsPage: React.FC = () => {
         </Card>
 
         {/* Recent Activity */}
-        <Card className="p-6">
+        <Card className="p-6 mb-8">
           <h2 className="text-2xl font-bold mb-6">Recent Activity</h2>
           {recentActivity.length === 0 ? (
             <p className="text-gray-500 text-center py-8">
@@ -179,16 +169,11 @@ export const AdminMembershipAnalyticsPage: React.FC = () => {
                 >
                   <div className="flex-1">
                     <p className="font-medium capitalize">
-                      {activity.action.replace('_', ' ')}
+                      {activity.action.replace(/_/g, ' ')}
                     </p>
-                    {activity.from_tier && activity.to_tier && (
+                    {activity.to_tier && (
                       <p className="text-sm text-gray-600">
-                        {getTierName(activity.from_tier)} → {getTierName(activity.to_tier)}
-                      </p>
-                    )}
-                    {!activity.from_tier && activity.to_tier && (
-                      <p className="text-sm text-gray-600">
-                        New {getTierName(activity.to_tier)} subscription
+                        New Individual Membership
                       </p>
                     )}
                   </div>
@@ -209,7 +194,7 @@ export const AdminMembershipAnalyticsPage: React.FC = () => {
         </Card>
 
         {/* Revenue Projections */}
-        <Card className="p-6 mt-8">
+        <Card className="p-6">
           <h2 className="text-2xl font-bold mb-6">Revenue Projections</h2>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="text-center p-6 bg-blue-50 rounded-lg">
@@ -222,16 +207,16 @@ export const AdminMembershipAnalyticsPage: React.FC = () => {
             <div className="text-center p-6 bg-emerald-50 rounded-lg">
               <p className="text-sm text-gray-600 mb-2">Year 1 Target</p>
               <p className="text-3xl font-bold text-emerald-600">
-                $37,500
+                $180,000
               </p>
-              <p className="text-sm text-gray-500 mt-2">500 members goal</p>
+              <p className="text-sm text-gray-500 mt-2">500 paid members goal</p>
             </div>
             <div className="text-center p-6 bg-purple-50 rounded-lg">
               <p className="text-sm text-gray-600 mb-2">Year 3 Target</p>
               <p className="text-3xl font-bold text-purple-600">
-                $375,000
+                $1,800,000
               </p>
-              <p className="text-sm text-gray-500 mt-2">5,000 members goal</p>
+              <p className="text-sm text-gray-500 mt-2">5,000 paid members goal</p>
             </div>
           </div>
         </Card>

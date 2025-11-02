@@ -58,9 +58,9 @@ Deno.serve(async (req) => {
             throw new Error('Unauthorized: Admin access required');
         }
 
-        // Get total subscriptions by tier
+        // Get all active subscriptions with activation method
         const subsResponse = await fetch(
-            `${supabaseUrl}/rest/v1/subscriptions?status=eq.active&select=price_id`,
+            `${supabaseUrl}/rest/v1/subscriptions?status=eq.active&select=activation_method`,
             {
                 headers: {
                     'Authorization': `Bearer ${serviceRoleKey}`,
@@ -71,40 +71,28 @@ Deno.serve(async (req) => {
 
         const subscriptions = await subsResponse.json();
 
-        // Count by tier
-        const tierCounts = {
-            student: 0,
-            individual: 0,
-            family: 0
+        // Count by activation method (payment vs volunteer)
+        const activationCounts = {
+            payment: 0,
+            volunteer: 0,
+            donation: 0
         };
 
-        let totalRevenue = 0;
-
         subscriptions.forEach((sub: any) => {
-            if (sub.price_id === 'student_free') {
-                tierCounts.student += 1;
-            } else if (sub.price_id.includes('individual')) {
-                tierCounts.individual += 1;
-                totalRevenue += 50; // $50/month
-            } else if (sub.price_id.includes('family')) {
-                tierCounts.family += 1;
-                totalRevenue += 150; // $150/month
+            const method = sub.activation_method || 'payment';
+            if (method === 'volunteer') {
+                activationCounts.volunteer += 1;
+            } else if (method === 'donation') {
+                activationCounts.donation += 1;
+            } else {
+                activationCounts.payment += 1;
             }
         });
 
-        // Get total family members
-        const membersResponse = await fetch(
-            `${supabaseUrl}/rest/v1/subscription_members?select=id`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${serviceRoleKey}`,
-                    'apikey': serviceRoleKey,
-                }
-            }
-        );
-
-        const members = await membersResponse.json();
-        const totalFamilyMembers = members.length;
+        // Calculate revenue: $360/year = $30/month per active member
+        // Only count paid and donation-based memberships (volunteer-based generate no revenue)
+        const paidMemberships = activationCounts.payment + activationCounts.donation;
+        const monthlyRevenue = paidMemberships * 30; // $30/month per paid member
 
         // Get recent subscription activity
         const historyResponse = await fetch(
@@ -120,15 +108,15 @@ Deno.serve(async (req) => {
         const recentActivity = await historyResponse.json();
 
         // Calculate monthly recurring revenue (MRR)
-        const mrr = totalRevenue;
+        const mrr = monthlyRevenue;
         const annualRecurringRevenue = mrr * 12;
 
         return new Response(JSON.stringify({
             data: {
                 summary: {
                     totalSubscriptions: subscriptions.length,
-                    tierCounts,
-                    totalFamilyMembers,
+                    activationCounts,
+                    paidMemberships,
                     monthlyRecurringRevenue: mrr,
                     annualRecurringRevenue
                 },
