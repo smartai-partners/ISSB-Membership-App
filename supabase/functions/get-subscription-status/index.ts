@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
         );
 
         const subscriptions = await subsResponse.json();
-        const activeSubscription = subscriptions.find((s: any) => s.status === 'active');
+        const activeSubscription = subscriptions.find((s: any) => s.status === 'active' || s.status === 'pending');
 
         // Get family members if family tier
         let familyMembers = [];

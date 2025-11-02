@@ -151,7 +151,7 @@
       "22": {
         "id": "22",
         "content": "Phase 3E.3: Volunteer Hours Management System",
-        "details": "Built complete volunteer hour tracking and management system including: member interface for logging hours, admin approval workflow, progress tracking toward 30-hour requirement, automatic membership activation, and volunteer opportunity integration. All edge functions deployed and active.",
+        "details": "FIXED: Resolved missing volunteer portal section in member dashboard. Issue was API only returning 'active' subscriptions but volunteer memberships start as 'pending' status. Updated edge function to handle both active and pending subscriptions. All volunteer features now visible and functional on member dashboard.",
         "status": "completed",
         "priority": "high"
       }

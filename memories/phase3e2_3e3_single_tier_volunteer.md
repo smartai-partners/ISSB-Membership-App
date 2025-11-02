@@ -70,8 +70,16 @@
 - [x] create-subscription edge function updated (single-tier $360/year)
 - [x] manage-subscription edge function updated (cancel only, no tier change)
 - [x] Build and deploy successful
-- [x] Deployed to: https://zeepjpxlqkif.space.minimax.io
+- [x] Deployed to: https://f06lxqd7vgpw.space.minimax.io
+- [x] **CRITICAL BUG FIX**: Fixed get-subscription-status to return pending subscriptions
 - [ ] Manual testing required (browser automation unavailable)
+
+### Bug Fix - Volunteer Portal Not Showing:
+**Issue**: Volunteer portal sections were missing from member dashboard
+**Root Cause**: get-subscription-status only returned status='active' subscriptions, but volunteer subscriptions start with status='pending'
+**Fix**: Updated get-subscription-status line 56 to: `const activeSubscription = subscriptions.find((s: any) => s.status === 'active' || s.status === 'pending');`
+**Deployed**: 2025-11-03
+**Status**: Fixed and deployed
 
 ### Edge Functions Deployed:
 1. get-volunteer-progress - Get volunteer hour progress
