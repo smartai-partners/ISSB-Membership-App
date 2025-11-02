@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Calendar, Users, Heart, LayoutDashboard, FileCheck, LogOut, Menu, X, MessageSquare, CheckSquare, BarChart3 } from 'lucide-react';
+import { Home, Calendar, Users, Heart, LayoutDashboard, FileCheck, LogOut, Menu, X, MessageSquare, CheckSquare, BarChart3, CreditCard } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -24,6 +24,7 @@ export function Navbar({ className = '' }: NavbarProps) {
     { name: 'Volunteer', path: '/volunteers', icon: Users, roles: ['admin', 'board', 'member', 'student'], highlight: true },
     { name: 'Donate', path: '/donations', icon: Heart, public: true, highlight: true },
     { name: 'Events', path: '/events', icon: Calendar, public: true },
+    { name: 'Membership', path: '/membership', icon: CreditCard, public: true },
   ];
 
   const memberItems = [
@@ -39,6 +40,7 @@ export function Navbar({ className = '' }: NavbarProps) {
     { name: 'Help Assistant', path: '/admin/help-assistant', icon: MessageSquare, roles: ['admin', 'board'] },
     { name: 'Accessibility', path: '/admin/accessibility-audit', icon: CheckSquare, roles: ['admin', 'board'] },
     { name: 'Analytics', path: '/admin/accessibility-analytics', icon: BarChart3, roles: ['admin', 'board'] },
+    { name: 'Membership Analytics', path: '/admin/membership-analytics', icon: CreditCard, roles: ['admin', 'board'] },
   ];
 
   const isActive = (path: string) => {
