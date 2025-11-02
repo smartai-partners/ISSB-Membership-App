@@ -339,7 +339,11 @@ export interface EscalatedConversation {
 // Accessibility Audit Types
 export type WCAGLevel = 'A' | 'AA' | 'AAA';
 export type IssueSeverity = 'critical' | 'high' | 'medium' | 'low';
-export type IssueStatus = 'open' | 'in_progress' | 'resolved' | 'wont_fix';
+// Phase 3C.2: Extended status workflow
+export type IssueStatus = 'open' | 'assigned' | 'in_progress' | 'under_review' | 'resolved' | 'closed' | 'wont_fix';
+export type IssuePriority = 'critical' | 'high' | 'medium' | 'low';
+export type VerificationStatus = 'pending' | 'verified' | 'failed';
+export type AuditPriority = 'critical' | 'high' | 'medium' | 'low';
 
 export interface AccessibilityAudit {
   id: string;
@@ -355,6 +359,13 @@ export interface AccessibilityAudit {
   medium_issues: number;
   low_issues: number;
   notes?: string;
+  // Phase 3C.2: Enhanced fields
+  progress_percentage?: number;
+  assigned_team?: string;
+  overall_deadline?: string;
+  priority?: AuditPriority;
+  tags?: string[];
+  component_name?: string;
   created_at: string;
   updated_at: string;
 }
@@ -365,10 +376,27 @@ export interface AccessibilityIssue {
   issue_type: string;
   severity: IssueSeverity;
   wcag_criterion?: string;
+  wcag_criteria?: string;
   description: string;
   affected_component?: string;
   recommended_fix?: string;
+  recommendation?: string;
+  element_selector?: string;
   status: IssueStatus;
+  // Phase 3C.2: Enhanced fields
+  assigned_to?: string;
+  assigned_to_name?: string;
+  priority?: IssuePriority;
+  deadline?: string;
+  resolution_notes?: string;
+  verification_status?: VerificationStatus;
+  estimated_effort?: string;
+  actual_effort?: string;
+  screenshot_before?: string;
+  screenshot_after?: string;
+  code_example?: string;
+  affected_users?: string;
+  component_name?: string;
   created_at: string;
   updated_at: string;
 }
@@ -387,4 +415,73 @@ export interface AuditSummaryMetrics {
   lowIssues: number;
   resolvedIssues: number;
   openIssues: number;
+}
+
+// Phase 3C.2: Team Members
+export type TeamRole = 'developer' | 'designer' | 'qa' | 'manager';
+export type TeamName = 'frontend' | 'backend' | 'design' | 'qa';
+
+export interface TeamMember {
+  id: string;
+  user_id?: string;
+  email: string;
+  full_name: string;
+  role: TeamRole;
+  team?: TeamName;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Phase 3C.2: Filter Presets
+export interface FilterPreset {
+  id: string;
+  user_id: string;
+  preset_name: string;
+  filters: Record<string, any>;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Phase 3C.2: Audit Timeline
+export type TimelineActionType = 'created' | 'status_changed' | 'assigned' | 'resolved' | 'commented';
+
+export interface AuditTimeline {
+  id: string;
+  audit_id?: string;
+  issue_id?: string;
+  action_type: TimelineActionType;
+  old_value?: string;
+  new_value?: string;
+  changed_by?: string;
+  changed_by_name?: string;
+  notes?: string;
+  created_at: string;
+}
+
+// Phase 3C.2: Bulk Operations
+export interface BulkUpdateResult {
+  success: number;
+  failed: number;
+  total: number;
+  errors?: Array<{ id: string; error: string }>;
+}
+
+// Phase 3C.2: Analytics
+export interface AuditAnalytics {
+  totalAudits: number;
+  averageComplianceScore: number;
+  averageProgress: number;
+  totalIssues: number;
+  statusBreakdown: Record<string, number>;
+  severityBreakdown: Record<string, number>;
+  priorityBreakdown: Record<string, number>;
+  teamBreakdown: Record<string, number>;
+  componentBreakdown: Record<string, number>;
+  trendData: Array<{
+    week: string;
+    created: number;
+    resolved: number;
+  }>;
 }
