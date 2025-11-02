@@ -18,6 +18,7 @@ import { EnhancedUsersManagementPage } from '@/pages/EnhancedUsersManagementPage
 import { MembershipsManagementPage } from '@/pages/MembershipsManagementPage';
 import { EventsManagementPage } from '@/pages/EventsManagementPage';
 import { AdminVolunteerManagement } from '@/pages/AdminVolunteerManagementPage';
+import { AdminVolunteerOpportunitiesPage } from '@/pages/AdminVolunteerOpportunitiesPage';
 import { AdminHelpAssistantPage } from '@/pages/AdminHelpAssistantPage';
 import EnhancedAdminAccessibilityAuditPage from '@/pages/EnhancedAdminAccessibilityAuditPage';
 import { AccessibilityAnalyticsPage } from '@/pages/AccessibilityAnalyticsPage';
@@ -127,6 +128,15 @@ function App() {
               element={
                 <ProtectedRoute roles={['admin', 'board']}>
                   <AdminVolunteerManagement />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/admin/volunteer-opportunities"
+              element={
+                <ProtectedRoute roles={['admin', 'board']}>
+                  <AdminVolunteerOpportunitiesPage />
                 </ProtectedRoute>
               }
             />

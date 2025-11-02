@@ -12,28 +12,28 @@
         "id": "25",
         "content": "Design integrated volunteer system database schema",
         "details": "Create volunteer_opportunities, volunteer_assignments tables that INTEGRATE with existing volunteer_hours table. No duplication - enhance the current system.",
-        "status": "in_progress",
+        "status": "completed",
         "priority": "high"
       },
       "26": {
         "id": "26",
         "content": "Develop migration path for existing volunteer hours",
         "details": "Create migration plan to convert existing volunteer_hours entries to new opportunities-based system. Ensure no duplicate data.",
-        "status": "pending",
+        "status": "completed",
         "priority": "high"
       },
       "27": {
         "id": "27",
         "content": "Build unified volunteer management backend",
         "details": "Create edge functions that provide opportunities AND enhanced hour logging. Replace existing volunteer functions, not add to them.",
-        "status": "pending",
+        "status": "completed",
         "priority": "high"
       },
       "28": {
         "id": "28",
         "content": "Build unified volunteer frontend experience",
         "details": "Replace current volunteer pages with enhanced opportunities-based interface. Single volunteer dashboard, not multiple systems.",
-        "status": "pending",
+        "status": "completed",
         "priority": "high"
       }
     }

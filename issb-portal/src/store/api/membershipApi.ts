@@ -76,15 +76,70 @@ export interface VolunteerHour {
   updated_at: string;
 }
 
+export interface VolunteerOpportunity {
+  id: string;
+  title: string;
+  description: string;
+  opportunity_type: string;
+  status: string;
+  start_date?: string;
+  end_date?: string;
+  hours_required: number;
+  capacity?: number;
+  current_volunteers?: number;
+  location?: string;
+  contact_person?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  required_skills?: string[];
+  category?: string;
+  image_url?: string;
+  date_time?: string;
+  duration_hours?: number;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  userAssignmentStatus?: string | null;
+}
+
+export interface VolunteerAssignment {
+  id: string;
+  opportunity_id: string;
+  user_id: string;
+  status: string;
+  assigned_date: string;
+  completed_date?: string;
+  hours_logged?: number;
+  notes?: string;
+  approved_by?: string;
+  approved_at?: string;
+  created_at: string;
+  updated_at: string;
+  volunteer_opportunities?: VolunteerOpportunity;
+  hours_entries?: VolunteerHour[];
+  total_approved_hours?: number;
+}
+
 export interface VolunteerProgress {
   subscription: Subscription | null;
   volunteerHours: VolunteerHour[];
+  assignments: VolunteerAssignment[];
+  upcomingOpportunities: VolunteerOpportunity[];
   summary: {
     totalApprovedHours: number;
     totalPendingHours: number;
     hoursNeeded: number;
     percentageComplete: number;
     membershipActivated: boolean;
+    activeAssignments: number;
+    completedAssignments: number;
+    hoursByOpportunity: {
+      opportunityId: string;
+      opportunityTitle: string | null;
+      approved: number;
+      pending: number;
+      total: number;
+    }[];
   };
 }
 
@@ -106,7 +161,7 @@ export interface MembershipAnalytics {
 export const membershipApi = createApi({
   reducerPath: 'membershipApi',
   baseQuery: fetchBaseQuery({ baseUrl: SUPABASE_URL }),
-  tagTypes: ['Subscription', 'FamilyMembers', 'Analytics', 'VolunteerHours'],
+  tagTypes: ['Subscription', 'FamilyMembers', 'Analytics', 'VolunteerHours', 'Opportunities', 'Assignments'],
   endpoints: (builder) => ({
     // Get current user's subscription status
     getSubscriptionStatus: builder.query<SubscriptionStatus, void>({
@@ -295,6 +350,133 @@ export const membershipApi = createApi({
       },
       invalidatesTags: ['VolunteerHours', 'Subscription', 'Analytics'],
     }),
+
+    // List volunteer opportunities
+    listOpportunities: builder.query<{ opportunities: VolunteerOpportunity[]; total: number }, { status?: string; category?: string; includeUserAssignments?: boolean }>({
+      queryFn: async ({ status, category, includeUserAssignments }) => {
+        try {
+          const params = new URLSearchParams();
+          if (status) params.append('status', status);
+          if (category) params.append('category', category);
+          if (includeUserAssignments) params.append('includeUserAssignments', 'true');
+          
+          const queryString = params.toString();
+          const url = `list-opportunities${queryString ? `?${queryString}` : ''}`;
+          
+          const { data, error } = await supabase.functions.invoke(url);
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      providesTags: ['Opportunities'],
+    }),
+
+    // Create volunteer opportunity (Admin only)
+    createOpportunity: builder.mutation<{ opportunity: VolunteerOpportunity; message: string }, Partial<VolunteerOpportunity>>({
+      queryFn: async (opportunityData) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('create-opportunity', {
+            body: opportunityData
+          });
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Opportunities'],
+    }),
+
+    // Update volunteer opportunity (Admin only)
+    updateOpportunity: builder.mutation<{ opportunity: VolunteerOpportunity; message: string }, { id: string; updates: Partial<VolunteerOpportunity> }>({
+      queryFn: async ({ id, updates }) => {
+        try {
+          const { data, error } = await supabase.functions.invoke(`update-opportunity?id=${id}`, {
+            body: updates
+          });
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Opportunities', 'Assignments'],
+    }),
+
+    // Delete volunteer opportunity (Admin only)
+    deleteOpportunity: builder.mutation<{ message: string }, string>({
+      queryFn: async (opportunityId) => {
+        try {
+          const { data, error } = await supabase.functions.invoke(`delete-opportunity?id=${opportunityId}`);
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Opportunities', 'Assignments'],
+    }),
+
+    // Signup for volunteer opportunity
+    signupForOpportunity: builder.mutation<{ assignment: VolunteerAssignment; message: string }, string>({
+      queryFn: async (opportunityId) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('signup-for-opportunity', {
+            body: { opportunityId }
+          });
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Assignments', 'Opportunities', 'VolunteerHours'],
+    }),
+
+    // Withdraw from volunteer opportunity
+    withdrawFromOpportunity: builder.mutation<{ message: string }, string>({
+      queryFn: async (opportunityId) => {
+        try {
+          const { data, error } = await supabase.functions.invoke(`withdraw-from-opportunity?opportunityId=${opportunityId}`);
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Assignments', 'Opportunities', 'VolunteerHours'],
+    }),
+
+    // Get member's volunteer assignments
+    getMemberAssignments: builder.query<{ assignments: VolunteerAssignment[]; total: number }, { status?: string }>({
+      queryFn: async ({ status }) => {
+        try {
+          const queryString = status ? `?status=${status}` : '';
+          const { data, error } = await supabase.functions.invoke(`get-member-assignments${queryString}`);
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      providesTags: ['Assignments'],
+    }),
   }),
 });
 
@@ -310,4 +492,11 @@ export const {
   useLogVolunteerHoursMutation,
   useGetVolunteerProgressQuery,
   useApproveVolunteerHoursMutation,
+  useListOpportunitiesQuery,
+  useCreateOpportunityMutation,
+  useUpdateOpportunityMutation,
+  useDeleteOpportunityMutation,
+  useSignupForOpportunityMutation,
+  useWithdrawFromOpportunityMutation,
+  useGetMemberAssignmentsQuery,
 } = membershipApi;

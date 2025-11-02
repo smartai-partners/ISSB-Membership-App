@@ -68,22 +68,78 @@ Deno.serve(async (req) => {
 
         const volunteerHours = await volunteerHoursResponse.json();
 
+        // Get member's active assignments
+        const assignmentsResponse = await fetch(
+            `${supabaseUrl}/rest/v1/volunteer_assignments?user_id=eq.${userId}&status=neq.cancelled&select=*,volunteer_opportunities(*)&order=assigned_date.desc`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${serviceRoleKey}`,
+                    'apikey': serviceRoleKey,
+                }
+            }
+        );
+
+        const assignments = await assignmentsResponse.json();
+
+        // Get upcoming active opportunities (for member to browse)
+        const upcomingOpportunitiesResponse = await fetch(
+            `${supabaseUrl}/rest/v1/volunteer_opportunities?status=eq.active&order=start_date.asc&limit=5`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${serviceRoleKey}`,
+                    'apikey': serviceRoleKey,
+                }
+            }
+        );
+
+        const upcomingOpportunities = await upcomingOpportunitiesResponse.json();
+
         // Calculate totals
         const approvedHours = volunteerHours.filter((h: any) => h.status === 'approved');
         const pendingHours = volunteerHours.filter((h: any) => h.status === 'pending');
         const totalApprovedHours = approvedHours.reduce((sum: number, h: any) => sum + parseFloat(h.hours), 0);
         const totalPendingHours = pendingHours.reduce((sum: number, h: any) => sum + parseFloat(h.hours), 0);
 
+        // Group hours by opportunity for breakdown
+        const hoursByOpportunity = volunteerHours.reduce((acc: any, hour: any) => {
+            const oppId = hour.opportunity_id || 'general';
+            if (!acc[oppId]) {
+                acc[oppId] = {
+                    opportunityId: oppId,
+                    opportunityTitle: oppId === 'general' ? 'General Volunteer Work' : null,
+                    approved: 0,
+                    pending: 0,
+                    total: 0
+                };
+            }
+            
+            const hours = parseFloat(hour.hours);
+            acc[oppId].total += hours;
+            
+            if (hour.status === 'approved') {
+                acc[oppId].approved += hours;
+            } else if (hour.status === 'pending') {
+                acc[oppId].pending += hours;
+            }
+            
+            return acc;
+        }, {});
+
         return new Response(JSON.stringify({
             data: {
                 subscription: activeSubscription || null,
                 volunteerHours: volunteerHours,
+                assignments: assignments,
+                upcomingOpportunities: upcomingOpportunities,
                 summary: {
                     totalApprovedHours: totalApprovedHours,
                     totalPendingHours: totalPendingHours,
                     hoursNeeded: Math.max(0, 30 - totalApprovedHours),
                     percentageComplete: Math.min(100, (totalApprovedHours / 30) * 100),
-                    membershipActivated: totalApprovedHours >= 30
+                    membershipActivated: totalApprovedHours >= 30,
+                    activeAssignments: assignments.filter((a: any) => a.status === 'confirmed').length,
+                    completedAssignments: assignments.filter((a: any) => a.status === 'completed').length,
+                    hoursByOpportunity: Object.values(hoursByOpportunity)
                 }
             }
         }), {
