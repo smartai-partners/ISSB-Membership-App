@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { LogIn, Mail, Lock, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
@@ -36,36 +38,39 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Sign in to ISSB Portal
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Islamic Society of Sarasota and Bradenton
-        </p>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Or{' '}
-          <Link to="/signup" className="font-medium text-green-600 hover:text-green-500">
-            create a new account
-          </Link>
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8 animate-fade-in">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-2xl mb-4">
+            <LogIn className="w-8 h-8 text-primary-600" />
+          </div>
+          <h2 className="text-4xl font-bold text-gray-900 mb-2">
+            Welcome Back
+          </h2>
+          <p className="text-lg text-gray-600 mb-1">
+            Sign in to ISSB Portal
+          </p>
+          <p className="text-sm text-gray-500">
+            Islamic Society of Sarasota and Bradenton
+          </p>
+        </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        {/* Login Card */}
+        <div className="bg-white rounded-2xl shadow-md p-8 border border-gray-100 animate-slide-up">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
+              <div className="bg-error-light border border-red-200 text-red-800 px-4 py-3 rounded-lg">
                 {error}
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="label-modern">
                 Email address
               </label>
-              <div className="mt-1">
+              <div className="relative mt-1">
+                <Mail className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
                 <input
                   id="email"
                   name="email"
@@ -74,16 +79,18 @@ export function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  className="input-modern pl-11"
+                  placeholder="you@example.com"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="label-modern">
                 Password
               </label>
-              <div className="mt-1">
+              <div className="relative mt-1">
+                <Lock className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
                 <input
                   id="password"
                   name="password"
@@ -92,21 +99,41 @@ export function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  className="input-modern pl-11"
+                  placeholder="••••••••"
                 />
               </div>
             </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-              >
-                {loading ? 'Signing in...' : 'Sign in'}
-              </button>
-            </div>
+            <Button
+              type="submit"
+              disabled={loading}
+              size="lg"
+              className="w-full"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  <LogIn className="h-5 w-5 mr-2" />
+                  Sign in
+                </>
+              )}
+            </Button>
           </form>
+
+          {/* Sign up link */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              Don't have an account?{' '}
+              <Link to="/signup" className="font-semibold text-primary-600 hover:text-primary-700">
+                Create account
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
