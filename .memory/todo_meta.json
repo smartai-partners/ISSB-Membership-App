@@ -122,14 +122,14 @@
       },
       "18": {
         "id": "18",
-        "content": "Phase 3D.2: Administrative Donation Management",
+        "content": "Administrative Donation Management",
         "details": "Build donation management dashboard with real-time monitoring, transaction history, donor management tools, financial reporting, and analytics. Integrate with existing admin interface patterns.",
         "status": "pending",
         "priority": "medium"
       },
       "19": {
         "id": "19",
-        "content": "Phase 3D.3: Advanced Donor Experience Features",
+        "content": "Advanced Donor Experience Features",
         "details": "Implement recurring donations, donor history, tax documentation, receipt management, and advanced donor segmentation. Include automated workflows for donor communication and impact reporting.",
         "status": "pending",
         "priority": "medium"
@@ -139,6 +139,20 @@
         "content": "Phase 3E.1: Membership Foundation Implementation",
         "details": "Successfully implemented complete membership management system with Stripe subscription integration, three membership tiers (Student $0, Individual $50, Family $150), family member management, and admin analytics dashboard. Deployed at https://3yfw1fsoobj2.space.minimax.io with comprehensive documentation and testing procedures.",
         "status": "completed",
+        "priority": "high"
+      },
+      "21": {
+        "id": "21",
+        "content": "Phase 3E.2: Membership Structure Update - Single Tier Model",
+        "details": "UPDATE REQUIRED: Replace 3-tier system with single membership model: Individual membership $360/year with volunteer hours (30 hours) or payment as payment options. Key changes: 1. Remove Student and Family tiers 2. Implement volunteer hour tracking system 3. Update pricing to $360/year ($30/month) 4. Integrate volunteer hours as payment alternative 5. Update donation system so membership fees covered first, remainder goes to donation 6. Update database schema and UI components",
+        "status": "pending",
+        "priority": "high"
+      },
+      "22": {
+        "id": "22",
+        "content": "Phase 3E.3: Volunteer Hours Management System",
+        "details": "Build comprehensive volunteer hour tracking and management system including: 1. Hour logging interface for members 2. Admin approval workflow for volunteer hours 3. Progress tracking toward 30-hour requirement 4. Volunteer opportunity integration 5. Automatic membership activation when 30 hours completed 6. Reporting and analytics for volunteer activities",
+        "status": "pending",
         "priority": "high"
       }
     }
