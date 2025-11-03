@@ -1,0 +1,160 @@
+Validation: Zod - Provides excellent TypeScript integration for schema definition and validation.
+
+
+Logging: Pino - A highly performant, low-overhead JSON logger. Essential for production environments.
+
+
+Environment Variables: dotenv - For loading environment variables from a .env file.
+
+
+HTTP Client: axios - A robust, promise-based HTTP client for making requests to the Gemini API and any other external services.
+
+
+Security Headers: helmet - Helps secure Express apps by setting various HTTP headers.
+
+
+CORS: cors - Middleware to enable Cross-Origin Resource Sharing.
+
+
+Rate Limiting: express-rate-limit - Basic protection against brute-force attacks and excessive API usage.
+
+
+Authentication Middleware: jsonwebtoken (for JWT signing/verification) and potentially passport.js for modular authentication strategies.
+
+
+ChatService:
+
+
+ProcessUserMessage(sessionId, userId, message, context):
+
+
+Session Management: Retrieve or create ChatSession and User context.
+
+
+Context Augmentation: Combine userId, userRole, membershipTier, and portal context with the user's message.
+
+
+History Retrieval: Fetch recent ChatMessages for the sessionId to maintain conversational context.
+
+
+Knowledge Base Retrieval (RAG):
+
+
+Call KnowledgeBaseService.search(query, context) with the user's message and contextual information.
+
+
+The KnowledgeBaseService will query an optimized knowledge base (e.g., using vector embeddings via Pinecone/Weaviate, or a full-text search engine like Elasticsearch/MeiliSearch for articles matching the query and context).
+
+
+Retrieve a few top-k relevant knowledge base articles/chunks.
+
+
+Prompt Engineering: Construct a detailed prompt for Gemini, including:
+
+
+System instructions (e.g., "You are a helpful assistant for the membership application...", "Answer based on provided context.").
+
+
+User context (role, tier, portal).
+
+
+Chat history.
+
+
+Retrieved knowledge base content (the most critical part for "AI-synthesized answers from a knowledge base").
+
+
+User's current message.
+
+
+Gemini API Call: Send the crafted prompt to GeminiService.generateResponse(prompt).
+
+
+Response Parsing: Parse Gemini's response. Extract the synthesized answer, identify if an escalation trigger (e.g., explicit phrases like "talk to a human", "escalate", or negative sentiment detected) or specific data points are present.
+
+
+Store Conversation: Save both the user's ChatMessage and Gemini's ChatMessage (along with knowledgeBaseSourceIds) to the database.
+
+
+Return: Respond with the AI's answer, escalationTriggered status, knowledgeBaseSources, and suggested followUpQuestions.
+
+
+GeminiService:
+
+
+Encapsulates all direct interactions with the Google Gemini API.
+
+
+Handles API key management (server-side), request formatting, and robust error handling for API calls.
+
+
+Methods like generateResponse(prompt: string, model: string = 'gemini-pro') or analyzeSentiment(text: string).
+
+
+KnowledgeBaseService:
+
+
+Manages the retrieval of information from the application's knowledge base.
+
+
+Search(query: string, context: ChatContext): This is the core RAG component. It could involve:
+
+
+Text-based keyword search on KnowledgeBaseArticle content.
+
+
+Vector similarity search if articles are embedded (more advanced, highly recommended for rich semantic search).
+
+
+Filtering results based on user role or membershipTier (e.g., admin-only articles).
+
+
+EscalationService:
+
+
+RequestEscalation(sessionId, userId, reason, conversationHistory):
+
+
+Creates an EscalationRequest record in the database.
+
+
+Triggers notifications to relevant Admin/Board Members (e.g., email, Slack, internal ticketing system integration).
+
+
+Provides context (session history, user details) to the human agent.
+
+
+Authentication: Implement JWT (JSON Web Tokens) for user authentication. Users must be authenticated before accessing any chatbot API endpoints. passport.js middleware can be used for robust JWT verification.
+
+
+Authorization: Middleware to check UserRole and MembershipTier from the authenticated JWT. This ensures users only access information and triggers relevant to their permissions (e.g., an Admin might have access to more comprehensive knowledge base articles than a Regular Member). The userId and role should be extracted from the token and passed down to services for contextual processing.
+
+
+API Input Validation: Use Zod (or similar) schemas to strictly validate all incoming request bodies and parameters in controllers. This prevents malformed requests and basic injection attacks.
+
+
+Prompt Injection Mitigation: Sanitize user input before sending it to the Gemini API. While Gemini has built-in safeguards, additional server-side sanitization (e.g., stripping harmful markdown, limiting length, identifying suspicious patterns) can help prevent malicious prompt injection attempts that aim to make the AI act out of character or reveal sensitive information.
+
+
+Gemini API Key: Store the Gemini API key securely as an environment variable (.env file) and never expose it to the client-side. The backend makes all direct calls to Gemini. Use a secret manager in production environments (e.g., AWS Secrets Manager, Google Secret Manager).
+
+
+Implement express-rate-limit on the chatbot endpoints to prevent abuse, DoS attacks, and control costs associated with Gemini API usage.
+
+
+Data Privacy (PII): Carefully consider what user information is passed to Gemini. Avoid sending PII unless absolutely necessary and with explicit user consent. If PII is sent, ensure Google's data privacy policies are aligned with requirements.
+
+
+Logging: Configure Pino to redact or mask sensitive data in logs. Avoid logging raw user messages that might contain PII, especially when logging Gemini's raw responses.
+
+
+Implement a global error handling middleware in Express to catch unhandled exceptions and return generic, non-informative error messages to the client. This prevents leaking internal server details or sensitive data.
+
+
+Utilize helmet middleware to set various HTTP security headers (e.g., X-Content-Type-Options, X-Frame-Options, Strict-Transport-Security, Content-Security-Policy) to mitigate common web vulnerabilities like XSS and clickjacking.
+
+
+Strictly configure the cors middleware to only allow requests from your trusted frontend domains, preventing unauthorized cross-origin requests.
+
+
+Regularly audit third-party dependencies for known vulnerabilities using tools like npm audit or Snyk. Keep dependencies updated.
