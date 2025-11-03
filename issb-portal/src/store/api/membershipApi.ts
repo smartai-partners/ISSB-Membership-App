@@ -177,10 +177,96 @@ export interface MembershipAnalytics {
   recentActivity: SubscriptionHistory[];
 }
 
+// Event & Gamification Types
+export interface Event {
+  id: string;
+  title: string;
+  description: string;
+  event_date: string;
+  location: string;
+  capacity: number;
+  status: string;
+  featured_image_url?: string;
+  created_at: string;
+  created_by: string;
+  registrations_count?: number;
+}
+
+export interface Gallery {
+  id: string;
+  title: string;
+  description: string;
+  event_id?: string;
+  created_at: string;
+  is_published: boolean;
+  photos_count?: number;
+  cover_image_url?: string;
+}
+
+export interface Photo {
+  id: string;
+  gallery_id: string;
+  image_url: string;
+  caption?: string;
+  uploaded_at: string;
+}
+
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon_url?: string;
+  achievement_criteria: any;
+  points_value: number;
+  badge_type: string;
+  created_at: string;
+  awarded_count?: number;
+}
+
+export interface MemberBadge {
+  id: string;
+  member_id: string;
+  badge_id: string;
+  awarded_at: string;
+  awarded_by?: string;
+  reason?: string;
+  member_name?: string;
+  member_email?: string;
+}
+
+export interface Contest {
+  id: string;
+  title: string;
+  description: string;
+  rules: string;
+  start_date: string;
+  end_date: string;
+  prize_description: string;
+  sponsor_name?: string;
+  sponsor_logo_url?: string;
+  status: string;
+  max_submissions_per_member: number;
+  created_at: string;
+  submissions_count?: number;
+}
+
+export interface ContestSubmission {
+  id: string;
+  contest_id: string;
+  member_id: string;
+  submission_text?: string;
+  attachment_url?: string;
+  submitted_at: string;
+  status: string;
+  admin_notes?: string;
+  member_name?: string;
+  member_email?: string;
+}
+
 export const membershipApi = createApi({
   reducerPath: 'membershipApi',
   baseQuery: fetchBaseQuery({ baseUrl: SUPABASE_URL }),
-  tagTypes: ['Subscription', 'FamilyMembers', 'Analytics', 'VolunteerHours', 'Opportunities', 'Assignments', 'Announcements'],
+  tagTypes: ['Subscription', 'FamilyMembers', 'Analytics', 'VolunteerHours', 'Opportunities', 'Assignments', 'Announcements', 'Events', 'Galleries', 'Photos', 'Badges', 'MemberBadges', 'Contests', 'Submissions'],
   endpoints: (builder) => ({
     // Get current user's subscription status
     getSubscriptionStatus: builder.query<SubscriptionStatus, void>({
@@ -572,6 +658,220 @@ export const membershipApi = createApi({
       },
       invalidatesTags: ['Announcements'],
     }),
+
+    // ===== EVENT MANAGEMENT ENDPOINTS =====
+    listEvents: builder.query<{ events: Event[] }, { status?: string }>({
+      queryFn: async ({ status }) => {
+        try {
+          const params = status ? `?status=${status}` : '';
+          const { data, error } = await supabase.functions.invoke(`list-events${params}`);
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      providesTags: ['Events'],
+    }),
+
+    createEvent: builder.mutation<{ event: Event; message: string }, Partial<Event>>({
+      queryFn: async (eventData) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('create-event', {
+            body: eventData
+          });
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Events'],
+    }),
+
+    updateEvent: builder.mutation<{ event: Event; message: string }, { id: string; updates: Partial<Event> }>({
+      queryFn: async ({ id, updates }) => {
+        try {
+          const { data, error } = await supabase.functions.invoke(`update-event?id=${id}`, {
+            body: updates
+          });
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Events'],
+    }),
+
+    deleteEvent: builder.mutation<{ message: string }, string>({
+      queryFn: async (eventId) => {
+        try {
+          const { data, error } = await supabase.functions.invoke(`delete-event?id=${eventId}`);
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Events'],
+    }),
+
+    // ===== GALLERY MANAGEMENT ENDPOINTS =====
+    listGalleries: builder.query<{ galleries: Gallery[] }, void>({
+      queryFn: async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke('list-galleries');
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      providesTags: ['Galleries'],
+    }),
+
+    createGallery: builder.mutation<{ gallery: Gallery; message: string }, Partial<Gallery>>({
+      queryFn: async (galleryData) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('create-gallery', {
+            body: galleryData
+          });
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Galleries'],
+    }),
+
+    uploadPhoto: builder.mutation<{ photo: Photo; message: string }, { gallery_id: string; image_url: string; caption?: string }>({
+      queryFn: async (photoData) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('upload-photo', {
+            body: photoData
+          });
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Photos', 'Galleries'],
+    }),
+
+    // ===== BADGE MANAGEMENT ENDPOINTS =====
+    listBadges: builder.query<{ badges: Badge[] }, void>({
+      queryFn: async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke('list-badges');
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      providesTags: ['Badges'],
+    }),
+
+    getMemberBadges: builder.query<{ badges: MemberBadge[] }, { badge_id?: string }>({
+      queryFn: async ({ badge_id }) => {
+        try {
+          const params = badge_id ? `?badge_id=${badge_id}` : '';
+          const { data, error } = await supabase.functions.invoke(`get-member-badges${params}`);
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      providesTags: ['MemberBadges'],
+    }),
+
+    awardBadge: builder.mutation<{ memberBadge: MemberBadge; message: string }, { badge_id: string; member_email: string; reason?: string }>({
+      queryFn: async (awardData) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('award-badge', {
+            body: awardData
+          });
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['MemberBadges', 'Badges'],
+    }),
+
+    checkAchievements: builder.mutation<{ message: string; awardsGiven: number }, void>({
+      queryFn: async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke('check-achievements');
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['MemberBadges', 'Badges'],
+    }),
+
+    // ===== CONTEST MANAGEMENT ENDPOINTS =====
+    listContests: builder.query<{ contests: Contest[] }, { status?: string }>({
+      queryFn: async ({ status }) => {
+        try {
+          const params = status ? `?status=${status}` : '';
+          const { data, error } = await supabase.functions.invoke(`list-contests${params}`);
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      providesTags: ['Contests'],
+    }),
+
+    createContest: builder.mutation<{ contest: Contest; message: string }, Partial<Contest>>({
+      queryFn: async (contestData) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('create-contest', {
+            body: contestData
+          });
+          
+          if (error) throw error;
+          
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Contests'],
+    }),
   }),
 });
 
@@ -598,4 +898,18 @@ export const {
   useCreateAnnouncementMutation,
   useUpdateAnnouncementMutation,
   useDeleteAnnouncementMutation,
+  // Event & Gamification hooks
+  useListEventsQuery,
+  useCreateEventMutation,
+  useUpdateEventMutation,
+  useDeleteEventMutation,
+  useListGalleriesQuery,
+  useCreateGalleryMutation,
+  useUploadPhotoMutation,
+  useListBadgesQuery,
+  useGetMemberBadgesQuery,
+  useAwardBadgeMutation,
+  useCheckAchievementsMutation,
+  useListContestsQuery,
+  useCreateContestMutation,
 } = membershipApi;

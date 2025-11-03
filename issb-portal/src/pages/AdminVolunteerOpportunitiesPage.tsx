@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import { useListOpportunitiesQuery, useCreateOpportunityMutation, useUpdateOpportunityMutation, useDeleteOpportunityMutation } from '@/store/api/membershipApi';
-import { Plus, Edit, Trash2, Calendar, MapPin, Users, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Calendar, MapPin, Users, Clock, CheckCircle, XCircle, Target, Image as ImageIcon, Award, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { EventManagement } from '@/components/admin/EventManagement';
+import { GalleryManagement } from '@/components/admin/GalleryManagement';
+import { BadgeManagement } from '@/components/admin/BadgeManagement';
+import { ContestManagement } from '@/components/admin/ContestManagement';
 
 interface OpportunityFormData {
   title: string;
@@ -21,6 +25,7 @@ interface OpportunityFormData {
 }
 
 export const AdminVolunteerOpportunitiesPage = () => {
+  const [activeTab, setActiveTab] = useState<'opportunities' | 'events' | 'galleries' | 'badges' | 'contests'>('opportunities');
   const [filter, setFilter] = useState<string>('all');
   const { data, isLoading, refetch } = useListOpportunitiesQuery({ status: filter === 'all' ? undefined : filter });
   const [createOpportunity] = useCreateOpportunityMutation();
@@ -148,8 +153,8 @@ export const AdminVolunteerOpportunitiesPage = () => {
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Manage Volunteer Opportunities</h1>
-          <p className="text-lg text-gray-600">Create and manage volunteer opportunities for members</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Admin Management Portal</h1>
+          <p className="text-lg text-gray-600">Manage volunteer opportunities, events, galleries, badges, and contests</p>
         </div>
 
         {message && (
@@ -160,7 +165,77 @@ export const AdminVolunteerOpportunitiesPage = () => {
           </Alert>
         )}
 
-        <div className="mb-6 flex items-center justify-between">
+        {/* Tabbed Navigation */}
+        <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden mb-8">
+          <div className="border-b border-gray-200">
+            <nav className="flex -mb-px">
+              <button
+                onClick={() => setActiveTab('opportunities')}
+                className={`flex-1 py-4 px-6 text-center font-semibold transition-colors ${
+                  activeTab === 'opportunities'
+                    ? 'border-b-2 border-primary-600 text-primary-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Target className="w-5 h-5 inline mr-2" />
+                Volunteer Opportunities
+              </button>
+              <button
+                onClick={() => setActiveTab('events')}
+                className={`flex-1 py-4 px-6 text-center font-semibold transition-colors ${
+                  activeTab === 'events'
+                    ? 'border-b-2 border-primary-600 text-primary-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Calendar className="w-5 h-5 inline mr-2" />
+                Events
+              </button>
+              <button
+                onClick={() => setActiveTab('galleries')}
+                className={`flex-1 py-4 px-6 text-center font-semibold transition-colors ${
+                  activeTab === 'galleries'
+                    ? 'border-b-2 border-primary-600 text-primary-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <ImageIcon className="w-5 h-5 inline mr-2" />
+                Photo Galleries
+              </button>
+              <button
+                onClick={() => setActiveTab('badges')}
+                className={`flex-1 py-4 px-6 text-center font-semibold transition-colors ${
+                  activeTab === 'badges'
+                    ? 'border-b-2 border-primary-600 text-primary-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Award className="w-5 h-5 inline mr-2" />
+                Badges & Achievements
+              </button>
+              <button
+                onClick={() => setActiveTab('contests')}
+                className={`flex-1 py-4 px-6 text-center font-semibold transition-colors ${
+                  activeTab === 'contests'
+                    ? 'border-b-2 border-primary-600 text-primary-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Trophy className="w-5 h-5 inline mr-2" />
+                Contests
+              </button>
+            </nav>
+          </div>
+
+          <div className="p-6 sm:p-8">
+            {activeTab === 'events' && <EventManagement />}
+            {activeTab === 'galleries' && <GalleryManagement />}
+            {activeTab === 'badges' && <BadgeManagement />}
+            {activeTab === 'contests' && <ContestManagement />}
+            
+            {activeTab === 'opportunities' && (
+              <div>
+                <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <select
               value={filter}
@@ -444,6 +519,10 @@ export const AdminVolunteerOpportunitiesPage = () => {
               <p className="text-gray-600">No opportunities found.</p>
             </div>
           )}
+        </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

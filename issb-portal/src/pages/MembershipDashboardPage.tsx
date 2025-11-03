@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useGetSubscriptionStatusQuery, useGetVolunteerProgressQuery, useLogVolunteerHoursMutation, useGetMemberAssignmentsQuery } from '@/store/api/membershipApi';
-import { CheckCircle, Clock, XCircle, Calendar, FileText, Award, AlertCircle, TrendingUp, Users, Target } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, Calendar, FileText, Award, AlertCircle, TrendingUp, Users, Target, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { OpportunitiesBrowse } from '@/components/volunteer/OpportunitiesBrowse';
 import { MyAssignments } from '@/components/volunteer/MyAssignments';
+import { EventsList } from '@/components/events/EventsList';
+import { MemberAchievements } from '@/components/achievements/MemberAchievements';
+import { ActiveContests } from '@/components/contests/ActiveContests';
 
 export const MembershipDashboardPage = () => {
   const navigate = useNavigate();
@@ -17,7 +20,7 @@ export const MembershipDashboardPage = () => {
   const { data: assignmentsData } = useGetMemberAssignmentsQuery({});
   const [logVolunteerHours] = useLogVolunteerHoursMutation();
 
-  const [activeTab, setActiveTab] = useState<'progress' | 'opportunities' | 'assignments' | 'log'>('progress');
+  const [activeTab, setActiveTab] = useState<'progress' | 'opportunities' | 'assignments' | 'log' | 'events' | 'achievements' | 'contests'>('progress');
   const [formData, setFormData] = useState({
     hours: '',
     date: '',
@@ -280,6 +283,39 @@ export const MembershipDashboardPage = () => {
                     <TrendingUp className="w-5 h-5 inline mr-2" />
                     History
                   </button>
+                  <button
+                    onClick={() => setActiveTab('events')}
+                    className={`flex-1 py-4 px-6 text-center font-semibold transition-colors ${
+                      activeTab === 'events'
+                        ? 'border-b-2 border-primary-600 text-primary-600'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Calendar className="w-5 h-5 inline mr-2" />
+                    Events
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('achievements')}
+                    className={`flex-1 py-4 px-6 text-center font-semibold transition-colors ${
+                      activeTab === 'achievements'
+                        ? 'border-b-2 border-primary-600 text-primary-600'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Award className="w-5 h-5 inline mr-2" />
+                    Achievements
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('contests')}
+                    className={`flex-1 py-4 px-6 text-center font-semibold transition-colors ${
+                      activeTab === 'contests'
+                        ? 'border-b-2 border-primary-600 text-primary-600'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Trophy className="w-5 h-5 inline mr-2" />
+                    Contests
+                  </button>
                 </nav>
               </div>
 
@@ -287,6 +323,12 @@ export const MembershipDashboardPage = () => {
                 {activeTab === 'opportunities' && <OpportunitiesBrowse />}
                 
                 {activeTab === 'assignments' && <MyAssignments />}
+                
+                {activeTab === 'events' && <EventsList />}
+                
+                {activeTab === 'achievements' && <MemberAchievements />}
+                
+                {activeTab === 'contests' && <ActiveContests />}
                 
                 {activeTab === 'log' && (
                   <div>
