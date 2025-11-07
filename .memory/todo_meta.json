@@ -5,14 +5,14 @@
         "id": "1",
         "content": "Database schema creation for AI Help Assistant",
         "details": "Create 4 new tables: chat_sessions, chat_messages, knowledge_base_articles, escalation_requests. Ensure proper relationships with existing auth.users table and maintain backward compatibility.",
-        "status": "pending",
+        "status": "in_progress",
         "priority": "high"
       },
       "2": {
         "id": "2",
         "content": "Implement core Supabase edge functions",
         "details": "Develop 6 edge functions: chat-message, chat-history, chat-create-session, chat-escalate, knowledge-base-search, admin-escalation-management. Include proper error handling, rate limiting, and security measures.",
-        "status": "pending",
+        "status": "in_progress",
         "priority": "high"
       },
       "3": {
