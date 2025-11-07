@@ -20,6 +20,7 @@ import { EventsManagementPage } from '@/pages/EventsManagementPage';
 import { AdminVolunteerManagement } from '@/pages/AdminVolunteerManagementPage';
 import { AdminVolunteerOpportunitiesPage } from '@/pages/AdminVolunteerOpportunitiesPage';
 import { AdminHelpAssistantPage } from '@/pages/AdminHelpAssistantPage';
+import { AdminAIAssistantPage } from '@/pages/AdminAIAssistantPage';
 import EnhancedAdminAccessibilityAuditPage from '@/pages/EnhancedAdminAccessibilityAuditPage';
 import { AccessibilityAnalyticsPage } from '@/pages/AccessibilityAnalyticsPage';
 import { MembershipPlansPage } from '@/pages/MembershipPlansPage';
@@ -157,6 +158,15 @@ function App() {
               element={
                 <ProtectedRoute roles={['admin', 'board']}>
                   <AdminHelpAssistantPage />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/admin/ai-assistant"
+              element={
+                <ProtectedRoute roles={['admin', 'board']}>
+                  <AdminAIAssistantPage />
                 </ProtectedRoute>
               }
             />

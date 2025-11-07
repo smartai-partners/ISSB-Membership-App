@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Navbar } from './Navbar';
+import { FloatingChatWidget } from '../chat/FloatingChatWidget';
 
 export function Layout() {
   return (
@@ -9,6 +10,7 @@ export function Layout() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Outlet />
       </main>
+      <FloatingChatWidget />
     </div>
   );
 }
