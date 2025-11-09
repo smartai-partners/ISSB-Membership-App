@@ -266,21 +266,23 @@ export function Navbar({ className = '' }: NavbarProps) {
         </div>
       )}
 
-      {/* Floating Action Buttons - Mobile Only */}
+      {/* Enhanced Floating Action Buttons - Mobile Only */}
       <div className="fixed bottom-6 right-6 md:hidden flex flex-col gap-3 z-50">
         <Link
           to="/volunteers"
-          className="flex items-center justify-center w-14 h-14 bg-green-600 text-white rounded-full shadow-2xl hover:bg-green-700 transform hover:scale-110 transition"
+          className="flex items-center justify-center w-14 h-14 bg-green-600 text-white rounded-full shadow-2xl hover:bg-green-700 hover:shadow-green-500/25 transform hover:scale-110 transition-all duration-300 hover-lift group"
           title="Volunteer"
         >
-          <Users className="w-6 h-6" />
+          <Users className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" />
+          <div className="absolute inset-0 bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </Link>
         <Link
           to="/donations"
-          className="flex items-center justify-center w-14 h-14 bg-amber-500 text-white rounded-full shadow-2xl hover:bg-amber-600 transform hover:scale-110 transition"
+          className="flex items-center justify-center w-14 h-14 bg-amber-500 text-white rounded-full shadow-2xl hover:bg-amber-600 hover:shadow-amber-500/25 transform hover:scale-110 transition-all duration-300 hover-lift group"
           title="Donate"
         >
-          <Heart className="w-6 h-6" />
+          <Heart className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" />
+          <div className="absolute inset-0 bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </Link>
       </div>
     </nav>

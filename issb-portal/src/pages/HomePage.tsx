@@ -107,95 +107,146 @@ export function HomePage() {
         </div>
       </div>
 
-      {/* Impact Metrics - Social Proof */}
-      <div className="bg-gradient-to-r from-emerald-600 to-green-600 rounded-lg shadow-xl p-8 text-white">
-        <h2 className="text-2xl font-bold mb-6 text-center">Our Community Impact</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="text-center">
-            <div className="text-4xl md:text-5xl font-bold mb-2">{metrics.totalVolunteerHours}+</div>
-            <div className="text-green-100 text-sm md:text-base">Volunteer Hours This Year</div>
+      {/* Impact Metrics - Enhanced with Animations */}
+      <div className="bg-gradient-to-r from-emerald-600 to-green-600 rounded-lg shadow-xl p-8 text-white animate-fade-in">
+        <h2 className="text-2xl font-bold mb-8 text-center">Our Community Impact</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 animate-stagger">
+          <div className="text-center group hover:scale-105 transition-transform duration-300">
+            <div className="text-4xl md:text-5xl font-bold mb-2 group-hover:text-green-100 transition-colors duration-200">
+              {loading ? (
+                <div className="h-12 bg-green-400/30 rounded animate-pulse-soft mx-auto w-20" />
+              ) : (
+                <>
+                  {metrics.totalVolunteerHours}+
+                  <div className="animate-bounce-in text-2xl">🎯</div>
+                </>
+              )}
+            </div>
+            <div className="text-green-100 text-sm md:text-base group-hover:text-white transition-colors duration-200">Volunteer Hours This Year</div>
           </div>
-          <div className="text-center">
-            <div className="text-4xl md:text-5xl font-bold mb-2">${(metrics.totalDonations / 1000).toFixed(0)}K</div>
-            <div className="text-green-100 text-sm md:text-base">Raised for Community</div>
+          <div className="text-center group hover:scale-105 transition-transform duration-300">
+            <div className="text-4xl md:text-5xl font-bold mb-2 group-hover:text-green-100 transition-colors duration-200">
+              {loading ? (
+                <div className="h-12 bg-green-400/30 rounded animate-pulse-soft mx-auto w-16" />
+              ) : (
+                <>
+                  ${(metrics.totalDonations / 1000).toFixed(0)}K
+                  <div className="animate-bounce-in text-2xl">💝</div>
+                </>
+              )}
+            </div>
+            <div className="text-green-100 text-sm md:text-base group-hover:text-white transition-colors duration-200">Raised for Community</div>
           </div>
-          <div className="text-center">
-            <div className="text-4xl md:text-5xl font-bold mb-2">{metrics.activeVolunteers}</div>
-            <div className="text-green-100 text-sm md:text-base">Active Volunteers</div>
+          <div className="text-center group hover:scale-105 transition-transform duration-300">
+            <div className="text-4xl md:text-5xl font-bold mb-2 group-hover:text-green-100 transition-colors duration-200">
+              {loading ? (
+                <div className="h-12 bg-green-400/30 rounded animate-pulse-soft mx-auto w-12" />
+              ) : (
+                <>
+                  {metrics.activeVolunteers}
+                  <div className="animate-bounce-in text-2xl">👥</div>
+                </>
+              )}
+            </div>
+            <div className="text-green-100 text-sm md:text-base group-hover:text-white transition-colors duration-200">Active Volunteers</div>
           </div>
-          <div className="text-center">
-            <div className="text-4xl md:text-5xl font-bold mb-2">{metrics.totalMembers}+</div>
-            <div className="text-green-100 text-sm md:text-base">Community Members</div>
+          <div className="text-center group hover:scale-105 transition-transform duration-300">
+            <div className="text-4xl md:text-5xl font-bold mb-2 group-hover:text-green-100 transition-colors duration-200">
+              {loading ? (
+                <div className="h-12 bg-green-400/30 rounded animate-pulse-soft mx-auto w-12" />
+              ) : (
+                <>
+                  {metrics.totalMembers}+
+                  <div className="animate-bounce-in text-2xl">🏛️</div>
+                </>
+              )}
+            </div>
+            <div className="text-green-100 text-sm md:text-base group-hover:text-white transition-colors duration-200">Community Members</div>
           </div>
         </div>
-        <div className="mt-6 text-center">
-          <p className="text-green-100 text-lg">
+        <div className="mt-8 text-center">
+          <p className="text-green-100 text-lg group-hover:text-white transition-colors duration-200">
             Join {metrics.activeVolunteers} volunteers who are making a difference this month
             {!metrics.isRealData && (
-              <span className="text-xs opacity-75 block mt-1">(Demo data - will update with real metrics)</span>
+              <span className="text-xs opacity-75 block mt-2 animate-pulse-soft">(Demo data - will update with real metrics)</span>
             )}
           </p>
         </div>
       </div>
 
-      {/* Featured Opportunities - Top 3 Cards */}
+      {/* Featured Opportunities - Enhanced Cards with Micro-interactions */}
       <div>
-        <h2 className="text-3xl font-bold mb-6 text-gray-900 text-center">Get Involved Today</h2>
-        <div className="grid md:grid-cols-3 gap-6">
+        <h2 className="text-3xl font-bold mb-8 text-gray-900 text-center animate-fade-in">Get Involved Today</h2>
+        <div className="grid md:grid-cols-3 gap-8 animate-stagger">
           {/* Volunteer Now - Featured */}
           <Link
             to="/volunteers"
-            className="bg-gradient-to-br from-green-50 to-emerald-50 border-4 border-green-500 rounded-xl shadow-xl p-8 hover:shadow-2xl transition transform hover:scale-105 group relative overflow-hidden"
+            className="group relative"
           >
-            <div className="absolute top-0 right-0 bg-green-600 text-white px-4 py-1 rounded-bl-xl text-sm font-bold">
-              Most Popular
-            </div>
-            <div className="flex items-center justify-center w-16 h-16 bg-green-600 rounded-xl mb-4 group-hover:bg-green-700 transition">
-              <Users className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="text-2xl font-bold mb-3 text-gray-900">Volunteer Now</h3>
-            <p className="text-gray-700 mb-4 leading-relaxed">
-              Join our community service projects and make a real difference. Help us reach our goal of 1,000 volunteer hours.
-            </p>
-            <div className="flex items-center text-green-700 font-semibold">
-              View Opportunities
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-4 border-green-500 rounded-xl shadow-xl p-8 hover:shadow-2xl transition-all duration-500 transform hover:scale-105 hover-lift interactive-card relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-green-600 text-white px-4 py-1 rounded-bl-xl text-sm font-bold animate-pulse-soft">
+                Most Popular
+              </div>
+              <div className="flex items-center justify-center w-16 h-16 bg-green-600 rounded-xl mb-6 group-hover:bg-green-700 transition-all duration-300 group-hover:scale-110">
+                <Users className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-3 text-gray-900 group-hover:text-green-700 transition-colors duration-200">Volunteer Now</h3>
+              <p className="text-gray-700 mb-6 leading-relaxed">
+                Join our community service projects and make a real difference. Help us reach our goal of 1,000 volunteer hours.
+              </p>
+              <div className="flex items-center text-green-700 font-semibold group-hover:text-green-800 transition-colors duration-200">
+                View Opportunities
+                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
+              </div>
+              
+              {/* Hover effect overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
             </div>
           </Link>
 
           {/* Donate Today */}
           <Link
             to="/donations"
-            className="bg-gradient-to-br from-amber-50 to-orange-50 border-4 border-amber-500 rounded-xl shadow-xl p-8 hover:shadow-2xl transition transform hover:scale-105 group"
+            className="group relative"
           >
-            <div className="flex items-center justify-center w-16 h-16 bg-amber-600 rounded-xl mb-4 group-hover:bg-amber-700 transition">
-              <Heart className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="text-2xl font-bold mb-3 text-gray-900">Donate Today</h3>
-            <p className="text-gray-700 mb-4 leading-relaxed">
-              Support our mosque and community programs. Every donation helps us serve the community better.
-            </p>
-            <div className="flex items-center text-amber-700 font-semibold">
-              Make a Donation
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-4 border-amber-500 rounded-xl shadow-xl p-8 hover:shadow-2xl transition-all duration-500 transform hover:scale-105 hover-lift interactive-card">
+              <div className="flex items-center justify-center w-16 h-16 bg-amber-600 rounded-xl mb-6 group-hover:bg-amber-700 transition-all duration-300 group-hover:scale-110">
+                <Heart className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-3 text-gray-900 group-hover:text-amber-700 transition-colors duration-200">Donate Today</h3>
+              <p className="text-gray-700 mb-6 leading-relaxed">
+                Support our mosque and community programs. Every donation helps us serve the community better.
+              </p>
+              <div className="flex items-center text-amber-700 font-semibold group-hover:text-amber-800 transition-colors duration-200">
+                Make a Donation
+                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
+              </div>
+              
+              {/* Hover effect overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
             </div>
           </Link>
 
           {/* Upcoming Events */}
           <Link
             to="/events"
-            className="bg-gradient-to-br from-blue-50 to-cyan-50 border-4 border-blue-500 rounded-xl shadow-xl p-8 hover:shadow-2xl transition transform hover:scale-105 group"
+            className="group relative"
           >
-            <div className="flex items-center justify-center w-16 h-16 bg-blue-600 rounded-xl mb-4 group-hover:bg-blue-700 transition">
-              <Calendar className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="text-2xl font-bold mb-3 text-gray-900">Upcoming Events</h3>
-            <p className="text-gray-700 mb-4 leading-relaxed">
-              Prayer times, Islamic programs, and community gatherings. Stay connected with your community.
-            </p>
-            <div className="flex items-center text-blue-700 font-semibold">
-              View Calendar
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-4 border-blue-500 rounded-xl shadow-xl p-8 hover:shadow-2xl transition-all duration-500 transform hover:scale-105 hover-lift interactive-card">
+              <div className="flex items-center justify-center w-16 h-16 bg-blue-600 rounded-xl mb-6 group-hover:bg-blue-700 transition-all duration-300 group-hover:scale-110">
+                <Calendar className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-3 text-gray-900 group-hover:text-blue-700 transition-colors duration-200">Upcoming Events</h3>
+              <p className="text-gray-700 mb-6 leading-relaxed">
+                Prayer times, Islamic programs, and community gatherings. Stay connected with your community.
+              </p>
+              <div className="flex items-center text-blue-700 font-semibold group-hover:text-blue-800 transition-colors duration-200">
+                View Calendar
+                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
+              </div>
+              
+              {/* Hover effect overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
             </div>
           </Link>
         </div>
