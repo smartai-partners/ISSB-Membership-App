@@ -90,7 +90,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       // Support Enter and Space keys
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        onClick?.(e);
+        // Trigger the native click event to maintain proper event types
+        e.currentTarget.click();
       }
       
       onKeyDown?.(e);
