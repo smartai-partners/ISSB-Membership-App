@@ -193,7 +193,10 @@ export function Navbar({ className = '' }: NavbarProps) {
                       
                       {/* Admin Dropdown Menu */}
                       {isOpen && (
-                        <div className="absolute top-full left-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50">
+                        <div 
+                          className="absolute top-full left-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-2xl z-[99998] backdrop-blur-sm"
+                          style={{ zIndex: 999998 }}
+                        >
                           <div className="p-4">
                             {menu.groups.map((group) => {
                               const groupItems = group.items.filter(canAccess);
@@ -274,7 +277,10 @@ export function Navbar({ className = '' }: NavbarProps) {
                   
                   {/* User Dropdown Menu */}
                   {openUserDropdown && (
-                    <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-xl z-[9999]">
+                    <div 
+                      className="absolute top-full right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-2xl z-[99999] backdrop-blur-sm"
+                      style={{ zIndex: 999999 }}
+                    >
                       <div className="p-2">
                         <div className="px-3 py-2 border-b border-gray-100 mb-2">
                           <div className="text-sm font-medium text-gray-900">
