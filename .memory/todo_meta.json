@@ -3,51 +3,23 @@
     "Coordinator": {
       "1": {
         "id": "1",
-        "content": "Analyze current UI/UX implementation",
-        "details": "Examine existing React components, design patterns, navigation structure, responsive design, accessibility features, and user workflows to identify improvement opportunities",
-        "status": "completed",
+        "content": "Fix add user button functionality",
+        "details": "Investigate and fix the add user button implementation to ensure proper user creation flow, form validation, and error handling",
+        "status": "pending",
         "priority": "high"
       },
       "2": {
         "id": "2",
-        "content": "Create comprehensive UI/UX improvement plan",
-        "details": "Based on analysis, develop detailed improvement plan covering: navigation enhancements, component design, mobile optimization, accessibility improvements, loading states, error handling, and user flow optimization",
-        "status": "completed",
-        "priority": "high"
+        "content": "Optimize admin bar length and layout",
+        "details": "Redesign admin bar to reduce length, improve navigation efficiency, and enhance user experience for admin functions",
+        "status": "pending",
+        "priority": "medium"
       },
       "3": {
         "id": "3",
-        "content": "Implement visual design improvements",
-        "details": "Enhance visual hierarchy, typography, color schemes, spacing, component styling, and modern design patterns while maintaining Islamic community branding",
-        "status": "completed",
-        "priority": "high"
-      },
-      "4": {
-        "id": "4",
-        "content": "Optimize mobile and responsive experience",
-        "details": "Improve mobile navigation, touch interactions, responsive layouts, and ensure seamless experience across all device sizes",
-        "status": "completed",
-        "priority": "high"
-      },
-      "5": {
-        "id": "5",
-        "content": "Enhance accessibility and usability",
-        "details": "Implement WCAG 2.1 AA compliance improvements, keyboard navigation, screen reader support, focus management, and inclusive design patterns",
-        "status": "completed",
-        "priority": "high"
-      },
-      "6": {
-        "id": "6",
-        "content": "Improve loading states and micro-interactions",
-        "details": "Add smooth loading animations, progress indicators, hover effects, transitions, and feedback mechanisms for better user engagement",
-        "status": "completed",
-        "priority": "medium"
-      },
-      "7": {
-        "id": "7",
-        "content": "Deploy and test improvements",
-        "details": "Deploy enhanced UI/UX, conduct user testing, gather feedback, and ensure all improvements work seamlessly across the portal",
-        "status": "completed",
+        "content": "Fix membership analytics functionality",
+        "details": "Debug and fix membership analytics data fetching, chart rendering, and dashboard display issues",
+        "status": "pending",
         "priority": "high"
       }
     }
