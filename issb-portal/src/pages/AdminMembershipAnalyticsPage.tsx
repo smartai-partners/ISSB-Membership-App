@@ -23,14 +23,36 @@ export const AdminMembershipAnalyticsPage: React.FC = () => {
     );
   }
 
-  if (error) {
+  // Show loading state
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4">
         <div className="max-w-2xl mx-auto text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Error Loading Analytics</h1>
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Loading Analytics...</h1>
           <p className="text-gray-600">
-            Failed to load membership analytics. Please check your permissions and try again.
+            Fetching membership data and analytics
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error only if we have no data at all
+  if (error && !analytics) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12 px-4">
+        <div className="max-w-2xl mx-auto text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Unable to Load Analytics</h1>
+          <p className="text-gray-600 mb-4">
+            There was an issue connecting to the analytics service. Please try refreshing the page.
+          </p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            Refresh Page
+          </button>
         </div>
       </div>
     );
