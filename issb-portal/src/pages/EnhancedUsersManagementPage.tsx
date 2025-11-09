@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { ColumnDef } from '@tanstack/react-table';
 import { Edit, Trash2, MoreVertical, UserPlus, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useGetAllUsersQuery, useUpdateUserProfileMutation, useDeleteUserMutation } from '@/store/api/adminApi';
+import { useGetAllUsersQuery, useUpdateUserProfileMutation, useDeleteUserMutation, useCreateUserMutation } from '@/store/api/adminApi';
 import { DataTable } from '@/components/admin/DataTable';
 import { UserFilters, UserFilterValues } from '@/components/admin/UserFilters';
 import { Button } from '@/components/ui/button';
@@ -85,6 +85,18 @@ export function EnhancedUsersManagementPage() {
   const [showAddUserDialog, setShowAddUserDialog] = useState(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+  
+  // New user form state
+  const [newUser, setNewUser] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    role: 'member' as UserRole,
+    status: 'pending' as UserStatus,
+    phone: '',
+  });
+  const [newUserFormErrors, setNewUserFormErrors] = useState<FormErrors>({});
+  const [newUserTouchedFields, setNewUserTouchedFields] = useState<Set<string>>(new Set());
 
   // RTK Query hooks
   const { data, isLoading, error, refetch } = useGetAllUsersQuery({
@@ -100,6 +112,7 @@ export function EnhancedUsersManagementPage() {
 
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserProfileMutation();
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const [createUser, { isLoading: isCreating }] = useCreateUserMutation();
 
   // Check authorization
   React.useEffect(() => {
@@ -163,6 +176,29 @@ export function EnhancedUsersManagementPage() {
     }
   };
 
+  // New user form handlers
+  const handleNewUserFieldChange = (fieldName: keyof typeof newUser, value: string) => {
+    setNewUser({ ...newUser, [fieldName]: value });
+
+    // Clear error when user starts typing
+    if (newUserTouchedFields.has(fieldName)) {
+      const error = validateField(fieldName as keyof FormErrors, value);
+      setNewUserFormErrors((prev) => ({
+        ...prev,
+        [fieldName]: error,
+      }));
+    }
+  };
+
+  const handleNewUserFieldBlur = (fieldName: keyof FormErrors, value: string) => {
+    setNewUserTouchedFields((prev) => new Set(prev).add(fieldName));
+    const error = validateField(fieldName, value);
+    setNewUserFormErrors((prev) => ({
+      ...prev,
+      [fieldName]: error,
+    }));
+  };
+
   // Validate entire form
   const validateForm = (): boolean => {
     if (!editingUser) return false;
@@ -183,6 +219,88 @@ export function EnhancedUsersManagementPage() {
 
     setFormErrors(cleanedErrors);
     return Object.keys(cleanedErrors).length === 0;
+  };
+
+  // Validate new user form
+  const validateNewUserForm = (): boolean => {
+    const errors: FormErrors = {
+      first_name: validateField('first_name', newUser.first_name),
+      last_name: validateField('last_name', newUser.last_name),
+      email: validateField('email', newUser.email),
+      phone: validateField('phone', newUser.phone || ''),
+      role: validateField('role', newUser.role),
+      status: validateField('status', newUser.status),
+    };
+
+    // Remove undefined errors
+    const cleanedErrors = Object.fromEntries(
+      Object.entries(errors).filter(([_, v]) => v !== undefined)
+    ) as FormErrors;
+
+    setNewUserFormErrors(cleanedErrors);
+    return Object.keys(cleanedErrors).length === 0;
+  };
+
+  // Handle create user
+  const handleCreateUser = async () => {
+    // Validate form
+    if (!validateNewUserForm()) {
+      toastError.validationFailed('Please fix the errors before creating the user.');
+      return;
+    }
+
+    const toastId = toastLoading.creating();
+
+    try {
+      const createdUser = await createUser({
+        first_name: newUser.first_name,
+        last_name: newUser.last_name,
+        email: newUser.email,
+        role: newUser.role,
+        status: newUser.status,
+        phone: newUser.phone || undefined,
+      }).unwrap();
+
+      dismissToast(toastId);
+      toastSuccess.userCreated(`${createdUser.first_name} ${createdUser.last_name}`);
+
+      // Reset form and close dialog
+      setNewUser({
+        first_name: '',
+        last_name: '',
+        email: '',
+        role: 'member',
+        status: 'pending',
+        phone: '',
+      });
+      setNewUserFormErrors({});
+      setNewUserTouchedFields(new Set());
+      setShowAddUserDialog(false);
+      refetch();
+
+      // TODO: Send invitation email functionality
+      // This would be implemented with an email service
+      console.log(`Invitation email would be sent to ${newUser.email}`);
+    } catch (error: any) {
+      dismissToast(toastId);
+      const mappedError = mapSupabaseError(error);
+      toastError.createFailed(mappedError.message);
+    }
+  };
+
+  // Handle close add user dialog
+  const handleCloseAddUserDialog = () => {
+    setShowAddUserDialog(false);
+    setNewUser({
+      first_name: '',
+      last_name: '',
+      email: '',
+      role: 'member',
+      status: 'pending',
+      phone: '',
+    });
+    setNewUserFormErrors({});
+    setNewUserTouchedFields(new Set());
   };
 
   // Define table columns
@@ -675,28 +793,256 @@ export function EnhancedUsersManagementPage() {
 
       {/* Add User Dialog */}
       <Dialog open={showAddUserDialog} onOpenChange={setShowAddUserDialog}>
-        <DialogContent>
+        <DialogContent 
+          className="sm:max-w-[500px]"
+          onEscapeKeyDown={handleCloseAddUserDialog}
+        >
           <DialogHeader>
             <DialogTitle>Add New User</DialogTitle>
             <DialogDescription>
-              Create a new user account. This will send an invitation email to the user.
+              Create a new user account. This will send an invitation email to the user with login credentials.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="text-center py-8 text-gray-500">
-              <UserPlus className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium mb-2">Add User Feature Coming Soon</h3>
-              <p className="text-sm">This feature will be implemented in a future update.</p>
+            {/* Form error summary for screen readers */}
+            {Object.keys(newUserFormErrors).length > 0 && (
+              <div 
+                role="alert" 
+                aria-live="assertive"
+                className="bg-red-50 border border-red-200 rounded-md p-3"
+              >
+                <div className="flex items-start">
+                  <AlertCircle className="h-5 w-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-red-800">
+                    <strong>Please fix the following errors:</strong>
+                    <ul className="list-disc list-inside mt-1">
+                      {Object.entries(newUserFormErrors).map(([field, error]) => (
+                        <li key={field}>{error}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              {/* First Name */}
+              <div>
+                <Label htmlFor="new-user-first-name">
+                  First Name <span className="text-red-600" aria-label="required">*</span>
+                </Label>
+                <Input
+                  id="new-user-first-name"
+                  value={newUser.first_name}
+                  onChange={(e) => handleNewUserFieldChange('first_name', e.target.value)}
+                  onBlur={(e) => handleNewUserFieldBlur('first_name', e.target.value)}
+                  aria-invalid={!!newUserFormErrors.first_name}
+                  aria-describedby={newUserFormErrors.first_name ? 'new-user-first-name-error' : undefined}
+                  className={newUserFormErrors.first_name ? 'border-red-500 focus:ring-red-500' : ''}
+                  placeholder="Enter first name"
+                />
+                {newUserFormErrors.first_name && (
+                  <p id="new-user-first-name-error" className="text-sm text-red-600 mt-1 flex items-center">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    {newUserFormErrors.first_name}
+                  </p>
+                )}
+                {!newUserFormErrors.first_name && newUserTouchedFields.has('first_name') && newUser.first_name && (
+                  <p className="text-sm text-green-600 mt-1 flex items-center">
+                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                    Valid
+                  </p>
+                )}
+              </div>
+
+              {/* Last Name */}
+              <div>
+                <Label htmlFor="new-user-last-name">
+                  Last Name <span className="text-red-600" aria-label="required">*</span>
+                </Label>
+                <Input
+                  id="new-user-last-name"
+                  value={newUser.last_name}
+                  onChange={(e) => handleNewUserFieldChange('last_name', e.target.value)}
+                  onBlur={(e) => handleNewUserFieldBlur('last_name', e.target.value)}
+                  aria-invalid={!!newUserFormErrors.last_name}
+                  aria-describedby={newUserFormErrors.last_name ? 'new-user-last-name-error' : undefined}
+                  className={newUserFormErrors.last_name ? 'border-red-500 focus:ring-red-500' : ''}
+                  placeholder="Enter last name"
+                />
+                {newUserFormErrors.last_name && (
+                  <p id="new-user-last-name-error" className="text-sm text-red-600 mt-1 flex items-center">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    {newUserFormErrors.last_name}
+                  </p>
+                )}
+                {!newUserFormErrors.last_name && newUserTouchedFields.has('last_name') && newUser.last_name && (
+                  <p className="text-sm text-green-600 mt-1 flex items-center">
+                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                    Valid
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Email */}
+            <div>
+              <Label htmlFor="new-user-email">
+                Email <span className="text-red-600" aria-label="required">*</span>
+              </Label>
+              <Input
+                id="new-user-email"
+                type="email"
+                value={newUser.email}
+                onChange={(e) => handleNewUserFieldChange('email', e.target.value)}
+                onBlur={(e) => handleNewUserFieldBlur('email', e.target.value)}
+                aria-invalid={!!newUserFormErrors.email}
+                aria-describedby={newUserFormErrors.email ? 'new-user-email-error' : undefined}
+                className={newUserFormErrors.email ? 'border-red-500 focus:ring-red-500' : ''}
+                placeholder="Enter email address"
+              />
+              {newUserFormErrors.email && (
+                <p id="new-user-email-error" className="text-sm text-red-600 mt-1 flex items-center">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  {newUserFormErrors.email}
+                </p>
+              )}
+              {!newUserFormErrors.email && newUserTouchedFields.has('email') && newUser.email && (
+                <p className="text-sm text-green-600 mt-1 flex items-center">
+                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                  Valid email
+                </p>
+              )}
+            </div>
+
+            {/* Phone */}
+            <div>
+              <Label htmlFor="new-user-phone">
+                Phone (Optional)
+              </Label>
+              <Input
+                id="new-user-phone"
+                type="tel"
+                value={newUser.phone}
+                onChange={(e) => handleNewUserFieldChange('phone', e.target.value)}
+                onBlur={(e) => handleNewUserFieldBlur('phone', e.target.value)}
+                aria-invalid={!!newUserFormErrors.phone}
+                aria-describedby={newUserFormErrors.phone ? 'new-user-phone-error' : undefined}
+                className={newUserFormErrors.phone ? 'border-red-500 focus:ring-red-500' : ''}
+                placeholder="Enter phone number"
+              />
+              {newUserFormErrors.phone && (
+                <p id="new-user-phone-error" className="text-sm text-red-600 mt-1 flex items-center">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  {newUserFormErrors.phone}
+                </p>
+              )}
+            </div>
+
+            {/* Role */}
+            <div>
+              <Label htmlFor="new-user-role">
+                Role <span className="text-red-600" aria-label="required">*</span>
+              </Label>
+              <Select
+                value={newUser.role}
+                onValueChange={(value) => handleNewUserFieldChange('role', value as UserRole)}
+              >
+                <SelectTrigger 
+                  id="new-user-role"
+                  aria-invalid={!!newUserFormErrors.role}
+                  className={newUserFormErrors.role ? 'border-red-500 focus:ring-red-500' : ''}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Administrator</SelectItem>
+                  <SelectItem value="board">Board Member</SelectItem>
+                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="student">Student</SelectItem>
+                  <SelectItem value="applicant">Applicant</SelectItem>
+                </SelectContent>
+              </Select>
+              {newUserFormErrors.role && (
+                <p className="text-sm text-red-600 mt-1 flex items-center">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  {newUserFormErrors.role}
+                </p>
+              )}
+            </div>
+
+            {/* Status */}
+            <div>
+              <Label htmlFor="new-user-status">
+                Status <span className="text-red-600" aria-label="required">*</span>
+              </Label>
+              <Select
+                value={newUser.status}
+                onValueChange={(value) => handleNewUserFieldChange('status', value as UserStatus)}
+              >
+                <SelectTrigger 
+                  id="new-user-status"
+                  aria-invalid={!!newUserFormErrors.status}
+                  className={newUserFormErrors.status ? 'border-red-500 focus:ring-red-500' : ''}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="suspended">Suspended</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                </SelectContent>
+              </Select>
+              {newUserFormErrors.status && (
+                <p className="text-sm text-red-600 mt-1 flex items-center">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  {newUserFormErrors.status}
+                </p>
+              )}
+            </div>
+
+            {/* Invitation info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+              <div className="flex items-start">
+                <UserPlus className="h-5 w-5 text-blue-600 mr-2 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-blue-800">
+                  <strong>Invitation Email</strong>
+                  <p className="mt-1">
+                    An invitation email will be sent to the user with login credentials. 
+                    They will be able to access the system using the email and a temporary password.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
           <DialogFooter>
             <Button 
-              onClick={() => setShowAddUserDialog(false)}
-              className="bg-gray-600 hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              variant="outline" 
+              onClick={handleCloseAddUserDialog}
+              disabled={isCreating}
+              className="focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
             >
-              Close
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleCreateUser} 
+              disabled={isCreating || Object.keys(newUserFormErrors).length > 0}
+              className="bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isCreating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating User...
+                </>
+              ) : (
+                <>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Create User
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

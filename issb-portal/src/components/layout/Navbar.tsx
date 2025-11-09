@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Home, Calendar, Users, Heart, LayoutDashboard, FileCheck, LogOut, Menu, X, MessageSquare, CheckSquare, BarChart3, CreditCard, Bell } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Home, Calendar, Users, Heart, LayoutDashboard, FileCheck, LogOut, Menu, X, MessageSquare, CheckSquare, BarChart3, CreditCard, Bell, Settings, ChevronDown, Shield, FileText, TrendingUp } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -12,6 +12,19 @@ export function Navbar({ className = '' }: NavbarProps) {
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openAdminDropdown, setOpenAdminDropdown] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpenAdminDropdown(null);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -32,18 +45,46 @@ export function Navbar({ className = '' }: NavbarProps) {
     { name: 'Announcements', path: '/announcements', icon: Bell, roles: ['admin', 'board', 'member', 'student'] },
   ];
 
-  const adminItems = [
+  // Optimized admin navigation structure
+  const adminPriorityItems = [
     { name: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard, roles: ['admin', 'board'] },
-    { name: 'Applications', path: '/admin/applications', icon: FileCheck, roles: ['admin', 'board'] },
     { name: 'Users', path: '/admin/users', icon: Users, roles: ['admin', 'board'] },
-    { name: 'Events', path: '/admin/events', icon: Calendar, roles: ['admin', 'board'] },
-    { name: 'Volunteer Mgmt', path: '/admin/volunteers', icon: Users, roles: ['admin', 'board'] },
-    { name: 'Volunteer Hours', path: '/admin/volunteer-hours', icon: CheckSquare, roles: ['admin', 'board'] },
-    { name: 'Help Assistant', path: '/admin/help-assistant', icon: MessageSquare, roles: ['admin', 'board'] },
-    { name: 'Accessibility', path: '/admin/accessibility-audit', icon: CheckSquare, roles: ['admin', 'board'] },
-    { name: 'Analytics', path: '/admin/accessibility-analytics', icon: BarChart3, roles: ['admin', 'board'] },
-    { name: 'Membership Analytics', path: '/admin/membership-analytics', icon: CreditCard, roles: ['admin', 'board'] },
-    { name: 'Announcements', path: '/admin/announcements', icon: Bell, roles: ['admin', 'board'] },
+    { name: 'Applications', path: '/admin/applications', icon: FileCheck, roles: ['admin', 'board'] },
+  ];
+
+  const adminGroups = [
+    {
+      name: 'Content Mgmt',
+      icon: FileText,
+      items: [
+        { name: 'Events', path: '/admin/events', icon: Calendar, roles: ['admin', 'board'] },
+        { name: 'Announcements', path: '/admin/announcements', icon: Bell, roles: ['admin', 'board'] },
+        { name: 'Help Assistant', path: '/admin/help-assistant', icon: MessageSquare, roles: ['admin', 'board'] },
+      ]
+    },
+    {
+      name: 'Volunteer Mgmt',
+      icon: Users,
+      items: [
+        { name: 'Volunteer Mgmt', path: '/admin/volunteers', icon: Users, roles: ['admin', 'board'] },
+        { name: 'Volunteer Hours', path: '/admin/volunteer-hours', icon: CheckSquare, roles: ['admin', 'board'] },
+      ]
+    },
+    {
+      name: 'Analytics',
+      icon: TrendingUp,
+      items: [
+        { name: 'Analytics', path: '/admin/accessibility-analytics', icon: BarChart3, roles: ['admin', 'board'] },
+        { name: 'Membership Analytics', path: '/admin/membership-analytics', icon: CreditCard, roles: ['admin', 'board'] },
+      ]
+    },
+    {
+      name: 'Settings',
+      icon: Settings,
+      items: [
+        { name: 'Accessibility', path: '/admin/accessibility-audit', icon: CheckSquare, roles: ['admin', 'board'] },
+      ]
+    }
   ];
 
   const isActive = (path: string) => {
@@ -101,20 +142,77 @@ export function Navbar({ className = '' }: NavbarProps) {
                   {item.name}
                 </Link>
               ))}
-              {user && profile && adminItems.filter(canAccess).map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`inline-flex items-center px-3 pt-1 border-b-2 text-sm font-medium ${
-                    isActive(item.path)
-                      ? 'border-green-600 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                  }`}
-                >
-                  <item.icon className="w-4 h-4 mr-2" />
-                  {item.name}
-                </Link>
-              ))}
+              {/* Admin Navigation - Optimized with Dropdown */}
+              {user && profile && (
+                <>
+                  {/* Priority Admin Items - Always Visible */}
+                  {adminPriorityItems.filter(canAccess).map((item) => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`inline-flex items-center px-3 pt-1 border-b-2 text-sm font-medium ${
+                        isActive(item.path)
+                          ? 'border-green-600 text-gray-900'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      }`}
+                    >
+                      <item.icon className="w-4 h-4 mr-2" />
+                      {item.name}
+                    </Link>
+                  ))}
+                  
+                  {/* Admin Dropdown Groups */}
+                  <div className="relative" ref={dropdownRef}>
+                    {adminGroups.map((group) => {
+                      const accessibleItems = group.items.filter(canAccess);
+                      if (accessibleItems.length === 0) return null;
+                      
+                      const hasActiveItem = accessibleItems.some(item => isActive(item.path));
+                      const isOpen = openAdminDropdown === group.name;
+                      
+                      return (
+                        <div key={group.name} className="relative">
+                          <button
+                            onClick={() => setOpenAdminDropdown(isOpen ? null : group.name)}
+                            className={`inline-flex items-center px-3 pt-1 border-b-2 text-sm font-medium ${
+                              hasActiveItem
+                                ? 'border-green-600 text-gray-900'
+                                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                            }`}
+                          >
+                            <group.icon className="w-4 h-4 mr-2" />
+                            {group.name}
+                            <ChevronDown className={`w-3 h-3 ml-1 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                          </button>
+                          
+                          {/* Dropdown Menu */}
+                          {isOpen && (
+                            <div className="absolute top-full left-0 mt-1 w-56 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                              <div className="py-1">
+                                {accessibleItems.map((item) => (
+                                  <Link
+                                    key={item.path}
+                                    to={item.path}
+                                    onClick={() => setOpenAdminDropdown(null)}
+                                    className={`flex items-center px-4 py-2 text-sm ${
+                                      isActive(item.path)
+                                        ? 'bg-green-50 text-green-700 font-medium'
+                                        : 'text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                  >
+                                    <item.icon className="w-4 h-4 mr-3" />
+                                    {item.name}
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -206,21 +304,64 @@ export function Navbar({ className = '' }: NavbarProps) {
                 {item.name}
               </Link>
             ))}
-            {user && profile && adminItems.filter(canAccess).map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center px-3 py-3 rounded-md text-base font-medium ${
-                  isActive(item.path)
-                    ? 'bg-green-100 text-green-900'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <item.icon className="w-5 h-5 mr-3" />
-                {item.name}
-              </Link>
-            ))}
+            {/* Mobile Admin Navigation - Organized */}
+            {user && profile && (
+              <>
+                {/* Mobile Priority Admin Items */}
+                {adminPriorityItems.filter(canAccess).map((item) => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center px-3 py-3 rounded-md text-base font-medium ${
+                      isActive(item.path)
+                        ? 'bg-green-100 text-green-900'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5 mr-3" />
+                    {item.name}
+                  </Link>
+                ))}
+                
+                {/* Mobile Admin Groups */}
+                {adminGroups.map((group) => {
+                  const accessibleItems = group.items.filter(canAccess);
+                  if (accessibleItems.length === 0) return null;
+                  
+                  const hasActiveItem = accessibleItems.some(item => isActive(item.path));
+                  
+                  return (
+                    <div key={group.name} className="space-y-1">
+                      {/* Group Header */}
+                      <div className={`flex items-center px-3 py-2 text-sm font-medium text-gray-500 ${
+                        hasActiveItem ? 'text-green-700' : ''
+                      }`}>
+                        <group.icon className="w-4 h-4 mr-2" />
+                        {group.name}
+                      </div>
+                      
+                      {/* Group Items - Indented */}
+                      {accessibleItems.map((item) => (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`flex items-center pl-10 pr-3 py-3 rounded-md text-base font-medium ${
+                            isActive(item.path)
+                              ? 'bg-green-100 text-green-900'
+                              : 'text-gray-600 hover:bg-gray-100'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4 mr-3" />
+                          {item.name}
+                        </Link>
+                      ))}
+                    </div>
+                  );
+                })}
+              </>
+            )}
             
             {/* Mobile Auth */}
             <div className="border-t border-gray-200 pt-4 mt-4">

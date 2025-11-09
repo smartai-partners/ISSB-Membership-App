@@ -9,6 +9,16 @@ import { supabase } from '../../lib/supabase';
 import type { Profile, UserRole, UserStatus } from '../../types';
 import type { RootState } from '../index';
 
+// Helper function to generate temporary password
+function generateTemporaryPassword(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+  let password = '';
+  for (let i = 0; i < 12; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+}
+
 // Admin-specific types
 export interface UserFilters {
   searchQuery?: string;
@@ -220,6 +230,99 @@ export const adminApi = createApi({
       ],
     }),
 
+    // Create new user
+    createUser: builder.mutation<Profile, {
+      email: string;
+      first_name: string;
+      last_name: string;
+      role: UserRole;
+      status: UserStatus;
+      phone?: string;
+    }>({
+      queryFn: async (userData) => {
+        try {
+          // Get current session for auth token
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (!session) {
+            return { 
+              error: { 
+                status: 401, 
+                data: { message: 'Authentication required' } 
+              } 
+            };
+          }
+
+          // Call the admin-create-user edge function
+          const { data: response, error: functionError } = await supabase.functions.invoke('admin-create-user', {
+            body: {
+              email: userData.email,
+              first_name: userData.first_name,
+              last_name: userData.last_name,
+              role: userData.role,
+              status: userData.status,
+              phone: userData.phone || undefined,
+            },
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          });
+
+          if (functionError) {
+            return { 
+              error: { 
+                status: 'CUSTOM_ERROR', 
+                data: { message: functionError.message } 
+              } 
+            };
+          }
+
+          if (response?.error) {
+            return { 
+              error: { 
+                status: 'CUSTOM_ERROR', 
+                data: { message: response.error } 
+              } 
+            };
+          }
+
+          if (!response?.success || !response?.user) {
+            return { 
+              error: { 
+                status: 'CUSTOM_ERROR', 
+                data: { message: 'Failed to create user - invalid response' } 
+              } 
+            };
+          }
+
+          // Return the created user profile
+          const createdUser: Profile = {
+            id: response.user.id,
+            email: response.user.email,
+            first_name: response.user.first_name,
+            last_name: response.user.last_name,
+            role: response.user.role,
+            status: response.user.status,
+            phone: response.user.phone,
+            total_volunteer_hours: 0,
+            membership_fee_waived: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+
+          return { data: createdUser };
+        } catch (error) {
+          return {
+            error: {
+              status: 'CUSTOM_ERROR',
+              data: { message: error instanceof Error ? error.message : 'Failed to create user' },
+            },
+          };
+        }
+      },
+      invalidatesTags: [{ type: 'AdminUsers', id: 'LIST' }, 'AdminStats'],
+    }),
+
     // Bulk update users
     bulkUpdateUsers: builder.mutation<BulkUpdateResult, BulkUpdateOperation[]>({
       queryFn: async (operations) => {
@@ -359,6 +462,7 @@ export const {
   useGetAllUsersQuery,
   useUpdateUserProfileMutation,
   useDeleteUserMutation,
+  useCreateUserMutation,
   useBulkUpdateUsersMutation,
   useGetUserActivityQuery,
   useGetAdminStatsQuery,
