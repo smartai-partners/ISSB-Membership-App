@@ -13,6 +13,8 @@ export function Navbar({ className = '' }: NavbarProps) {
   const { user, profile, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openAdminDropdown, setOpenAdminDropdown] = useState<string | null>(null);
+  const [openUserDropdown, setOpenUserDropdown] = useState(false);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns when clicking outside
@@ -20,6 +22,9 @@ export function Navbar({ className = '' }: NavbarProps) {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setOpenAdminDropdown(null);
+      }
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+        setOpenUserDropdown(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -252,23 +257,63 @@ export function Navbar({ className = '' }: NavbarProps) {
 
             {/* User Profile & Auth */}
             {user && profile ? (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3" ref={userDropdownRef}>
                 <div className="hidden sm:block text-right">
                   <div className="text-sm font-medium text-gray-900">
                     {profile.first_name} {profile.last_name}
                   </div>
                   <div className="text-xs text-gray-500 capitalize">{profile.role}</div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-600 to-green-500 rounded-full flex items-center justify-center text-white font-medium text-sm">
-                    {profile.first_name?.[0]}{profile.last_name?.[0]}
-                  </div>
+                <div className="relative">
                   <button
-                    onClick={handleSignOut}
-                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200"
+                    onClick={() => setOpenUserDropdown(!openUserDropdown)}
+                    className="w-8 h-8 bg-gradient-to-r from-green-600 to-green-500 rounded-full flex items-center justify-center text-white font-medium text-sm hover:shadow-md transition-all duration-200"
                   >
-                    <LogOut className="w-4 h-4" />
+                    {profile.first_name?.[0]}{profile.last_name?.[0]}
                   </button>
+                  
+                  {/* User Dropdown Menu */}
+                  {openUserDropdown && (
+                    <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-xl z-[9999]">
+                      <div className="p-2">
+                        <div className="px-3 py-2 border-b border-gray-100 mb-2">
+                          <div className="text-sm font-medium text-gray-900">
+                            {profile.first_name} {profile.last_name}
+                          </div>
+                          <div className="text-xs text-gray-500 capitalize">{profile.role}</div>
+                        </div>
+                        <div className="space-y-1">
+                          <Link
+                            to="/admin/help-assistant"
+                            onClick={() => setOpenUserDropdown(false)}
+                            className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150"
+                          >
+                            <MessageSquare className="w-4 h-4 mr-3" />
+                            Help Assistant
+                          </Link>
+                          <Link
+                            to="/admin/accessibility-audit"
+                            onClick={() => setOpenUserDropdown(false)}
+                            className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150"
+                          >
+                            <CheckSquare className="w-4 h-4 mr-3" />
+                            Accessibility
+                          </Link>
+                          <hr className="my-2" />
+                          <button
+                            onClick={() => {
+                              handleSignOut();
+                              setOpenUserDropdown(false);
+                            }}
+                            className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150"
+                          >
+                            <LogOut className="w-4 h-4 mr-3" />
+                            Sign Out
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
