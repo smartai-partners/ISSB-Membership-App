@@ -189,7 +189,7 @@ Please provide a helpful response. If the question requires admin intervention o
 
         // Call Google Gemini API
         const geminiResponse = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
             {
                 method: 'POST',
                 headers: {
@@ -240,7 +240,7 @@ Please provide a helpful response. If the question requires admin intervention o
                 sender_type: 'assistant',
                 content: aiResponse,
                 metadata: {
-                    model: 'gemini-pro',
+                    model: 'gemini-2.0-flash',
                     kb_articles_used: kbContext ? true : false,
                     escalation_suggested: shouldEscalate
                 }
