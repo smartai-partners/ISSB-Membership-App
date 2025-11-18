@@ -14,7 +14,9 @@ export function Navbar({ className = '' }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openAdminDropdown, setOpenAdminDropdown] = useState<string | null>(null);
   const [openUserDropdown, setOpenUserDropdown] = useState(false);
+  const [userDropdownPosition, setUserDropdownPosition] = useState<'below' | 'above'>('below');
   const userDropdownRef = useRef<HTMLDivElement>(null);
+  const userDropdownContainerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns when clicking outside
@@ -30,6 +32,22 @@ export function Navbar({ className = '' }: NavbarProps) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Detect viewport position for user dropdown
+  useEffect(() => {
+    if (openUserDropdown && userDropdownContainerRef.current) {
+      const rect = userDropdownContainerRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const spaceBelow = viewportHeight - rect.bottom;
+      const dropdownHeight = 200; // Approximate dropdown height
+      
+      if (spaceBelow < dropdownHeight) {
+        setUserDropdownPosition('above');
+      } else {
+        setUserDropdownPosition('below');
+      }
+    }
+  }, [openUserDropdown]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -260,14 +278,14 @@ export function Navbar({ className = '' }: NavbarProps) {
 
             {/* User Profile & Auth */}
             {user && profile ? (
-              <div className="flex items-center space-x-3" ref={userDropdownRef}>
+              <div className="flex items-center space-x-3" ref={userDropdownContainerRef}>
                 <div className="hidden sm:block text-right">
                   <div className="text-sm font-medium text-gray-900">
                     {profile.first_name} {profile.last_name}
                   </div>
                   <div className="text-xs text-gray-500 capitalize">{profile.role}</div>
                 </div>
-                <div className="relative">
+                <div className="relative" ref={userDropdownRef}>
                   <button
                     onClick={() => setOpenUserDropdown(!openUserDropdown)}
                     className="w-8 h-8 bg-gradient-to-r from-green-600 to-green-500 rounded-full flex items-center justify-center text-white font-medium text-sm hover:shadow-md transition-all duration-200"
@@ -278,7 +296,11 @@ export function Navbar({ className = '' }: NavbarProps) {
                   {/* User Dropdown Menu */}
                   {openUserDropdown && (
                     <div 
-                      className="absolute top-full right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-2xl z-[99999] backdrop-blur-sm"
+                      className={`absolute ${
+                        userDropdownPosition === 'above' 
+                          ? 'bottom-full mb-2' 
+                          : 'top-full mt-2'
+                      } right-0 w-56 bg-white border border-gray-200 rounded-xl shadow-2xl z-[99999] backdrop-blur-sm`}
                       style={{ zIndex: 999999 }}
                     >
                       <div className="p-2">
