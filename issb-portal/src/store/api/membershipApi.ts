@@ -878,15 +878,71 @@ export const membershipApi = createApi({
           const { data, error } = await supabase.functions.invoke('create-contest', {
             body: contestData
           });
-          
+
           if (error) throw error;
-          
+
           return { data: data.data };
         } catch (error: any) {
           return { error: { status: 'FETCH_ERROR', error: error.message } };
         }
       },
       invalidatesTags: ['Contests'],
+    }),
+
+    // ===== EVENT REGISTRATION ENDPOINTS =====
+    registerForEvent: builder.mutation<{
+      success: boolean;
+      message: string;
+      registration: any;
+      event: Event;
+      status: string;
+    }, {
+      event_id: string;
+      notes?: string;
+      guest_count?: number;
+      dietary_restrictions?: string;
+      emergency_contact?: string;
+    }>({
+      queryFn: async (registrationData) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('register-for-event', {
+            body: registrationData
+          });
+
+          if (error) throw error;
+
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Events'],
+    }),
+
+    cancelEventRegistration: builder.mutation<{
+      success: boolean;
+      message: string;
+      cancelled_registration_id: string;
+      event: Event;
+      promoted_user: any;
+    }, {
+      event_id: string;
+      registration_id?: string;
+    }>({
+      queryFn: async (cancellationData) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('cancel-event-registration', {
+            body: cancellationData
+          });
+
+          if (error) throw error;
+
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Events'],
     }),
   }),
 });
@@ -928,4 +984,7 @@ export const {
   useCheckAchievementsMutation,
   useListContestsQuery,
   useCreateContestMutation,
+  // Event Registration hooks
+  useRegisterForEventMutation,
+  useCancelEventRegistrationMutation,
 } = membershipApi;
