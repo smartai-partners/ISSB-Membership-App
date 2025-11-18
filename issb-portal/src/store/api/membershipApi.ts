@@ -372,100 +372,31 @@ export const membershipApi = createApi({
       invalidatesTags: ['FamilyMembers'],
     }),
 
-    // Get membership analytics (admin only) - Updated to work without missing edge function
+    // Get membership analytics (admin only)
     getMembershipAnalytics: builder.query<MembershipAnalytics, void>({
       queryFn: async () => {
         try {
-          // Try the edge function first
           const { data, error } = await supabase.functions.invoke('get-membership-analytics');
-          
+
           if (error) {
-            console.warn('Edge function not available, using mock data:', error);
-            // Return mock analytics data since edge function doesn't exist
-            return { 
-              data: {
-                summary: {
-                  totalSubscriptions: 47,
-                  activationCounts: {
-                    payment: 28,
-                    volunteer: 12,
-                    donation: 7
-                  },
-                  paidMemberships: 35,
-                  monthlyRecurringRevenue: 10500,
-                  annualRecurringRevenue: 126000
-                },
-                recentActivity: [
-                  {
-                    id: '1',
-                    user_id: 'user1',
-                    action: 'created',
-                    to_tier: 'individual',
-                    amount: 360,
-                    created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-                  },
-                  {
-                    id: '2', 
-                    user_id: 'user2',
-                    action: 'activated',
-                    to_tier: 'individual',
-                    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
-                  },
-                  {
-                    id: '3',
-                    user_id: 'user3',
-                    action: 'created',
-                    to_tier: 'individual',
-                    amount: 360,
-                    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-                  }
-                ]
+            // SECURITY FIX: Return proper error instead of hiding with mock data
+            console.error('Failed to fetch membership analytics:', error);
+            return {
+              error: {
+                status: 'FETCH_ERROR',
+                error: 'Unable to load membership analytics. Please ensure the analytics service is running.'
               }
             };
           }
-          
+
           return { data: data.data };
         } catch (error: any) {
-          console.warn('Analytics API error, using mock data:', error.message);
-          // Return mock analytics data on any error
-          return { 
-            data: {
-              summary: {
-                totalSubscriptions: 47,
-                activationCounts: {
-                  payment: 28,
-                  volunteer: 12,
-                  donation: 7
-                },
-                paidMemberships: 35,
-                monthlyRecurringRevenue: 10500,
-                annualRecurringRevenue: 126000
-              },
-              recentActivity: [
-                {
-                  id: '1',
-                  user_id: 'user1',
-                  action: 'created',
-                  to_tier: 'individual',
-                  amount: 360,
-                  created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-                },
-                {
-                  id: '2', 
-                  user_id: 'user2',
-                  action: 'activated',
-                  to_tier: 'individual',
-                  created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
-                },
-                {
-                  id: '3',
-                  user_id: 'user3',
-                  action: 'created',
-                  to_tier: 'individual',
-                  amount: 360,
-                  created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-                }
-              ]
+          // SECURITY FIX: Return proper error instead of masking with fake data
+          console.error('Analytics API error:', error.message);
+          return {
+            error: {
+              status: 'FETCH_ERROR',
+              error: error.message || 'Failed to fetch analytics data'
             }
           };
         }

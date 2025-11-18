@@ -1,11 +1,19 @@
 // Shared authentication utilities for edge functions
 
+// SECURITY FIX: Use environment-configured CORS origin instead of wildcard
+// This prevents unauthorized domains from accessing the API
+const getAllowedOrigin = () => {
+  const allowedOrigins = Deno.env.get('ALLOWED_ORIGINS')?.split(',') || [];
+  // Default to localhost for development if no origins configured
+  return allowedOrigins.length > 0 ? allowedOrigins[0] : 'http://localhost:3000';
+};
+
 export const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': getAllowedOrigin(),
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE, PATCH',
   'Access-Control-Max-Age': '86400',
-  'Access-Control-Allow-Credentials': 'false'
+  'Access-Control-Allow-Credentials': 'true'
 };
 
 export interface AuthUser {
