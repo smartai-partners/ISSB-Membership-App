@@ -4,6 +4,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { getStripeClient } from '../_shared/stripe.ts';
+import { getEmailService } from '../_shared/email.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -149,6 +150,39 @@ async function handlePaymentIntentSucceeded(paymentIntent: any, supabase: any) {
       await supabase.rpc('update_campaign_total', {
         campaign_id_param: paymentIntent.metadata.campaignId,
       });
+    }
+
+    // Send payment confirmation email
+    try {
+      const userId = paymentIntent.metadata?.userId;
+      if (userId) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('email, full_name')
+          .eq('id', userId)
+          .single();
+
+        if (profile?.email) {
+          const emailService = getEmailService();
+          const template = emailService.paymentSuccessEmail(
+            profile.full_name || 'Member',
+            paymentIntent.amount,
+            paymentIntent.currency,
+            paymentIntent.description || 'Payment to ISSB'
+          );
+
+          await emailService.sendEmail({
+            to: profile.email,
+            subject: template.subject,
+            html: template.html,
+          });
+
+          console.log('Payment confirmation email sent to:', profile.email);
+        }
+      }
+    } catch (emailError) {
+      console.error('Error sending payment confirmation email:', emailError);
+      // Don't fail the webhook if email fails
     }
 
   } catch (error) {

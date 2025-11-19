@@ -4,6 +4,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { cors} from '../_shared/cors.ts';
+import { getEmailService } from '../_shared/email.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -157,6 +158,47 @@ serve(async (req) => {
 
     if (eventError) {
       console.error('Error fetching event:', eventError);
+    }
+
+    // Send confirmation email
+    try {
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.email && event) {
+        const emailService = getEmailService();
+        const eventDate = event.event_date
+          ? new Date(event.event_date).toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit'
+            })
+          : 'Date TBD';
+
+        const template = emailService.eventRegistrationEmail(
+          profile.full_name || 'Member',
+          event.title,
+          eventDate,
+          event.location || 'Location TBD'
+        );
+
+        await emailService.sendEmail({
+          to: profile.email,
+          subject: template.subject,
+          html: template.html,
+        });
+
+        console.log('Registration confirmation email sent to:', profile.email);
+      }
+    } catch (emailError) {
+      console.error('Error sending registration confirmation email:', emailError);
+      // Don't fail the registration if email fails
     }
 
     // Return success response
