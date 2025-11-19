@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { 
-  useListAnnouncementsQuery, 
-  useCreateAnnouncementMutation, 
-  useUpdateAnnouncementMutation, 
-  useDeleteAnnouncementMutation 
+import {
+  useListAnnouncementsQuery,
+  useCreateAnnouncementMutation,
+  useUpdateAnnouncementMutation,
+  useDeleteAnnouncementMutation,
+  useGenerateAnnouncementAIMutation
 } from '@/store/api/membershipApi';
-import { Plus, Edit, Trash2, Calendar, Users, CheckCircle, XCircle, Send } from 'lucide-react';
+import { Plus, Edit, Trash2, Calendar, Users, CheckCircle, XCircle, Send, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -23,6 +24,7 @@ export const AdminAnnouncementsManagement = () => {
   const [createAnnouncement] = useCreateAnnouncementMutation();
   const [updateAnnouncement] = useUpdateAnnouncementMutation();
   const [deleteAnnouncement] = useDeleteAnnouncementMutation();
+  const [generateAnnouncementAI, { isLoading: isGeneratingAI }] = useGenerateAnnouncementAIMutation();
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -35,6 +37,10 @@ export const AdminAnnouncementsManagement = () => {
   });
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // AI Generation states
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
 
   const announcements = data?.announcements || [];
 
@@ -129,6 +135,45 @@ export const AdminAnnouncementsManagement = () => {
     });
     setEditingId(null);
     setShowForm(false);
+    setAiPrompt('');
+    setShowAIGenerator(false);
+  };
+
+  const handleGenerateAI = async () => {
+    if (!aiPrompt.trim()) {
+      setMessage({ type: 'error', text: 'Please enter a description for the AI to generate an announcement' });
+      return;
+    }
+
+    if (aiPrompt.length < 10) {
+      setMessage({ type: 'error', text: 'Description is too short. Please provide more details (at least 10 characters)' });
+      return;
+    }
+
+    setMessage(null);
+
+    try {
+      const result = await generateAnnouncementAI({ prompt: aiPrompt }).unwrap();
+
+      // Populate form with AI-generated content
+      setFormData(prev => ({
+        ...prev,
+        title: result.title,
+        content: result.content
+      }));
+
+      setMessage({
+        type: 'success',
+        text: 'AI draft generated successfully! Review and edit as needed before publishing.'
+      });
+      setAiPrompt(''); // Clear the prompt
+      setShowAIGenerator(false); // Collapse the AI section
+    } catch (error: any) {
+      setMessage({
+        type: 'error',
+        text: error.data?.error?.message || 'Failed to generate announcement with AI. Please try again.'
+      });
+    }
   };
 
   const handleRecipientGroupChange = (group: string) => {
@@ -198,6 +243,82 @@ export const AdminAnnouncementsManagement = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
               {editingId ? 'Edit Announcement' : 'Create New Announcement'}
             </h2>
+
+            {/* AI Generator Section */}
+            {!editingId && (
+              <div className="mb-6 border-b border-gray-200 pb-6">
+                <button
+                  type="button"
+                  onClick={() => setShowAIGenerator(!showAIGenerator)}
+                  className="flex items-center justify-between w-full text-left group"
+                  aria-expanded={showAIGenerator}
+                  aria-controls="ai-generator-section"
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-purple-600" />
+                    <span className="text-lg font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
+                      Generate with AI
+                    </span>
+                    <span className="text-sm text-gray-500 bg-purple-50 px-2 py-0.5 rounded-full">Beta</span>
+                  </div>
+                  {showAIGenerator ? (
+                    <ChevronUp className="w-5 h-5 text-gray-400" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                  )}
+                </button>
+
+                {showAIGenerator && (
+                  <div id="ai-generator-section" className="mt-4 space-y-4" role="region" aria-label="AI announcement generator">
+                    <p className="text-sm text-gray-600">
+                      Describe the announcement you'd like to create, and our AI will generate a professional draft for you to review and customize.
+                    </p>
+                    <div>
+                      <label htmlFor="ai-prompt" className="label-modern">
+                        Announcement Description
+                      </label>
+                      <textarea
+                        id="ai-prompt"
+                        value={aiPrompt}
+                        onChange={(e) => setAiPrompt(e.target.value)}
+                        rows={4}
+                        className="textarea-modern"
+                        placeholder="Example: Announce our upcoming Eid celebration on April 10th at the community center. Include details about the prayer time at 8 AM, followed by breakfast and children's activities. Mention that families are welcome and ask people to RSVP by April 5th."
+                        disabled={isGeneratingAI}
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Tip: Include details like dates, times, locations, and any special instructions you want in the announcement.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        type="button"
+                        onClick={handleGenerateAI}
+                        disabled={isGeneratingAI || !aiPrompt.trim()}
+                        className="bg-purple-600 hover:bg-purple-700"
+                      >
+                        {isGeneratingAI ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Generate Draft
+                          </>
+                        )}
+                      </Button>
+                      {isGeneratingAI && (
+                        <span className="text-sm text-gray-600" role="status" aria-live="polite">
+                          AI is drafting your announcement...
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>

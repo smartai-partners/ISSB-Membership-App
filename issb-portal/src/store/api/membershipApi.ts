@@ -664,15 +664,32 @@ export const membershipApi = createApi({
       queryFn: async (announcementId) => {
         try {
           const { data, error } = await supabase.functions.invoke(`delete-announcement?id=${announcementId}`);
-          
+
           if (error) throw error;
-          
+
           return { data: data.data };
         } catch (error: any) {
           return { error: { status: 'FETCH_ERROR', error: error.message } };
         }
       },
       invalidatesTags: ['Announcements'],
+    }),
+
+    // Generate announcement using AI (Admin only)
+    generateAnnouncementAI: builder.mutation<{ title: string; content: string; generated_at: string }, { prompt: string }>({
+      queryFn: async ({ prompt }) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('generate-announcement-ai', {
+            body: { prompt }
+          });
+
+          if (error) throw error;
+
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
     }),
 
     // ===== EVENT MANAGEMENT ENDPOINTS =====
@@ -1097,6 +1114,7 @@ export const {
   useCreateAnnouncementMutation,
   useUpdateAnnouncementMutation,
   useDeleteAnnouncementMutation,
+  useGenerateAnnouncementAIMutation,
   // Event & Gamification hooks
   useListEventsQuery,
   useCreateEventMutation,
