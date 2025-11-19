@@ -10,7 +10,8 @@ import {
   ArrowLeft,
   CheckCircle,
   AlertCircle,
-  X
+  X,
+  DollarSign
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -18,6 +19,7 @@ import {
   useRegisterForEventMutation,
   useCancelEventRegistrationMutation
 } from '@/store/api/membershipApi';
+import { PaymentModal } from '@/components/PaymentModal';
 
 export const EventDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +27,7 @@ export const EventDetailPage: React.FC = () => {
   const { user, profile } = useAuth();
 
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [registrationData, setRegistrationData] = useState({
     notes: '',
     guest_count: 0,
@@ -75,6 +78,19 @@ export const EventDetailPage: React.FC = () => {
       return;
     }
 
+    // Check if event requires payment
+    const registrationFee = (event as any).registration_fee || 0;
+
+    if (registrationFee > 0) {
+      // Show payment modal for paid events
+      setShowPaymentModal(true);
+    } else {
+      // Directly register for free events
+      await completeRegistration();
+    }
+  };
+
+  const completeRegistration = async () => {
     try {
       const result = await registerForEvent({
         event_id: event.id,
@@ -83,6 +99,7 @@ export const EventDetailPage: React.FC = () => {
 
       alert(result.message);
       setShowRegistrationForm(false);
+      setShowPaymentModal(false);
       setRegistrationData({
         notes: '',
         guest_count: 0,
@@ -92,6 +109,11 @@ export const EventDetailPage: React.FC = () => {
     } catch (error: any) {
       alert(error.data?.error || 'Failed to register for event');
     }
+  };
+
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
+    // Payment succeeded, now complete the registration
+    await completeRegistration();
   };
 
   const handleCancelRegistration = async () => {
@@ -396,6 +418,25 @@ export const EventDetailPage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Payment Modal for Paid Events */}
+      {showPaymentModal && (event as any).registration_fee > 0 && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          onSuccess={handlePaymentSuccess}
+          amount={(event as any).registration_fee}
+          currency="usd"
+          paymentType="event_registration"
+          eventId={event.id}
+          description={`Registration for ${event.title}`}
+          metadata={{
+            event_title: event.title,
+            event_date: event.event_date || '',
+            user_email: profile?.email || '',
+          }}
+        />
       )}
     </div>
   );

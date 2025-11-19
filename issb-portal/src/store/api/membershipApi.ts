@@ -266,7 +266,7 @@ export interface ContestSubmission {
 export const membershipApi = createApi({
   reducerPath: 'membershipApi',
   baseQuery: fetchBaseQuery({ baseUrl: SUPABASE_URL }),
-  tagTypes: ['Subscription', 'FamilyMembers', 'Analytics', 'VolunteerHours', 'Opportunities', 'Assignments', 'Announcements', 'Events', 'Galleries', 'Photos', 'Badges', 'MemberBadges', 'Contests', 'Submissions'],
+  tagTypes: ['Subscription', 'FamilyMembers', 'Analytics', 'VolunteerHours', 'Opportunities', 'Assignments', 'Announcements', 'Events', 'Galleries', 'Photos', 'Badges', 'MemberBadges', 'Contests', 'Submissions', 'Payments', 'Subscriptions'],
   endpoints: (builder) => ({
     // Get current user's subscription status
     getSubscriptionStatus: builder.query<SubscriptionStatus, void>({
@@ -1001,6 +1001,76 @@ export const membershipApi = createApi({
       },
       invalidatesTags: ['Events'],
     }),
+
+    // Payment Integration
+    createPaymentIntent: builder.mutation<{
+      success: boolean;
+      client_secret: string;
+      payment_intent_id: string;
+      payment_id: string;
+      amount: number;
+      currency: string;
+    }, {
+      amount: number;
+      currency?: string;
+      payment_type: 'event_registration' | 'membership' | 'donation' | 'other';
+      event_id?: string;
+      membership_id?: string;
+      campaign_id?: string;
+      description: string;
+      metadata?: Record<string, string>;
+    }>({
+      queryFn: async (paymentData) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('create-payment-intent', {
+            body: paymentData
+          });
+
+          if (error) throw error;
+
+          return { data: data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Payments'],
+    }),
+
+    getUserPayments: builder.query<any[], void>({
+      queryFn: async () => {
+        try {
+          const { data, error } = await supabase
+            .from('payments')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+
+          return { data: data || [] };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      providesTags: ['Payments'],
+    }),
+
+    getUserSubscriptions: builder.query<any[], void>({
+      queryFn: async () => {
+        try {
+          const { data, error } = await supabase
+            .from('subscriptions')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+
+          return { data: data || [] };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      providesTags: ['Subscriptions'],
+    }),
   }),
 });
 
@@ -1047,4 +1117,8 @@ export const {
   // Event Registration hooks
   useRegisterForEventMutation,
   useCancelEventRegistrationMutation,
+  // Payment hooks
+  useCreatePaymentIntentMutation,
+  useGetUserPaymentsQuery,
+  useGetUserSubscriptionsQuery,
 } = membershipApi;
