@@ -18,7 +18,28 @@ Deno.serve(async (req) => {
         const { sessionId, message } = await req.json();
 
         if (!sessionId || !message) {
-            throw new Error('Session ID and message are required');
+            return new Response(JSON.stringify({
+                error: {
+                    code: 'MISSING_PARAMS',
+                    message: 'Session ID and message are required'
+                }
+            }), {
+                status: 400,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+        }
+
+        // Validate message length
+        if (message.length > 2000) {
+            return new Response(JSON.stringify({
+                error: {
+                    code: 'MESSAGE_TOO_LONG',
+                    message: 'Message must be less than 2000 characters'
+                }
+            }), {
+                status: 400,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
         }
 
         const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -36,7 +57,15 @@ Deno.serve(async (req) => {
         // Get user from auth header
         const authHeader = req.headers.get('authorization');
         if (!authHeader) {
-            throw new Error('No authorization header');
+            return new Response(JSON.stringify({
+                error: {
+                    code: 'UNAUTHORIZED',
+                    message: 'No authorization header'
+                }
+            }), {
+                status: 401,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
         }
 
         const token = authHeader.replace('Bearer ', '');
@@ -50,7 +79,15 @@ Deno.serve(async (req) => {
         });
 
         if (!userResponse.ok) {
-            throw new Error('Invalid token');
+            return new Response(JSON.stringify({
+                error: {
+                    code: 'INVALID_TOKEN',
+                    message: 'Invalid authentication token'
+                }
+            }), {
+                status: 401,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
         }
 
         const userData = await userResponse.json();
@@ -58,7 +95,7 @@ Deno.serve(async (req) => {
 
         // Verify session belongs to user
         const sessionResponse = await fetch(
-            `${supabaseUrl}/rest/v1/chat_sessions?id=eq.${sessionId}&user_id=eq.${userId}`,
+            `${supabaseUrl}/rest/v1/chat_sessions?id=eq.${sessionId}&user_id=eq.${userId}&select=*`,
             {
                 headers: {
                     'Authorization': `Bearer ${serviceRoleKey}`,
@@ -68,19 +105,35 @@ Deno.serve(async (req) => {
         );
 
         if (!sessionResponse.ok) {
-            throw new Error('Session not found');
+            return new Response(JSON.stringify({
+                error: {
+                    code: 'SESSION_NOT_FOUND',
+                    message: 'Session not found'
+                }
+            }), {
+                status: 404,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
         }
 
         const sessions = await sessionResponse.json();
         if (sessions.length === 0) {
-            throw new Error('Unauthorized access to session');
+            return new Response(JSON.stringify({
+                error: {
+                    code: 'UNAUTHORIZED_SESSION',
+                    message: 'Unauthorized access to session'
+                }
+            }), {
+                status: 403,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
         }
 
         const session = sessions[0];
 
         // Get user profile for role-based context
         const profileResponse = await fetch(
-            `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`,
+            `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=role,full_name,email`,
             {
                 headers: {
                     'Authorization': `Bearer ${serviceRoleKey}`,
@@ -89,15 +142,20 @@ Deno.serve(async (req) => {
             }
         );
 
-        let userRole = 'regular';
+        let userRole = 'member';
         let userName = 'Member';
+        let userEmail = '';
+
         if (profileResponse.ok) {
             const profiles = await profileResponse.json();
             if (profiles.length > 0) {
-                userRole = profiles[0].role || 'regular';
-                userName = profiles[0].name || 'Member';
+                userRole = profiles[0].role || 'member';
+                userName = profiles[0].full_name || 'Member';
+                userEmail = profiles[0].email || '';
             }
         }
+
+        console.log(`Chat message from user ${userId} (${userName}, role: ${userRole})`);
 
         // Save user message
         const userMessageResponse = await fetch(`${supabaseUrl}/rest/v1/chat_messages`, {
@@ -111,7 +169,8 @@ Deno.serve(async (req) => {
             body: JSON.stringify({
                 session_id: sessionId,
                 sender_type: 'user',
-                content: message
+                content: message,
+                metadata: {}
             })
         });
 
@@ -119,9 +178,9 @@ Deno.serve(async (req) => {
             throw new Error('Failed to save user message');
         }
 
-        // Get recent conversation history (last 10 messages)
+        // Get recent conversation history (last 10 messages, excluding the one just saved)
         const historyResponse = await fetch(
-            `${supabaseUrl}/rest/v1/chat_messages?session_id=eq.${sessionId}&order=created_at.desc&limit=10`,
+            `${supabaseUrl}/rest/v1/chat_messages?session_id=eq.${sessionId}&order=created_at.desc&limit=11`,
             {
                 headers: {
                     'Authorization': `Bearer ${serviceRoleKey}`,
@@ -133,21 +192,27 @@ Deno.serve(async (req) => {
         let conversationHistory = [];
         if (historyResponse.ok) {
             const messages = await historyResponse.json();
-            conversationHistory = messages.reverse();
+            // Reverse to chronological order and skip the last (newest) message
+            conversationHistory = messages.reverse().slice(0, -1);
         }
 
         // Search knowledge base for relevant context
         const kbQuery = message.toLowerCase();
         let kbContext = '';
-        
+
         // Determine access level based on role
-        let accessFilter = 'access_level=eq.all';
-        if (userRole === 'admin' || userRole === 'board') {
-            accessFilter = 'access_level=in.(all,admin,board)';
+        let accessFilter = 'access_level=in.(all)';
+        if (userRole === 'admin') {
+            accessFilter = 'access_level=in.(all,member,board,admin)';
+        } else if (userRole === 'board') {
+            accessFilter = 'access_level=in.(all,member,board)';
+        } else if (userRole === 'member') {
+            accessFilter = 'access_level=in.(all,member)';
         }
 
+        // Improved knowledge base search
         const kbResponse = await fetch(
-            `${supabaseUrl}/rest/v1/knowledge_base_articles?is_published=eq.true&${accessFilter}&or=(title.ilike.*${encodeURIComponent(kbQuery)}*,content.ilike.*${encodeURIComponent(kbQuery)}*)&limit=3`,
+            `${supabaseUrl}/rest/v1/knowledge_base_articles?is_published=eq.true&${accessFilter}&or=(title.ilike.*${encodeURIComponent(kbQuery)}*,content.ilike.*${encodeURIComponent(kbQuery)}*)&select=title,content,category&limit=3`,
             {
                 headers: {
                     'Authorization': `Bearer ${serviceRoleKey}`,
@@ -159,37 +224,47 @@ Deno.serve(async (req) => {
         if (kbResponse.ok) {
             const articles = await kbResponse.json();
             if (articles.length > 0) {
-                kbContext = articles.map(a => `Title: ${a.title}\nContent: ${a.content}`).join('\n\n');
+                kbContext = articles.map(a =>
+                    `[KB Article - ${a.category || 'General'}]\nTitle: ${a.title}\n${a.content.substring(0, 500)}${a.content.length > 500 ? '...' : ''}`
+                ).join('\n\n');
+                console.log(`Found ${articles.length} relevant KB articles`);
             }
         }
 
         // Build context-aware prompt for Gemini
-        const systemPrompt = `You are an AI assistant for the ISSB Portal, a community engagement platform for board members and volunteers.
+        const systemPrompt = `You are an AI assistant for the Islamic Society of San Bernardino (ISSB) Membership Portal. You help members with questions about:
+
+- Event registration and attendance
+- Volunteer opportunities and logging hours
+- Donation campaigns and giving
+- Photo galleries and community activities
+- Membership fees and payment
+- Badge system and rewards
+- General portal navigation
 
 User Information:
 - Name: ${userName}
 - Role: ${userRole}
-- Current Context: ${session.context_data?.current_page || 'General Help'}
+- Current Page: ${session.context_data?.current_page || 'Portal'}
 
-Your responsibilities:
-1. Provide helpful, accurate information about the ISSB Portal
-2. Guide users through portal features (volunteering, events, communication, badges)
-3. Answer questions using the knowledge base when available
-4. Be professional, friendly, and concise
-5. If you cannot help, suggest escalating to a human agent
+${kbContext ? `\nRelevant Knowledge Base Information:\n${kbContext}\n` : ''}
 
-${kbContext ? `Knowledge Base Context:\n${kbContext}\n` : ''}
+${conversationHistory.length > 0 ? `Recent Conversation:\n${conversationHistory.slice(-6).map(m => `${m.sender_type === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n')}\n` : ''}
 
-Conversation History:
-${conversationHistory.slice(-5).map(m => `${m.sender_type === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n')}
+Current User Question: ${message}
 
-Current User Message: ${message}
+Instructions:
+1. Provide clear, helpful responses based on the knowledge base when available
+2. Be warm, professional, and concise (aim for 2-3 paragraphs max)
+3. If the question requires admin action (account issues, payment problems, etc.), politely suggest escalating to a human admin
+4. If you're unsure, admit it and offer to escalate rather than guessing
+5. Avoid repeating information from recent conversation unless asked
 
-Please provide a helpful response. If the question requires admin intervention or is too complex, suggest escalation.`;
+Response:`;
 
         // Call Google Gemini API
         const geminiResponse = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiApiKey}`,
             {
                 method: 'POST',
                 headers: {
@@ -203,10 +278,20 @@ Please provide a helpful response. If the question requires admin intervention o
                     }],
                     generationConfig: {
                         temperature: 0.7,
-                        maxOutputTokens: 800,
-                        topP: 0.8,
+                        maxOutputTokens: 1000,
+                        topP: 0.9,
                         topK: 40
-                    }
+                    },
+                    safetySettings: [
+                        {
+                            category: "HARM_CATEGORY_HARASSMENT",
+                            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                        },
+                        {
+                            category: "HARM_CATEGORY_HATE_SPEECH",
+                            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                        }
+                    ]
                 })
             }
         );
@@ -218,13 +303,14 @@ Please provide a helpful response. If the question requires admin intervention o
         }
 
         const geminiData = await geminiResponse.json();
-        const aiResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 
-                          'I apologize, but I am having trouble generating a response. Please try again or escalate to a human agent.';
+        const aiResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ||
+                          'I apologize, but I am having trouble generating a response right now. Please try again in a moment, or escalate to a human admin for immediate assistance.';
 
-        // Check if escalation is suggested
-        const shouldEscalate = aiResponse.toLowerCase().includes('escalat') || 
-                              aiResponse.toLowerCase().includes('human agent') ||
-                              aiResponse.toLowerCase().includes('admin');
+        // Enhanced escalation detection
+        const escalationKeywords = ['escalat', 'human agent', 'admin', 'speak to someone', 'talk to a person', 'human help'];
+        const shouldEscalate = escalationKeywords.some(keyword =>
+            aiResponse.toLowerCase().includes(keyword)
+        );
 
         // Save AI response
         const aiMessageResponse = await fetch(`${supabaseUrl}/rest/v1/chat_messages`, {
@@ -240,9 +326,12 @@ Please provide a helpful response. If the question requires admin intervention o
                 sender_type: 'assistant',
                 content: aiResponse,
                 metadata: {
-                    model: 'gemini-2.0-flash',
-                    kb_articles_used: kbContext ? true : false,
-                    escalation_suggested: shouldEscalate
+                    model: 'gemini-2.0-flash-exp',
+                    kb_articles_used: kbContext !== '',
+                    kb_article_count: kbContext ? (kbContext.match(/\[KB Article/g) || []).length : 0,
+                    escalation_suggested: shouldEscalate,
+                    user_role: userRole,
+                    response_length: aiResponse.length
                 }
             })
         });
@@ -251,30 +340,29 @@ Please provide a helpful response. If the question requires admin intervention o
             throw new Error('Failed to save AI response');
         }
 
-        const aiMessage = await aiMessageResponse.json();
+        const aiMessages = await aiMessageResponse.json();
+        const aiMessage = aiMessages[0];
 
-        // Update session last_message_at
-        await fetch(`${supabaseUrl}/rest/v1/chat_sessions?id=eq.${sessionId}`, {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${serviceRoleKey}`,
-                'apikey': serviceRoleKey,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                last_message_at: new Date().toISOString()
-            })
-        });
+        // Generate contextual follow-up suggestions
+        let suggestions = [];
+        if (shouldEscalate) {
+            suggestions = ['Escalate to human admin', 'Try rephrasing my question', 'View help articles'];
+        } else if (message.toLowerCase().includes('event')) {
+            suggestions = ['How do I register?', 'View upcoming events', 'Tell me about event fees'];
+        } else if (message.toLowerCase().includes('volunteer')) {
+            suggestions = ['How do I log hours?', 'View opportunities', 'Tell me about volunteer badges'];
+        } else if (message.toLowerCase().includes('donat')) {
+            suggestions = ['How do I donate?', 'View campaigns', 'Is my donation tax-deductible?'];
+        } else {
+            suggestions = ['What else can you help with?', 'Tell me about events', 'How does volunteering work?'];
+        }
 
-        // Generate follow-up suggestions
-        const suggestions = shouldEscalate 
-            ? ['Escalate to human agent', 'Try rephrasing', 'View help articles']
-            : ['Tell me more', 'What else can you help with?', 'View related articles'];
+        console.log(`AI response generated (${aiResponse.length} chars, escalation: ${shouldEscalate})`);
 
         return new Response(JSON.stringify({
             data: {
-                message: aiMessage[0],
-                suggestions,
+                message: aiMessage,
+                suggestions: suggestions.slice(0, 3),
                 escalation_suggested: shouldEscalate
             }
         }), {
@@ -287,7 +375,7 @@ Please provide a helpful response. If the question requires admin intervention o
         const errorResponse = {
             error: {
                 code: 'CHAT_MESSAGE_FAILED',
-                message: error.message
+                message: error.message || 'An unexpected error occurred'
             }
         };
 
