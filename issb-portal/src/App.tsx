@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { AuthBridge } from '@/components/AuthBridge';
+import { ConfigInitializer } from '@/components/ConfigInitializer';
 import { Layout } from '@/components/layout/Layout';
 import { HomePage } from '@/pages/HomePage';
 import { LoginPage } from '@/pages/LoginPage';
@@ -29,6 +30,7 @@ import { AdminMembershipAnalyticsPage } from '@/pages/AdminMembershipAnalyticsPa
 import { AdminVolunteerHoursPage } from '@/pages/AdminVolunteerHoursPage';
 import { AdminAnnouncementsPage } from '@/pages/AdminAnnouncementsPage';
 import { AnnouncementsPage } from '@/pages/AnnouncementsPage';
+import { ConfigDemoPage } from '@/pages/ConfigDemoPage';
 
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
   const { user, profile, loading } = useAuth();
@@ -52,8 +54,9 @@ function App() {
   return (
     <AuthProvider>
       <AuthBridge />
-      <BrowserRouter>
-        <Routes>
+      <ConfigInitializer>
+        <BrowserRouter>
+          <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           
@@ -217,7 +220,7 @@ function App() {
             />
             
             <Route path="/membership" element={<MembershipPlansPage />} />
-            
+
             <Route
               path="/membership/dashboard"
               element={
@@ -226,9 +229,19 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="/config-demo"
+              element={
+                <ProtectedRoute>
+                  <ConfigDemoPage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
         </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
+      </ConfigInitializer>
     </AuthProvider>
   );
 }
