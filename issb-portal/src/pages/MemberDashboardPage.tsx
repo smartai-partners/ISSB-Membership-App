@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useNavigate, Link } from 'react-router-dom';
-import { 
-  CheckCircle, Clock, DollarSign, HandHeart, Award, Calendar, 
-  TrendingUp, AlertCircle, FileCheck, Users, Heart 
+import {
+  CheckCircle, Clock, DollarSign, HandHeart, Award, Calendar,
+  TrendingUp, AlertCircle, FileCheck, Users, Heart
 } from 'lucide-react';
+import RecommendationsSection from '@/components/recommendations/RecommendationsSection';
 
 interface MembershipStatus {
   membership_id: string;
@@ -241,6 +242,9 @@ export function MemberDashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Personalized Recommendations */}
+      <RecommendationsSection />
 
       {/* Recent Volunteer Hours */}
       <div className="bg-white rounded-lg shadow-md p-6">

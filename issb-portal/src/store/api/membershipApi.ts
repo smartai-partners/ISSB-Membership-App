@@ -177,6 +177,23 @@ export interface MembershipAnalytics {
   recentActivity: SubscriptionHistory[];
 }
 
+export interface Recommendation {
+  id: string;
+  type: 'volunteer' | 'event' | 'payment' | 'member' | 'role';
+  title: string;
+  description: string;
+  actionText: string;
+  actionUrl: string;
+  priority: number;
+  metadata?: any;
+}
+
+export interface RecommendationsResponse {
+  recommendations: Recommendation[];
+  total: number;
+  generated_at: string;
+}
+
 // Event & Gamification Types
 export interface Event {
   id: string;
@@ -692,6 +709,22 @@ export const membershipApi = createApi({
       },
     }),
 
+    // Get personalized recommendations for member
+    getRecommendations: builder.query<RecommendationsResponse, void>({
+      queryFn: async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke('get-recommendations');
+
+          if (error) throw error;
+
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      providesTags: ['Subscription', 'VolunteerHours'],
+    }),
+
     // ===== EVENT MANAGEMENT ENDPOINTS =====
     listEvents: builder.query<{ events: Event[] }, { status?: string }>({
       queryFn: async ({ status }) => {
@@ -1115,6 +1148,7 @@ export const {
   useUpdateAnnouncementMutation,
   useDeleteAnnouncementMutation,
   useGenerateAnnouncementAIMutation,
+  useGetRecommendationsQuery,
   // Event & Gamification hooks
   useListEventsQuery,
   useCreateEventMutation,
