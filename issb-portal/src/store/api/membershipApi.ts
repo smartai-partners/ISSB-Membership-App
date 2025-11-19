@@ -780,15 +780,72 @@ export const membershipApi = createApi({
           const { data, error } = await supabase.functions.invoke('upload-photo', {
             body: photoData
           });
-          
+
           if (error) throw error;
-          
+
           return { data: data.data };
         } catch (error: any) {
           return { error: { status: 'FETCH_ERROR', error: error.message } };
         }
       },
       invalidatesTags: ['Photos', 'Galleries'],
+    }),
+
+    updateGallery: builder.mutation<{ success: boolean; gallery: Gallery; message: string }, {
+      gallery_id: string;
+      title?: string;
+      description?: string;
+      is_published?: boolean;
+      event_id?: string;
+    }>({
+      queryFn: async (updateData) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('update-gallery', {
+            body: updateData
+          });
+
+          if (error) throw error;
+
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Galleries'],
+    }),
+
+    deleteGallery: builder.mutation<{ success: boolean; message: string; deleted_id: string }, { gallery_id: string }>({
+      queryFn: async (deleteData) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('delete-gallery', {
+            body: deleteData
+          });
+
+          if (error) throw error;
+
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Galleries'],
+    }),
+
+    syncExternalGallery: builder.mutation<{ success: boolean; gallery: Gallery; message: string }, { gallery_id: string }>({
+      queryFn: async (syncData) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('sync-external-gallery', {
+            body: syncData
+          });
+
+          if (error) throw error;
+
+          return { data: data.data };
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: error.message } };
+        }
+      },
+      invalidatesTags: ['Galleries'],
     }),
 
     // ===== BADGE MANAGEMENT ENDPOINTS =====
@@ -978,6 +1035,9 @@ export const {
   useListGalleriesQuery,
   useCreateGalleryMutation,
   useUploadPhotoMutation,
+  useUpdateGalleryMutation,
+  useDeleteGalleryMutation,
+  useSyncExternalGalleryMutation,
   useListBadgesQuery,
   useGetMemberBadgesQuery,
   useAwardBadgeMutation,
