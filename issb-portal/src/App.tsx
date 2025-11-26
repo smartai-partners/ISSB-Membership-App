@@ -60,23 +60,15 @@ function App() {
           <Route element={<Layout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/events" element={<EventsPage />} />
+            <Route path="/volunteers" element={<VolunteersPage />} />
             <Route path="/donations" element={<DonationsPage />} />
             <Route path="/donate" element={<DonatePage />} />
-            
+
             <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
                   <MemberDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            
-            <Route
-              path="/volunteers"
-              element={
-                <ProtectedRoute>
-                  <VolunteersPage />
                 </ProtectedRoute>
               }
             />

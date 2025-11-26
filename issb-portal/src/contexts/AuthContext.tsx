@@ -191,9 +191,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           status: 'pending',
           total_volunteer_hours: 0,
           membership_fee_waived: false,
-        });
+        })
+        .select()
+        .single();
 
-      if (profileError) {
+      // PGRST204 means insert succeeded but RLS prevented reading back the row
+      // This is OK since we don't need the returned data
+      if (profileError && profileError.code !== 'PGRST204') {
         console.log('[AUTH] Profile creation error:', profileError);
         throw profileError;
       }
@@ -215,9 +219,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           donation_amount: userData.donation_amount || 0,
           agreed_to_terms: true,
           agreed_to_code_of_conduct: true,
-        });
+        })
+        .select()
+        .single();
 
-      if (applicationError) {
+      // PGRST204 means insert succeeded but RLS prevented reading back the row
+      if (applicationError && applicationError.code !== 'PGRST204') {
         console.log('[AUTH] Application creation error:', applicationError);
         throw applicationError;
       }
