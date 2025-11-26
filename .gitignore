@@ -18,7 +18,8 @@
 **/downloads/
 **/eggs/
 **/.eggs/
-**/lib/
+# **/lib/  # DISABLED - was excluding TypeScript/JavaScript lib directories
+# Only ignore Python lib directories, not source code lib folders
 **/lib64/
 **/parts/
 **/sdist/
