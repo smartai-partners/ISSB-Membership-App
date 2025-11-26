@@ -241,3 +241,24 @@ export async function deleteKnowledgeBaseArticle(id: string) {
 
   if (error) throw error;
 }
+
+// Additional escalation functions (aliases and helpers)
+export const updateEscalationRequest = updateEscalation;
+export const getEscalationRequests = getEscalations;
+export const escalateConversation = createEscalation;
+
+export async function assignEscalation(id: string, assignedTo: string) {
+  const { data, error } = await supabase
+    .from('escalation_requests')
+    .update({
+      assigned_to: assignedTo,
+      status: 'assigned',
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
