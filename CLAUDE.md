@@ -1,6 +1,6 @@
 # CLAUDE.md - AI Assistant Guide
 
-**Last Updated:** 2025-11-26
+**Last Updated:** 2025-11-27
 **Repository:** ISSB Membership Application
 **Purpose:** Comprehensive guide for AI assistants working on this codebase
 
@@ -19,8 +19,9 @@
 9. [Frontend Architecture](#frontend-architecture)
 10. [Testing Guidelines](#testing-guidelines)
 11. [Deployment](#deployment)
-12. [Common Tasks](#common-tasks)
-13. [Important Files Reference](#important-files-reference)
+12. [Recent Bug Fixes & Improvements](#recent-bug-fixes--improvements)
+13. [Common Tasks](#common-tasks)
+14. [Important Files Reference](#important-files-reference)
 
 ---
 
@@ -108,7 +109,7 @@ ISSB-Membership-App/
 │       ├── create-donation-payment/
 │       ├── create-subscription/
 │       ├── stripe-webhook/
-│       └── [40+ other edge functions]
+│       └── [43 total edge functions]
 │
 ├── docs/                       # Project documentation
 │   ├── admin_dashboard/
@@ -499,6 +500,12 @@ if (error || !user) {
 }
 ```
 
+**Recent Authentication Enhancements (Nov 2025):**
+- Email verification system implemented for new user registrations
+- Fixed orphaned auth user issues by implementing database triggers
+- Improved error messaging for unconfirmed email accounts
+- Added profile auto-creation triggers to prevent database inconsistencies
+
 #### Input Validation
 ```typescript
 // Validate and sanitize input
@@ -717,6 +724,51 @@ serve(async (req) => {
 - **create-donation-payment**: Process one-time donations
 - **create-subscription**: Set up recurring donations
 - **stripe-webhook**: Handle Stripe events
+
+#### Complete Edge Functions List (43 Total)
+1. admin-approve-volunteer-hours
+2. admin-escalation-management
+3. admin-update-user-role
+4. approve-volunteer-hours
+5. calculate-volunteer-waiver
+6. chat-create-session
+7. chat-escalate
+8. chat-history
+9. chat-message
+10. create-admin-user
+11. create-announcement
+12. create-bucket-badge-icons-temp
+13. create-bucket-contest-submissions-temp
+14. create-bucket-event-images-temp
+15. create-donation-payment
+16. create-opportunity
+17. create-payment-intent
+18. create-student-subscription
+19. create-subscription
+20. create-volunteer-subscription
+21. delete-announcement
+22. delete-opportunity
+23. get-community-metrics
+24. get-member-assignments
+25. get-membership-analytics
+26. get-subscription-status
+27. get-volunteer-progress
+28. knowledge-base-search
+29. list-announcements
+30. list-opportunities
+31. log-volunteer-hours
+32. manage-family-members
+33. manage-opportunity-capacity
+34. manage-subscription
+35. process-application
+36. signup-for-opportunity
+37. stripe-webhook
+38. submit-application
+39. test-gemini-api
+40. update-announcement
+41. update-opportunity
+42. volunteer-analytics
+43. withdraw-from-opportunity
 
 ### API Response Format
 
@@ -1010,6 +1062,41 @@ supabase db push
 
 ---
 
+## Recent Bug Fixes & Improvements
+
+### Authentication System (Nov 2025)
+**Issue:** Users unable to login after registration due to email verification requirements
+
+**Resolution:**
+- Implemented email verification flow with proper user messaging
+- Added database triggers to auto-create user profiles
+- Fixed orphaned auth user issues
+- Improved error handling for unconfirmed accounts
+
+**Files Modified:**
+- `issb-portal/src/contexts/AuthContext.tsx` - Enhanced signup and login flows
+- Database triggers added for automatic profile creation
+- RLS policies updated for better security
+
+### Payment Calculation (Nov 2025)
+**Issue:** Incorrect next payment date calculation for past membership start dates
+
+**Resolution:**
+- Fixed date calculation logic to handle edge cases
+- Improved payment scheduling for recurring memberships
+- Added validation for past dates
+
+**Impact:** Ensures accurate billing cycles for all membership types
+
+### Known Issues
+Currently, there are no critical known issues. The system is stable and fully operational.
+
+For the latest status, check:
+- Recent commits: `git log --oneline -10`
+- Open issues in documentation files ending with `*_FIX*.md`
+
+---
+
 ## Common Tasks
 
 ### Adding a New Component
@@ -1193,6 +1280,9 @@ supabase db reset
 1. **Always read** `PROJECT_RECAP.md` first to understand current state
 2. **Check** `QUICK_REFERENCE.md` for URLs and credentials
 3. **Review** recent commits to understand recent changes
+   - Use `git log --oneline -10` to see latest work
+   - Check `*_FIX*.md` and `*_DEBUG*.md` files for recent bug fixes
+   - Review `REGISTRATION_LOGIN_DEBUG_REPORT.md` for auth system details
 4. **Examine** existing implementations before creating new ones
 
 ### Best Practices
@@ -1297,6 +1387,13 @@ try {
 ---
 
 ## Changelog
+
+### 2025-11-27
+- Updated edge function count (43 total functions)
+- Added authentication enhancements documentation
+- Documented email verification implementation
+- Added recent bug fixes and stability improvements
+- Updated deployment and production status
 
 ### 2025-11-26
 - Initial creation of CLAUDE.md
