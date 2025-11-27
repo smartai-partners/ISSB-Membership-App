@@ -14,6 +14,8 @@ export interface UserDocument extends IUser, Document {
   passwordChangedAt?: Date;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
+  verificationToken?: string;
+  verificationTokenExpires?: Date;
   refreshTokens: string[];
   loginAttempts: number;
   lockUntil?: Date;
@@ -227,6 +229,12 @@ const userSchema = new Schema<UserDocument>({
     type: String,
   },
   passwordResetExpires: {
+    type: Date,
+  },
+  verificationToken: {
+    type: String,
+  },
+  verificationTokenExpires: {
     type: Date,
   },
   refreshTokens: [{
