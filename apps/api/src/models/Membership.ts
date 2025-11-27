@@ -153,21 +153,33 @@ membershipSchema.methods.calculateNextPaymentDate = function(): Date | null {
   
   const baseDate = this.lastPaymentDate || this.startDate || new Date();
   const nextDate = new Date(baseDate);
+  const now = new Date();
   
-  switch (this.renewalType) {
-    case RenewalType.MONTHLY:
-      nextDate.setMonth(nextDate.getMonth() + 1);
-      break;
-    case RenewalType.QUARTERLY:
-      nextDate.setMonth(nextDate.getMonth() + 3);
-      break;
-    case RenewalType.ANNUAL:
-      nextDate.setFullYear(nextDate.getFullYear() + 1);
-      break;
-    case RenewalType.LIFETIME:
-      return null;
-    default:
-      return null;
+  // Helper function to add period
+  const addPeriod = (date: Date) => {
+    switch (this.renewalType) {
+      case RenewalType.MONTHLY:
+        date.setMonth(date.getMonth() + 1);
+        break;
+      case RenewalType.QUARTERLY:
+        date.setMonth(date.getMonth() + 3);
+        break;
+      case RenewalType.ANNUAL:
+        date.setFullYear(date.getFullYear() + 1);
+        break;
+      default:
+        // Prevent infinite loop for unknown renewal types
+        throw new Error(`Invalid or unsupported renewal type: ${this.renewalType}`);
+    }
+  };
+
+  if (this.renewalType === RenewalType.LIFETIME) return null;
+
+  addPeriod(nextDate);
+
+  // If the calculated next date is still in the past, keep advancing it until it's in the future
+  while (nextDate <= now) {
+    addPeriod(nextDate);
   }
   
   return nextDate;
