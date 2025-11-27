@@ -15,6 +15,7 @@ export function SignUpPage() {
     initial_donation: '',
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { signUp } = useAuth();
@@ -79,6 +80,7 @@ export function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
@@ -94,8 +96,8 @@ export function SignUpPage() {
 
     try {
       const donationAmount = parseFloat(formData.initial_donation) || 0;
-      
-      const { error } = await signUp(formData.email, formData.password, {
+
+      const result = await signUp(formData.email, formData.password, {
         first_name: formData.first_name,
         last_name: formData.last_name,
         phone: formData.phone,
@@ -103,8 +105,17 @@ export function SignUpPage() {
         donation_amount: donationAmount,
       });
 
-      if (error) throw error;
-      navigate('/');
+      if (result.error) throw result.error;
+
+      // Check if email verification is required
+      if (result.requiresEmailVerification) {
+        setSuccess('✅ Registration successful! Please check your email to verify your account before logging in. Check your spam folder if you don\'t see the email within a few minutes.');
+        // Don't navigate - let user read the message
+      } else {
+        // Auto-login successful, redirect to dashboard
+        setSuccess('✅ Registration successful! Redirecting to your dashboard...');
+        setTimeout(() => navigate('/'), 1500);
+      }
     } catch (err) {
       const errorMessage = getErrorMessage(err);
       setError(errorMessage);
@@ -136,6 +147,12 @@ export function SignUpPage() {
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
                 {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+                {success}
               </div>
             )}
 

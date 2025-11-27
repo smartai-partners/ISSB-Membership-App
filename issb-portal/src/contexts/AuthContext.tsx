@@ -8,7 +8,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: Error }>;
-  signUp: (email: string, password: string, userData: Partial<Profile> & { volunteer_commitment?: boolean; donation_amount?: number }) => Promise<{ error?: Error }>;
+  signUp: (email: string, password: string, userData: Partial<Profile> & { volunteer_commitment?: boolean; donation_amount?: number }) => Promise<{ error?: Error; requiresEmailVerification?: boolean }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -165,40 +165,98 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function signUp(email: string, password: string, userData: Partial<Profile> & { volunteer_commitment?: boolean; donation_amount?: number }) {
     try {
       console.log('[AUTH] Starting signUp process...');
-      
-      // Sign up user
+
+      // Sign up user with metadata
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            first_name: userData.first_name,
+            last_name: userData.last_name,
+            phone: userData.phone,
+          },
+          // Note: If email confirmation is disabled in Supabase settings, user will be auto-confirmed
+        }
       });
 
       if (authError) {
         console.log('[AUTH] Auth error:', authError);
+        // Provide user-friendly error messages
+        if (authError.message.includes('already registered')) {
+          throw new Error('An account with this email already exists. Please try logging in instead.');
+        }
         throw authError;
       }
       if (!authData.user) throw new Error('User creation failed');
 
-      console.log('[AUTH] User created, creating profile...');
+      console.log('[AUTH] User created successfully');
+      const requiresEmailVerification = !authData.session;
 
-      // Create profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          email,
-          ...userData,
-          role: 'applicant',
-          status: 'pending',
-          total_volunteer_hours: 0,
-          membership_fee_waived: false,
-        });
-
-      if (profileError) {
-        console.log('[AUTH] Profile creation error:', profileError);
-        throw profileError;
+      if (requiresEmailVerification) {
+        console.log('[AUTH] Email verification required');
+        return { requiresEmailVerification: true };
       }
 
-      console.log('[AUTH] Profile created, creating application...');
+      // Wait for potential database trigger to create profile (if implemented)
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      console.log('[AUTH] Checking if profile exists...');
+
+      // Check if profile was auto-created by trigger
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', authData.user.id)
+        .maybeSingle();
+
+      if (!existingProfile) {
+        console.log('[AUTH] Profile not found, creating manually...');
+
+        // Create profile manually if trigger didn't run
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: authData.user.id,
+            email,
+            first_name: userData.first_name,
+            last_name: userData.last_name,
+            phone: userData.phone,
+            role: 'applicant',
+            status: 'pending',
+            total_volunteer_hours: 0,
+            membership_fee_waived: false,
+            membership_tier: 'standard',
+          });
+
+        if (profileError) {
+          console.error('[AUTH] Profile creation error:', profileError);
+          // Provide user-friendly error
+          if (profileError.code === '42501') {
+            throw new Error('Unable to create user profile. Please contact support for assistance.');
+          }
+          throw new Error(`Profile creation failed: ${profileError.message}`);
+        }
+      } else {
+        console.log('[AUTH] Profile exists, updating with user data...');
+
+        // Update existing profile with form data
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            first_name: userData.first_name,
+            last_name: userData.last_name,
+            phone: userData.phone,
+          })
+          .eq('id', authData.user.id);
+
+        if (updateError) {
+          console.warn('[AUTH] Profile update warning:', updateError);
+          // Don't throw - profile exists, update is optional
+        }
+      }
+
+      console.log('[AUTH] Profile ready, creating application...');
 
       // Create application record for membership tracking
       const { error: applicationError } = await supabase
@@ -218,14 +276,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
       if (applicationError) {
-        console.log('[AUTH] Application creation error:', applicationError);
-        throw applicationError;
+        console.warn('[AUTH] Application creation warning:', applicationError);
+        // Don't throw - user can still login without application
+        // Application can be created later by admin or through recovery process
       }
 
       console.log('[AUTH] SignUp completed successfully');
-      return {};
+      return { requiresEmailVerification: false };
     } catch (error) {
-      console.log('[AUTH] SignUp error:', error);
+      console.error('[AUTH] SignUp error:', error);
       return { error: error as Error };
     }
   }
