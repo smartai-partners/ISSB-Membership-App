@@ -201,6 +201,11 @@ const userSchema = new Schema<UserDocument>({
     enum: Object.values(UserStatus),
     default: UserStatus.PENDING,
   },
+  volunteerStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected', 'inactive'],
+    default: 'inactive',
+  },
   avatar: {
     type: String,
     default: null,

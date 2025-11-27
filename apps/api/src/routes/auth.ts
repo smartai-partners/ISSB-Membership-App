@@ -78,6 +78,10 @@ router.post('/register', asyncHandler(async (req, res) => {
     });
   }
   
+  // Generate verification token
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+  const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
   // Create user
   const user = await User.create({
     email: validatedData.email,
@@ -87,16 +91,12 @@ router.post('/register', asyncHandler(async (req, res) => {
     phone: validatedData.phone,
     dateOfBirth: validatedData.dateOfBirth ? new Date(validatedData.dateOfBirth) : undefined,
     status: 'active', // Option 2: Auto-activate user
+    verificationToken,
+    verificationTokenExpires,
   });
   
   // Send verification email (if email service is configured)
   try {
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    user.verificationToken = verificationToken;
-    user.verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-    user.emailVerifiedAt = undefined; // Will be set when email is verified
-    await user.save();
-    
     await sendEmail({
       to: user.email,
       subject: 'Verify Your Email - ISSB Membership Portal',
