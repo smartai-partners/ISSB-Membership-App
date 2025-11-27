@@ -86,28 +86,29 @@ router.post('/register', asyncHandler(async (req, res) => {
     lastName: validatedData.lastName,
     phone: validatedData.phone,
     dateOfBirth: validatedData.dateOfBirth ? new Date(validatedData.dateOfBirth) : undefined,
-    status: 'pending', // Email verification required
+    status: 'active', // Option 2: Auto-activate user
   });
   
   // Send verification email (if email service is configured)
   try {
     const verificationToken = crypto.randomBytes(32).toString('hex');
+    user.verificationToken = verificationToken;
+    user.verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
     user.emailVerifiedAt = undefined; // Will be set when email is verified
     await user.save();
     
-    // TODO: Send verification email
-    // await sendEmail({
-    //   to: user.email,
-    //   subject: 'Verify Your Email - ISSB Membership Portal',
-    //   template: 'emailVerification',
-    //   data: {
-    //     name: user.fullName,
-    //     verificationToken,
-    //     verificationUrl: `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`,
-    //   },
-    // });
+    await sendEmail({
+      to: user.email,
+      subject: 'Verify Your Email - ISSB Membership Portal',
+      template: 'emailVerification',
+      data: {
+        name: user.fullName,
+        verificationToken,
+        verificationUrl: `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`,
+      },
+    });
     
-    logger.info(`Verification email would be sent to ${user.email}`);
+    logger.info(`Verification email sent to ${user.email}`);
   } catch (error) {
     logger.error('Failed to send verification email:', error);
   }
@@ -484,6 +485,40 @@ router.post('/change-password', authenticate, asyncHandler(async (req, res) => {
   res.json({
     success: true,
     message: 'Password has been changed successfully',
+    timestamp: new Date().toISOString(),
+  });
+}));
+
+// @route   GET /api/v1/auth/verify-email/:token
+// @desc    Verify email address
+// @access  Public
+router.get('/verify-email/:token', asyncHandler(async (req, res) => {
+  const { token } = req.params;
+
+  const user = await User.findOne({
+    verificationToken: token,
+    verificationTokenExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return res.status(400).json({
+      success: false,
+      message: 'Token is invalid or has expired',
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  // Verify email
+  user.emailVerifiedAt = new Date();
+  user.verificationToken = undefined;
+  user.verificationTokenExpires = undefined;
+  await user.save({ validateBeforeSave: false });
+
+  logAuth('Email verification successful', true, user._id.toString(), user.email, req.ip, req.get('User-Agent'));
+
+  res.json({
+    success: true,
+    message: 'Email verified successfully',
     timestamp: new Date().toISOString(),
   });
 }));
