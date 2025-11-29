@@ -1,13 +1,6 @@
 import { toast } from 'sonner';
 
-export function toastSuccess(message: string) {
-  return toast.success(message);
-}
-
-export function toastError(message: string) {
-  return toast.error(message);
-}
-
+// Base functions for simple usage
 export function toastInfo(message: string) {
   return toast.info(message);
 }
@@ -16,43 +9,65 @@ export function toastWarning(message: string) {
   return toast.warning(message);
 }
 
-// Base toast loading function
-function baseToastLoading(message: string) {
-  return toast.loading(message);
-}
+// Type definitions for extended toast functions
+type ToastSuccessFunc = {
+  (message: string): string | number;
+  userCreated: (resource?: string) => string | number;
+  userUpdated: (resource?: string) => string | number;
+  userDeleted: (resource?: string) => string | number;
+  statusUpdated: () => string | number;
+};
 
-// Extended toast loading with message constants
-export const toastLoading: typeof baseToastLoading & {
-  saving: string;
-  creating: string;
-  deleting: string;
-} = Object.assign(baseToastLoading, {
-  saving: 'Saving...',
-  creating: 'Creating...',
-  deleting: 'Deleting...',
-});
+type ToastErrorFunc = {
+  (message: string): string | number;
+  createFailed: (msg: string) => string | number;
+  updateFailed: (msg: string) => string | number;
+  deleteFailed: (msg: string) => string | number;
+  permissionDenied: () => string | number;
+  validationFailed: () => string | number;
+};
 
-// Extended toast success with message constants
-const baseToastSuccessFunc = toastSuccess;
-export {baseToastSuccessFunc as _toastSuccess};
-Object.assign(toastSuccess, {
-  userCreated: 'User created successfully',
-  userUpdated: 'User updated successfully',
-  userDeleted: 'User deleted successfully',
-  statusUpdated: 'Status updated successfully',
-});
+type ToastLoadingFunc = {
+  (message: string): string | number;
+  saving: () => string | number;
+  creating: () => string | number;
+  deleting: () => string | number;
+  updating: () => string | number;
+};
+
+// Extended toast success with message functions
+export const toastSuccess: ToastSuccessFunc = Object.assign(
+  (message: string) => toast.success(message),
+  {
+    userCreated: (resource?: string) => toast.success(`${resource || 'User'} created successfully`),
+    userUpdated: (resource?: string) => toast.success(`${resource || 'User'} updated successfully`),
+    userDeleted: (resource?: string) => toast.success(`${resource || 'User'} deleted successfully`),
+    statusUpdated: () => toast.success('Status updated successfully'),
+  }
+);
 
 // Extended toast error with message helpers
-const baseToastErrorFunc = toastError;
-export {baseToastErrorFunc as _toastError};
-Object.assign(toastError, {
-  createFailed: (msg: string) => `Failed to create: ${msg}`,
-  updateFailed: (msg: string) => `Failed to update: ${msg}`,
-  deleteFailed: (msg: string) => `Failed to delete: ${msg}`,
-  permissionDenied: 'Permission denied',
-  validationFailed: 'Validation failed',
-  message: '', // placeholder for error.message access
-});
+export const toastError: ToastErrorFunc = Object.assign(
+  (message: string) => toast.error(message),
+  {
+    createFailed: (msg: string) => toast.error(`Failed to create: ${msg}`),
+    updateFailed: (msg: string) => toast.error(`Failed to update: ${msg}`),
+    deleteFailed: (msg: string) => toast.error(`Failed to delete: ${msg}`),
+    permissionDenied: () => toast.error('Permission denied'),
+    validationFailed: () => toast.error('Validation failed'),
+  }
+);
+
+// Extended toast loading with message functions
+export const toastLoading: ToastLoadingFunc = Object.assign(
+  (message: string) => toast.loading(message),
+  {
+    saving: () => toast.loading('Saving...'),
+    creating: () => toast.loading('Creating...'),
+    deleting: () => toast.loading('Deleting...'),
+    updating: () => toast.loading('Updating...'),
+  }
+);
 
 export function dismissToast(toastId: string | number) {
   toast.dismiss(toastId);

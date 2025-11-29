@@ -124,20 +124,22 @@ export function EnhancedUsersManagementPage() {
 
   // Validation helper
   const validateField = (fieldName: keyof FormErrors, value: string): string | undefined => {
-    let result: ValidationResult = { isValid: true };
+    let result: ValidationResult = { valid: true };
 
     switch (fieldName) {
       case 'first_name':
-        result = validateName(value, 'First name');
+        result = validateName(value);
         break;
       case 'last_name':
-        result = validateName(value, 'Last name');
+        result = validateName(value);
         break;
       case 'email':
-        result = validateEmail(value);
+        const emailValid = validateEmail(value);
+        result = { valid: emailValid, error: emailValid ? undefined : 'Invalid email address' };
         break;
       case 'phone':
-        result = validatePhone(value);
+        const phoneValid = validatePhone(value);
+        result = { valid: phoneValid, error: phoneValid ? undefined : 'Invalid phone number' };
         break;
       case 'role':
         result = validateRole(value);
@@ -147,7 +149,7 @@ export function EnhancedUsersManagementPage() {
         break;
     }
 
-    return result.isValid ? undefined : result.error;
+    return result.valid ? undefined : result.error;
   };
 
   // Handle field blur for validation

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Heart, DollarSign, Building, BookOpen, Users as UsersIcon, TrendingUp, HandHeart, Target, Zap, Shield, CheckCircle, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
@@ -21,13 +21,7 @@ export function DonationsPage() {
     purpose: 'general' as string,
   });
 
-  useEffect(() => {
-    if (user) {
-      loadMyDonations();
-    }
-  }, [user]);
-
-  async function loadMyDonations() {
+  const loadMyDonations = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -45,7 +39,13 @@ export function DonationsPage() {
     } catch (error) {
       console.error('Error loading donations:', error);
     }
-  }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadMyDonations();
+    }
+  }, [user, loadMyDonations]);
 
   async function handlePaymentSubmit() {
     setProcessing(true);

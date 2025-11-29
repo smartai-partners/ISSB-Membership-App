@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { Profile } from '@/types';
@@ -20,6 +20,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
+
+  const loadProfile = useCallback(async (userId: string) => {
+    // Prevent concurrent profile loading
+    if (profileLoading) {
+      console.log('[AUTH] Profile loading already in progress, skipping');
+      return;
+    }
+
+    try {
+      setProfileLoading(true);
+      console.log('[AUTH] Loading profile for user:', userId);
+
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Profile loading timeout')), 10000);
+      });
+
+      const profilePromise = supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+
+      const { data, error } = await Promise.race([profilePromise, timeoutPromise]) as any;
+
+      console.log('[AUTH] Profile query result:', { data: !!data, error: !!error });
+
+      if (error) throw error;
+      setProfile(data);
+      console.log('[AUTH] Profile set successfully:', data?.email);
+    } catch (error) {
+      console.error('[AUTH] Error loading profile:', error);
+      // Don't throw - set a basic profile to prevent auth issues
+      if (error instanceof Error && error.message === 'Profile loading timeout') {
+        console.log('[AUTH] Profile loading timed out, using basic profile');
+        setProfile({
+          id: userId,
+          email: user?.email || '',
+          first_name: 'User',
+          last_name: '',
+          role: 'member',
+          status: 'active',
+          membership_tier: 'standard',
+          total_volunteer_hours: 0,
+          membership_fee_waived: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        } as Profile);
+      }
+    } finally {
+      setProfileLoading(false);
+    }
+  }, [profileLoading, user]);
 
   // Load user on mount
   useEffect(() => {
@@ -68,60 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [profileLoading]);
-
-  async function loadProfile(userId: string) {
-    // Prevent concurrent profile loading
-    if (profileLoading) {
-      console.log('[AUTH] Profile loading already in progress, skipping');
-      return;
-    }
-
-    try {
-      setProfileLoading(true);
-      console.log('[AUTH] Loading profile for user:', userId);
-      
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Profile loading timeout')), 10000);
-      });
-
-      const profilePromise = supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
-
-      const { data, error } = await Promise.race([profilePromise, timeoutPromise]) as any;
-
-      console.log('[AUTH] Profile query result:', { data: !!data, error: !!error });
-
-      if (error) throw error;
-      setProfile(data);
-      console.log('[AUTH] Profile set successfully:', data?.email);
-    } catch (error) {
-      console.error('[AUTH] Error loading profile:', error);
-      // Don't throw - set a basic profile to prevent auth issues
-      if (error instanceof Error && error.message === 'Profile loading timeout') {
-        console.log('[AUTH] Profile loading timed out, using basic profile');
-        setProfile({
-          id: userId,
-          email: user?.email || '',
-          first_name: 'User',
-          last_name: '',
-          role: 'member',
-          status: 'active',
-          membership_tier: 'standard',
-          total_volunteer_hours: 0,
-          membership_fee_waived: false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        } as Profile);
-      }
-    } finally {
-      setProfileLoading(false);
-    }
-  }
+  }, [profileLoading, loadProfile]);
 
   async function signIn(email: string, password: string) {
     try {

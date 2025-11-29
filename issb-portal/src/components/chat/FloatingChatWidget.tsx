@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageCircle, X, Send, Minimize2, RotateCw } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -35,14 +35,7 @@ export const FloatingChatWidget: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Initialize session when widget is opened
-  useEffect(() => {
-    if (isOpen && !currentSession && user) {
-      initializeSession();
-    }
-  }, [isOpen, user]);
-
-  const initializeSession = async () => {
+  const initializeSession = useCallback(async () => {
     try {
       setIsLoading(true);
       const contextData = {
@@ -78,7 +71,14 @@ export const FloatingChatWidget: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  // Initialize session when widget is opened
+  useEffect(() => {
+    if (isOpen && !currentSession && user) {
+      initializeSession();
+    }
+  }, [isOpen, currentSession, user, initializeSession]);
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || !currentSession || isLoading) return;

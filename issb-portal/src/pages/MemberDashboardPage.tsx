@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useNavigate, Link } from 'react-router-dom';
@@ -30,15 +30,7 @@ export function MemberDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [recentHours, setRecentHours] = useState<any[]>([]);
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    loadMembershipData();
-  }, [user, navigate]);
-
-  async function loadMembershipData() {
+  const loadMembershipData = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -69,7 +61,15 @@ export function MemberDashboardPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    loadMembershipData();
+  }, [user, navigate, loadMembershipData]);
 
   if (loading) {
     return (

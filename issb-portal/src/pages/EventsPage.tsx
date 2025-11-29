@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Calendar, MapPin, Users, Plus } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,14 +12,7 @@ export function EventsPage() {
   const [myRegistrations, setMyRegistrations] = useState<EventRegistration[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadEvents();
-    if (user) {
-      loadMyRegistrations();
-    }
-  }, [user]);
-
-  async function loadEvents() {
+  const loadEvents = useCallback(async () => {
     try {
       const { data } = await supabase
         .from('events')
@@ -33,9 +26,9 @@ export function EventsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  async function loadMyRegistrations() {
+  const loadMyRegistrations = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -48,7 +41,14 @@ export function EventsPage() {
     } catch (error) {
       console.error('Error loading registrations:', error);
     }
-  }
+  }, [user]);
+
+  useEffect(() => {
+    loadEvents();
+    if (user) {
+      loadMyRegistrations();
+    }
+  }, [user, loadEvents, loadMyRegistrations]);
 
   const isRegistered = (eventId: string) => {
     return myRegistrations.some(r => r.event_id === eventId && r.status !== 'cancelled');
