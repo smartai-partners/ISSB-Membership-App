@@ -34,4 +34,4 @@ curl -X POST https://lsyimggqennkyxgajzvn.supabase.co/functions/v1/test-gemini-a
 ```
 
 ## 📋 Last Action
-**Chatbot Fixed**: Resolved API key and model issues. Gemini 2.0 Flash now working correctly.
+**Gemini Enhanced (v2.0)**: Upgraded AI chatbot with improved prompts, retry logic, better error handling, intelligent escalation detection, and context-aware suggestions. Model: gemini-2.0-flash-exp
